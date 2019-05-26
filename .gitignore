@@ -1,0 +1,35 @@
+# ignore all files that start with ~
+~*
+
+# ignore OS-generated files
+ehthumbs.db
+Thumbs.db
+
+# ignore Editor files
+*.sublime-project
+*.sublime-workspace
+*.komodoproject
+
+# ignore log files, databases and shell scripts
+*.log
+*.sql
+*.sqlite
+*.sh
+
+# ignore compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# ignore packaged files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
