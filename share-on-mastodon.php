@@ -8,6 +8,8 @@
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: share-on-mastodon
  * Version: 0.1
+ *
+ * @package Share_On_Mastodon
  */
 
 namespace Share_On_Mastodon;
@@ -30,10 +32,8 @@ class Share_On_Mastodon {
 	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'create_settings_link' ) );
-
 		// Register and handle plugin options.
 		new Options_Handler();
-
 		// Post-related functions.
 		new Post_Handler();
 	}
@@ -48,13 +48,14 @@ class Share_On_Mastodon {
 	/**
 	 * Adds a 'Settings' link on the Plugins page.
 	 *
-	 * @return array $links Links array.
-	 * @return array Modified links array.
+	 * @param  array $links Links array.
+	 * @return array        Modified links array.
 	 */
-	function create_settings_link( $links ) {
-		return array_merge( array(
-			'<a href="' . esc_url( admin_url( '/options-general.php?page=share-on-mastodon' ) ) . '">' . __( 'Settings', 'share-on-mastodon' ) . '</a>'
-		), $links );
+	public function create_settings_link( $links ) {
+		return array_merge(
+			array( '<a href="' . esc_url( admin_url( 'options-general.php?page=share-on-mastodon' ) ) . '">' . __( 'Settings', 'share-on-mastodon' ) . '</a>' ),
+			$links
+		);
 	}
 }
 
