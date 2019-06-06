@@ -26,7 +26,10 @@ class Post_Handler {
 		// exist.
 		$this->options = get_option( 'share_on_mastodon_settings', array() );
 
-		add_action( 'post_submitbox_misc_actions', array( $this, 'render_meta_box' ) );
+		// Note: below action is incompatible with Gutenberg/WordPress' block
+		// editor.
+		add_action( 'post_submitbox_misc_actions', array( $this, 'render_meta_box' ) );\
+
 		add_action( 'transition_post_status', array( $this, 'update_meta' ), 10, 3 );
 		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
 	}
@@ -46,7 +49,7 @@ class Post_Handler {
 		}
 		?>
 		<div class="misc-pub-section">
-			<?php wp_nonce_field( basename( __FILE__ ), '_share_on_mastodon_meta_nonce' ); ?>
+			<?php wp_nonce_field( basename( __FILE__ ) ); ?>
 			<label><input type="checkbox" name="share_on_mastodon" value="1" <?php checked( in_array( get_post_meta( $post->ID, '_share_on_mastodon', true ), array( '', '1' ), true ) ); ?>>
 			<?php echo strip_tags( __( 'Share on <b>Mastodon</b>', 'share-on-mastodon' ), '<b>' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 			</label>
@@ -67,7 +70,7 @@ class Post_Handler {
 			return;
 		}
 
-		if ( ! isset( $_POST['_share_on_mastodon_meta_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['_share_on_mastodon_meta_nonce'] ), basename( __FILE__ ) ) ) {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['_wpnonce'] ), basename( __FILE__ ) ) ) {
 			// Nonce missing or invalid.
 			return;
 		}
@@ -77,7 +80,8 @@ class Post_Handler {
 			return;
 		}
 
-		if ( isset( $_POST['share_on_mastodon'] ) ) {
+		if ( isset( $_POST['share_on_mastodon'] ) && '' !== $post->post_password ) {
+			// If checked and post is not password-protected.
 			update_post_meta( $post->ID, '_share_on_mastodon', '1' );
 		} else {
 			update_post_meta( $post->ID, '_share_on_mastodon', '0' );

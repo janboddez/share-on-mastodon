@@ -206,7 +206,12 @@ class Options_Handler {
 								'response_type' => 'code',
 								'client_id'     => $this->options['mastodon_client_id'],
 								'client_secret' => $this->options['mastodon_client_secret'],
-								'redirect_uri'  => admin_url( 'options-general.php?page=share-on-mastodon' ), // Redirect here after authorization.
+								'redirect_uri'  => add_query_arg(
+									array(
+										'page' => 'share-on-mastodon',
+									),
+									admin_url( 'options-general.php' )
+								), // Redirect here after authorization.
 								'scope'         => 'write:media write:statuses read:accounts read:statuses',
 							)
 						);
@@ -216,10 +221,26 @@ class Options_Handler {
 						<?php
 					} else {
 						// An access token exists.
-						$nonce = wp_create_nonce( basename( __FILE__ ) );
 						?>
 						<p><?php esc_html_e( 'You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline.', 'share-on-mastodon' ); ?></p>
-						<p class="submit"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( admin_url( 'options-general.php?page=share-on-mastodon&action=revoke&_wpnonce=' . $nonce ) ), esc_html__( 'Revoke Access', 'share-on-mastodon' ) ); ?>
+						<p class="submit">
+							<?php
+							printf(
+								'<a href="%1$s" class="button">%2$s</a>',
+								esc_url(
+									add_query_arg(
+										array(
+											'page'     => 'share-on-mastodon',
+											'action'   => 'revoke',
+											'_wpnonce' => wp_create_nonce( basename( __FILE__ ) ),
+										),
+										admin_url( 'options-general.php' )
+									)
+								),
+								esc_html__( 'Revoke Access', 'share-on-mastodon' )
+							);
+							?>
+						</p>
 						<?php
 					}
 				} else {
@@ -261,7 +282,14 @@ class Options_Handler {
 			array(
 				'body' => array(
 					'client_name'   => 'Share to Mastodon',
-					'redirect_uris' => admin_url( 'options-general.php?page=share-on-mastodon' ), // Allowed redirect URLs.
+					'redirect_uris' => add_query_arg(
+						array(
+							'page' => 'share-on-mastodon',
+						),
+						admin_url(
+							'options-general.php'
+						)
+					), // Allowed redirect URLs.
 					'scopes'        => 'write:media write:statuses read:accounts read:statuses',
 					'website'       => home_url(),
 				),
@@ -304,7 +332,12 @@ class Options_Handler {
 					'client_secret' => $this->options['mastodon_client_secret'],
 					'grant_type'    => 'authorization_code',
 					'code'          => $code,
-					'redirect_uri'  => admin_url( 'options-general.php?page=share-on-mastodon' ), // Redirect here after authorization.
+					'redirect_uri'  => add_query_arg(
+						array(
+							'page' => 'share-on-mastodon',
+						),
+						admin_url( 'options-general.php' )
+					), // Redirect here after authorization.
 				),
 			)
 		);
