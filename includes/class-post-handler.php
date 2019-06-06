@@ -49,7 +49,7 @@ class Post_Handler {
 		}
 		?>
 		<div class="misc-pub-section">
-			<?php wp_nonce_field( basename( __FILE__ ) ); ?>
+			<?php wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' ); ?>
 			<label><input type="checkbox" name="share_on_mastodon" value="1" <?php checked( in_array( get_post_meta( $post->ID, '_share_on_mastodon', true ), array( '', '1' ), true ) ); ?>>
 			<?php echo strip_tags( __( 'Share on <b>Mastodon</b>', 'share-on-mastodon' ), '<b>' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 			</label>
@@ -70,7 +70,7 @@ class Post_Handler {
 			return;
 		}
 
-		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['_wpnonce'] ), basename( __FILE__ ) ) ) {
+		if ( ! isset( $_POST['share_on_mastodon_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['share_on_mastodon_nonce'] ), basename( __FILE__ ) ) ) {
 			// Nonce missing or invalid.
 			return;
 		}
