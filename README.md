@@ -14,7 +14,7 @@ This plugin relies on WordPress' `post_submitbox_misc_actions`, which is **incom
 I currently recommend using it only in combination with the [Classic Editor](https://wordpress.org/plugins/classic-editor/) plugin.
 
 ## Media
-When a Featured Image is set, Share on Mastodon will try include it. Other media are not supported at the moment.
+When a Featured Image is set, Share on Mastodon will try to include it. Other media are not supported at the moment.
 
 ## Privacy
 Currently, all toots sent via this plugin are **public**. [Unlisted or followers-only](https://docs.joinmastodon.org/usage/privacy/#publishing-levels) toots may become an option later on.
