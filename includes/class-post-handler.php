@@ -101,7 +101,7 @@ class Post_Handler {
 		}
 
 		if ( isset( $_POST['share_on_mastodon'] ) && ! post_password_required( $post ) ) {
-			// If checked and post is not password-protected.
+			// If sharing enabled and post not password-protected.
 			update_post_meta( $post->ID, '_share_on_mastodon', '1' );
 		} else {
 			update_post_meta( $post->ID, '_share_on_mastodon', '0' );
@@ -118,7 +118,7 @@ class Post_Handler {
 	 */
 	public function toot( $old_status, $new_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
-			// Bail.
+			// Prevent accidental double posting.
 			return;
 		}
 
@@ -147,8 +147,15 @@ class Post_Handler {
 			return;
 		}
 
-		if ( empty( $this->options['mastodon_host'] ) || ! wp_http_validate_url( $this->options['mastodon_host'] ) || empty( $this->options['mastodon_access_token'] ) ) {
-			// Settings missing or invalid.
+		if ( empty( $this->options['mastodon_host'] ) ) {
+			return;
+		}
+
+		if ( ! wp_http_validate_url( $this->options['mastodon_host'] ) ) {
+			return;
+		}
+
+		if ( empty( $this->options['mastodon_access_token'] ) ) {
 			return;
 		}
 
@@ -210,9 +217,9 @@ class Post_Handler {
 	 * Since posting files using the WP HTTP API is somewhat tricky, uses PHP's
 	 * native cURL functions instead.
 	 *
-	 * @since 0.1.0
-	 * @param int $post_id Post ID.
-	 * @return string|null Unique media ID, or nothing on failure.
+	 * @since  0.1.0
+	 * @param  int $post_id Post ID.
+	 * @return string|null  Unique media ID, or nothing on failure.
 	 */
 	private function upload_thumbnail( $post_id ) {
 		$thumb_id  = get_post_thumbnail_id( $post_id );

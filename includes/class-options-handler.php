@@ -14,7 +14,8 @@ class Options_Handler {
 	/**
 	 * WordPress' default post types.
 	 *
-	 * @var array WordPress' default post types, minus 'post' itself.
+	 * @since 0.1.0
+	 * @var   array WordPress' default post types, minus 'post' itself.
 	 */
 	const DEFAULT_POST_TYPES = array(
 		'page',
@@ -37,6 +38,8 @@ class Options_Handler {
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 0.1.0
 	 */
 	public function __construct() {
 		$default_options = array(
@@ -54,6 +57,8 @@ class Options_Handler {
 
 	/**
 	 * Registers the plugin settings page.
+	 *
+	 * @since 0.1.0
 	 */
 	public function create_menu() {
 		add_options_page(
@@ -68,6 +73,8 @@ class Options_Handler {
 
 	/**
 	 * Registers the actual options.
+	 *
+	 * @since 0.1.0
 	 */
 	public function add_settings() {
 		register_setting(
@@ -80,14 +87,14 @@ class Options_Handler {
 	/**
 	 * Handles submitted options.
 	 *
-	 * @param array $settings Settings as submitted through WP Admin.
-	 * @return array Options to be stored.
+	 * @since  0.1.0
+	 * @param  array $settings Settings as submitted through WP Admin.
+	 * @return array           Options to be stored.
 	 */
 	public function sanitize_settings( $settings ) {
 		$this->options['post_types'] = array();
 
 		if ( isset( $settings['post_types'] ) && is_array( $settings['post_types'] ) ) {
-
 			// Post types considered valid.
 			$supported_post_types = array_diff(
 				get_post_types(),
@@ -124,12 +131,14 @@ class Options_Handler {
 			}
 		}
 
-		// Sanitized settings.
+		// Updated settings.
 		return $this->options;
 	}
 
 	/**
 	 * Echoes the plugin options form. Handles the OAuth flow, too, for now.
+	 *
+	 * @since 0.1.0
 	 */
 	public function settings_page() {
 		?>
@@ -194,7 +203,7 @@ class Options_Handler {
 						}
 					}
 
-					if ( ! empty( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) ) ) {
+					if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) ) ) {
 						// Request to revoke access.
 						$this->revoke_access();
 					}
@@ -270,6 +279,8 @@ class Options_Handler {
 
 	/**
 	 * Registers a new Mastodon app (client).
+	 *
+	 * @since 0.1.0
 	 */
 	private function register_app() {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -316,6 +327,7 @@ class Options_Handler {
 	/**
 	 * Requests a new access token.
 	 *
+	 * @since 0.1.0
 	 * @param string $code Authorization code.
 	 */
 	private function request_access_token( $code ) {
@@ -353,7 +365,6 @@ class Options_Handler {
 			// Success. Store access token.
 			$this->options['mastodon_access_token'] = $token->access_token;
 			update_option( 'share_on_mastodon_settings', $this->options );
-
 			return true;
 		} else {
 			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
@@ -365,6 +376,7 @@ class Options_Handler {
 	/**
 	 * Revokes WordPress' access to Mastodon.
 	 *
+	 * @since  0.1.0
 	 * @return boolean If access was revoked.
 	 */
 	private function revoke_access() {
