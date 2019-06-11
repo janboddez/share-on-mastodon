@@ -32,7 +32,8 @@ class Options_Handler {
 	/**
 	 * Plugin options.
 	 *
-	 * @var array $options Plugin options.
+	 * @since 0.1.0
+	 * @var   array $options Plugin options.
 	 */
 	private $options = array();
 
