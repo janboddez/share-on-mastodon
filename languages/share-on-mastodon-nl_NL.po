@@ -1,43 +1,59 @@
+# Copyright (C) 2019 Jan Boddez
+# This file is distributed under the same license as the Share on Mastodon plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Share on Mastodon\n"
-"POT-Creation-Date: 2019-05-26 15:18+0200\n"
-"PO-Revision-Date: 2019-05-26 15:19+0200\n"
-"Last-Translator: \n"
+"Project-Id-Version: Share on Mastodon 0.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/share-on-"
+"mastodon\n"
 "Language-Team: \n"
-"Language: nl_NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2019-06-11T18:25:21+02:00\n"
+"PO-Revision-Date: 2019-06-11 18:28+0200\n"
 "X-Generator: Poedit 2.0.6\n"
-"X-Poedit-Basepath: ..\n"
+"X-Domain: share-on-mastodon\n"
+"Last-Translator: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Poedit-KeywordsList: __;_e;esc_html_e\n"
-"X-Poedit-SearchPath-0: .\n"
-"X-Poedit-SearchPathExcluded-0: languages\n"
+"Language: nl_NL\n"
 
-#: includes/class-options-handler.php:47 includes/class-options-handler.php:48
-#: includes/class-options-handler.php:124
+#. Plugin Name of the plugin
+#: includes/class-post-handler.php:51 includes/class-post-handler.php:70
+#: includes/class-options-handler.php:66 includes/class-options-handler.php:67
+#: includes/class-options-handler.php:147
 msgid "Share on Mastodon"
 msgstr "Delen op Mastodon"
 
-#: includes/class-options-handler.php:126 share-on-mastodon.php:56
+#. Description of the plugin
+msgid "Easily share WordPress posts on Mastodon."
+msgstr "Eenvoudig posts delen op Mastodon."
+
+#. Author of the plugin
+msgid "Jan Boddez"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://janboddez.tech/"
+msgstr ""
+
+#: includes/class-share-on-mastodon.php:43
+#: includes/class-options-handler.php:149
 msgid "Settings"
 msgstr "Instellingen"
 
-#: includes/class-options-handler.php:140
+#: includes/class-options-handler.php:163
 msgid "Instance"
 msgstr "Instance"
 
-#: includes/class-options-handler.php:142
+#: includes/class-options-handler.php:165
 msgid "Your Mastodon instance&rsquo;s URL."
 msgstr "De URL van je Mastodon-instance."
 
-#: includes/class-options-handler.php:145
+#: includes/class-options-handler.php:168
 msgid "Supported Post Types"
 msgstr "Ondersteunde berichttypes"
 
-#: includes/class-options-handler.php:151
+#: includes/class-options-handler.php:179
 msgid ""
 "Post types for which sharing to Mastodon is possible. (Sharing can still be "
 "disabled on a per-post basis.)"
@@ -45,20 +61,16 @@ msgstr ""
 "Berichttypes die op Mastodon kunnen worden gedeeld. (Delen kan per bericht "
 "nog altijd worden uitgeschakeld.)"
 
-#: includes/class-options-handler.php:154
-msgid "Save Changes"
-msgstr "Wijzigingen opslaan"
-
-#: includes/class-options-handler.php:157
-#: includes/class-options-handler.php:195
+#: includes/class-options-handler.php:185
+#: includes/class-options-handler.php:230
 msgid "Authorize Access"
 msgstr "Authoriseren"
 
-#: includes/class-options-handler.php:173
+#: includes/class-options-handler.php:201
 msgid "Access granted!"
 msgstr "Authoriseren gelukt!"
 
-#: includes/class-options-handler.php:194
+#: includes/class-options-handler.php:229
 msgid ""
 "Authorize WordPress to read and write to your Mastodon timeline in order to "
 "enable crossposting."
@@ -66,7 +78,7 @@ msgstr ""
 "Laat WordPress toe om je Mastodon-tijdlijn te lezen en ernaartoe te "
 "schrijven."
 
-#: includes/class-options-handler.php:201
+#: includes/class-options-handler.php:235
 msgid ""
 "You&rsquo;ve authorized WordPress to read and write to your Mastodon "
 "timeline."
@@ -74,11 +86,11 @@ msgstr ""
 "Je hebt WordPress toelating gegeven om je Mastodon-tijdlijn te lezen en "
 "ernaartoe te schrijven."
 
-#: includes/class-options-handler.php:202
+#: includes/class-options-handler.php:250
 msgid "Revoke Access"
 msgstr "Ongedaan maken"
 
-#: includes/class-options-handler.php:208
+#: includes/class-options-handler.php:259
 msgid ""
 "Something went wrong contacting your Mastodon instance. Please reload this "
 "page to try again."
@@ -86,22 +98,18 @@ msgstr ""
 "Er ging iets mis met het contacteren van je Mastodon-instance. Herlaad deze "
 "pagina om het nog eens te proberen."
 
-#: includes/class-options-handler.php:214
+#: includes/class-options-handler.php:265
 msgid "Please fill out and save your Mastodon instance&rsquo;s URL first."
 msgstr "Vul alsjeblieft eerst je Mastodon-instance in."
 
-#: includes/class-options-handler.php:220
+#: includes/class-options-handler.php:271
 msgid "Debugging"
 msgstr "Debuggen"
 
-#: includes/class-options-handler.php:221
+#: includes/class-options-handler.php:272
 msgid ""
 "Below information is not meant to be shared with anyone but may help when "
 "troubleshooting issues."
 msgstr ""
-"Onderstaande informatie hoor je met niemand te delen maar kan helpen met het "
-"troubleshooten van problemen."
-
-#: includes/class-post-handler.php:42
-msgid "Share on <b>Mastodon</b>"
-msgstr "Delen op <b>Mastodon</b>"
+"Onderstaande informatie hoor je met niemand te delen maar kan helpen met "
+"het troubleshooten van problemen."
