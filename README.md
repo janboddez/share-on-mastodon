@@ -8,15 +8,6 @@ My Awesome Post Title https://url.to/original-post/
 
 Mastodon is smart enough to then try and find things like an Open Graph image and description for that URL. There's [no need for a link shortener](https://docs.joinmastodon.org/api/guidelines/#other-links), either.
 
-## Gutenberg
-This plugin now uses WordPress' Meta Box API—supported by Gutenberg—to store per-post sharing settings, which makes it 100% compatible with the new block editor.
-
-## Media
-When a Featured Image is set, Share on Mastodon will try to include it. Other media are not supported at the moment.
-
-## Privacy
-Currently, all toots sent via this plugin are **public**. [Unlisted or followers-only](https://docs.joinmastodon.org/usage/privacy/#publishing-levels) toots may become an option later on.
-
 ## Custom Formatting
 If you'd rather format toots differently, there's a `share_on_mastodon_status` filter.
 
@@ -27,3 +18,12 @@ add_filter( 'share_on_mastodon_status', function( $status, $post ) {
 	return $status;
 }, 10, 2 );
 ```
+
+## Media
+When a Featured Image is set, Share on Mastodon will try to include it. Other media are not supported at the moment.
+
+## Privacy
+Currently, all toots sent via this plugin are **public**. [Unlisted or followers-only](https://docs.joinmastodon.org/usage/privacy/#publishing-levels) toots may become an option later on.
+
+## Gutenberg
+This plugin now uses WordPress' Meta Box API—supported by Gutenberg—to store per-post sharing settings, which makes it 100% compatible with the new block editor.
