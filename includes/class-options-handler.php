@@ -293,7 +293,7 @@ class Options_Handler {
 			esc_url_raw( $this->options['mastodon_host'] ) . '/api/v1/apps',
 			array(
 				'body' => array(
-					'client_name'   => 'Share to Mastodon',
+					'client_name'   => __( 'Share on Mastodon' ),
 					'redirect_uris' => add_query_arg(
 						array(
 							'page' => 'share-on-mastodon',
