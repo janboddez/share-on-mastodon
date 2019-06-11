@@ -2,12 +2,6 @@
 <ruleset name="Custom WordPress Standards">
 	<rule ref="WordPress" />
 
-	<rule ref="WordPress.Files.FileName">
-		<properties>
-			<property name="strict_class_file_names" value="false" />
-		</properties>
-	</rule>
-
 	<rule ref="WordPress.PHP.NoSilencedErrors">
 		<properties>
 			<property name="custom_whitelist" type="array">

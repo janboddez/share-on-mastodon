@@ -14,24 +14,46 @@ class Post_Handler {
 	/**
 	 * Array that holds this plugin's settings.
 	 *
+	 * @since 0.1.0
 	 * @var array $options Plugin options.
 	 */
 	private $options = array();
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 0.1.0
 	 */
 	public function __construct() {
 		// Fetch settings from database. Fall back onto an empty array if none
 		// exist.
 		$this->options = get_option( 'share_on_mastodon_settings', array() );
 
-		// Note: below action is incompatible with Gutenberg/WordPress' block
-		// editor.
-		add_action( 'post_submitbox_misc_actions', array( $this, 'render_meta_box' ) );\
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 
-		add_action( 'transition_post_status', array( $this, 'update_meta' ), 10, 3 );
+		add_action( 'transition_post_status', array( $this, 'update_meta' ), 11, 3 );
 		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
+	}
+
+	/**
+	 * Registers a new meta box.
+	 *
+	 * @since 0.1.0
+	 */
+	public function add_meta_box() {
+		if ( empty( $this->options['post_types'] ) ) {
+			// Sharing disabled for all post types.
+			return;
+		}
+
+		add_meta_box(
+			'share-on-mastodon',
+			__( 'Share on Mastodon', 'share-on-mastodon' ),
+			array( $this, 'render_meta_box' ),
+			(array) $this->options['post_types'],
+			'side',
+			'default'
+		);
 	}
 
 	/**
@@ -41,25 +63,19 @@ class Post_Handler {
 	 * @param WP_Post $post Post being edited.
 	 */
 	public function render_meta_box( $post ) {
-		$current_screen = get_current_screen();
-
-		if ( empty( $current_screen ) || ! in_array( $current_screen->post_type, (array) $this->options['post_types'], true ) ) {
-			// Unsupported post type.
-			return;
-		}
 		?>
-		<div class="misc-pub-section">
 			<?php wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' ); ?>
-			<label><input type="checkbox" name="share_on_mastodon" value="1" <?php checked( in_array( get_post_meta( $post->ID, '_share_on_mastodon', true ), array( '', '1' ), true ) ); ?>>
-			<?php echo strip_tags( __( 'Share on <b>Mastodon</b>', 'share-on-mastodon' ), '<b>' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+			<label>
+				<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( in_array( get_post_meta( $post->ID, '_share_on_mastodon', true ), array( '', '1' ), true ) ); ?>>
+				<?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?>
 			</label>
-		</div>
 		<?php
 	}
 
 	/**
 	 * Handles metadata.
 	 *
+	 * @since 0.1.0
 	 * @param string  $old_status Old post status.
 	 * @param string  $new_status New post status.
 	 * @param WP_Post $post       Post object.
@@ -67,6 +83,10 @@ class Post_Handler {
 	public function update_meta( $old_status, $new_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
 			// Prevent double posting.
+			return;
+		}
+
+		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 			return;
 		}
 
@@ -80,7 +100,7 @@ class Post_Handler {
 			return;
 		}
 
-		if ( isset( $_POST['share_on_mastodon'] ) && '' !== $post->post_password ) {
+		if ( isset( $_POST['share_on_mastodon'] ) && ! post_password_required( $post ) ) {
 			// If checked and post is not password-protected.
 			update_post_meta( $post->ID, '_share_on_mastodon', '1' );
 		} else {
@@ -91,18 +111,14 @@ class Post_Handler {
 	/**
 	 * Shares a post on Mastodon.
 	 *
+	 * @since 0.1.0
 	 * @param string  $old_status Old post status.
 	 * @param string  $new_status New post status.
 	 * @param WP_Post $post       Post object.
 	 */
 	public function toot( $old_status, $new_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
-			// Prevent accidental double posting.
-			return;
-		}
-
-		if ( '' !== get_post_meta( $post->ID, '_share_on_mastodon_url', true ) ) {
-			// Prevent duplicate toots.
+			// Bail.
 			return;
 		}
 
@@ -111,12 +127,17 @@ class Post_Handler {
 			return;
 		}
 
+		if ( '' !== get_post_meta( $post->ID, '_share_on_mastodon_url', true ) ) {
+			// Prevent duplicate toots.
+			return;
+		}
+
 		if ( 'publish' !== $new_status ) {
 			// Status is something other than `publish`.
 			return;
 		}
 
-		if ( '' !== $post->post_password ) {
+		if ( post_password_required( $post ) ) {
 			// Post is password-protected.
 			return;
 		}
@@ -160,12 +181,13 @@ class Post_Handler {
 				// same reason.
 				'data_format' => 'body',
 				'body'        => $query_string,
+				'timeout'     => 30,
 			)
 		);
 
 		if ( is_wp_error( $response ) ) {
 			// An error occurred.
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			error_log( 'Something went wrong posting to mastodon: ' . print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return;
 		}
 
@@ -188,6 +210,7 @@ class Post_Handler {
 	 * Since posting files using the WP HTTP API is somewhat tricky, uses PHP's
 	 * native cURL functions instead.
 	 *
+	 * @since 0.1.0
 	 * @param int $post_id Post ID.
 	 * @return string|null Unique media ID, or nothing on failure.
 	 */
