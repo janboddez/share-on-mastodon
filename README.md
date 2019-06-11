@@ -9,9 +9,7 @@ My Awesome Post Title https://url.to/original-post/
 Mastodon is smart enough to then try and find things like an Open Graph image and description for that URL. There's [no need for a link shortener](https://docs.joinmastodon.org/api/guidelines/#other-links), either.
 
 ## Gutenberg
-This plugin relies on WordPress' `post_submitbox_misc_actions`, which is **incompatible** with the new block editor, to enable and disable per-post sharing.
-
-I currently recommend using it only in combination with the [Classic Editor](https://wordpress.org/plugins/classic-editor/) plugin.
+This plugin now uses WordPress' Meta Box API—supported by Gutenberg—to store per-post sharing settings, which makes it 100% compatible with the new block editor.
 
 ## Media
 When a Featured Image is set, Share on Mastodon will try to include it. Other media are not supported at the moment.
