@@ -13,10 +13,11 @@ namespace Share_On_Mastodon;
 class Share_On_Mastodon {
 	/**
 	 * Constructor.
+	 *
+	 * @since 0.1.0
 	 */
 	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'create_settings_link' ) );
 
 		// Register and handle plugin options.
 		new Options_Handler();
@@ -27,21 +28,10 @@ class Share_On_Mastodon {
 
 	/**
 	 * Enables localization.
+	 *
+	 * @since 0.1.0
 	 */
 	public function load_textdomain() {
-		load_plugin_textdomain( 'share-on-mastodon', false, basename( dirname( __FILE__ ) ) . '/languages' );
-	}
-
-	/**
-	 * Adds a 'Settings' link on the Plugins page.
-	 *
-	 * @param  array $links Links array.
-	 * @return array        Modified links array.
-	 */
-	public function create_settings_link( $links ) {
-		return array_merge(
-			array( '<a href="' . esc_url( admin_url( 'options-general.php?page=share-on-mastodon' ) ) . '">' . __( 'Settings', 'share-on-mastodon' ) . '</a>' ),
-			$links
-		);
+		load_plugin_textdomain( 'share-on-mastodon', false, basename( dirname( dirname( __FILE__ ) ) ) . '/languages' );
 	}
 }
