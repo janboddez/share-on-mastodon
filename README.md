@@ -22,6 +22,12 @@ add_filter( 'share_on_mastodon_status', function( $status, $post ) {
 ## Media
 When a Featured Image is set, Share on Mastodon will try to include it. Other media are not supported at the moment.
 
+This behavior can be disabled using the `share_on_mastodon_featured_image` filter.
+```
+// Never upload featured images.
+add_filter( 'share_on_mastodon_featured_image', '__return_false' );
+```
+
 ## Privacy
 Currently, all toots sent via this plugin are **public**. [Unlisted or followers-only](https://docs.joinmastodon.org/usage/privacy/#publishing-levels) toots may become an option later on.
 
