@@ -1,5 +1,5 @@
 # Share on Mastodon
-Easily share WordPress posts on Mastodon.
+Automatically share WordPress posts on [Mastodon](https://joinmastodon.org/).
 
 By default, shared statuses look something like:
 ```
