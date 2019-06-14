@@ -122,7 +122,9 @@ class Post_Handler {
 			return;
 		}
 
-		if ( '1' !== get_post_meta( $post->ID, '_share_on_mastodon', true ) ) {
+		$is_enabled = ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ? true : false );
+
+		if ( apply_filters( 'share_on_mastodon_enabled', $is_enabled ) ) {
 			// Disabled for this post.
 			return;
 		}
@@ -167,7 +169,7 @@ class Post_Handler {
 			array( 'status' => $status )
 		);
 
-		if ( has_post_thumbnail( $post->ID ) ) {
+		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', true ) ) {
 			// Upload the featured image.
 			$media_id = $this->upload_thumbnail( $post->ID );
 
@@ -194,15 +196,14 @@ class Post_Handler {
 
 		if ( is_wp_error( $response ) ) {
 			// An error occurred.
-			error_log( 'Something went wrong posting to mastodon: ' . print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return;
 		}
 
 		// Decode JSON, surpressing possible formatting errors.
 		$status = @json_decode( $response['body'] );
 
-		if ( ! empty( $status->url ) ) {
-			// Store resulting toot URL.
+		if ( ! empty( $status->url ) && post_type_supports( $post->post_type, 'custom-fields' ) ) {
 			update_post_meta( $post->ID, '_share_on_mastodon_url', $status->url );
 		} else {
 			// Provided debugging's enabled, let's store the (somehow faulty)
