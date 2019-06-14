@@ -11,7 +11,7 @@ Mastodon is smart enough to then try and find things like an Open Graph image an
 ## Custom Formatting
 If you'd rather format toots differently, there's a `share_on_mastodon_status` filter.
 
-**Example:** if all posts you share are short, plain-text messages and you want them to appear exactly as written and without a backlink, then the following would handle that.
+**Example:** if all posts you share are short, plain-text messages and you want them to appear exactly as written and without a backlink—and essentially create a WordPress front end to Mastodon—then the following couple lines of PHP would handle that.
 ```
 add_filter( 'share_on_mastodon_status', function( $status, $post ) {
 	$status = wp_strip_all_tags( $post->post_content );
