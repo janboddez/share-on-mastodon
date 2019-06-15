@@ -124,7 +124,7 @@ class Post_Handler {
 
 		$is_enabled = ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ? true : false );
 
-		if ( apply_filters( 'share_on_mastodon_enabled', $is_enabled ) ) {
+		if ( ! apply_filters( 'share_on_mastodon_enabled', $is_enabled ) ) {
 			// Disabled for this post.
 			return;
 		}
