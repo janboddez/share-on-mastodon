@@ -233,7 +233,7 @@ class Post_Handler {
 			return;
 		}
 
-		// Revert to cURL, as apparently posting files through wp_remote_post()
+		// Resort to cURL, as apparently posting files through wp_remote_post()
 		// is pretty difficult.
 		// phpcs:disable WordPress.WP.AlternativeFunctions
 		$ch = curl_init();
