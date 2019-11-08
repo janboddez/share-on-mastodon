@@ -317,8 +317,8 @@ class Options_Handler {
 
 		if ( isset( $app->client_id ) && isset( $app->client_secret ) ) {
 			// After successfully registering the App, store its keys.
-			$this->options['mastodon_client_id']     = sanitize_text_field( $app->client_id );
-			$this->options['mastodon_client_secret'] = sanitize_text_field( $app->client_secret );
+			$this->options['mastodon_client_id']     = $app->client_id;
+			$this->options['mastodon_client_secret'] = $app->client_secret;
 			update_option( 'share_on_mastodon_settings', $this->options );
 		} else {
 			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
