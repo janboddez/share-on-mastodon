@@ -215,9 +215,6 @@ class Post_Handler {
 	/**
 	 * Uploads a post thumbnail and returns a (single) media ID.
 	 *
-	 * Since posting files using the WP HTTP API is somewhat tricky, uses PHP's
-	 * native cURL functions instead.
-	 *
 	 * @since  0.1.0
 	 * @param  int $post_id Post ID.
 	 * @return string|null  Unique media ID, or nothing on failure.
@@ -233,48 +230,43 @@ class Post_Handler {
 			return;
 		}
 
-		// Resort to cURL, as apparently posting files through wp_remote_post()
-		// is pretty difficult.
-		// phpcs:disable WordPress.WP.AlternativeFunctions
-		$ch = curl_init();
+		$boundary = md5( time() );
+		$eol      = "\r\n";
 
-		curl_setopt( $ch, CURLOPT_URL, esc_url_raw( $this->options['mastodon_host'] . '/api/v1/media' ) );
-		curl_setopt(
-			$ch,
-			CURLOPT_HTTPHEADER,
+		$body  = '--' . $boundary . $eol;
+		$body .= 'Content-Disposition: form-data; name="file"; filename="' . basename( $file_path ) . '"' . $eol;
+		$body .= 'Content-Type: '. mime_content_type( $file_path ) . $eol . $eol;
+		$body .= file_get_contents( $file_path ) . $eol;
+		$body .= '--' . $boundary . '--';
+
+		$response = wp_remote_post(
+			esc_url_raw( $this->options['mastodon_host'] . '/api/v1/media' ),
 			array(
-				'Authorization: Bearer ' . $this->options['mastodon_access_token'],
-				'Content-Type: multipart/form-data',
+				'headers'     => array(
+					'Authorization' => 'Bearer ' . $this->options['mastodon_access_token'],
+					'Content-Type'  => 'multipart/form-data; boundary=' . $boundary,
+				),
+				'data_format' => 'body',
+				'body'        => $body,
+				'timeout'     => 30,
 			)
 		);
-		curl_setopt( $ch, CURLOPT_POST, true );
-		curl_setopt(
-			$ch,
-			CURLOPT_POSTFIELDS,
-			array(
-				// The use of `curl_file_create` (the cleanest way to attach a file)
-				// seems to prevent us from using `http_build_query()` (or, rather,
-				// Mastodon seems to choke on the outcome).
-				'file'        => curl_file_create( $file_path, get_post_mime_type( $thumb_id ) ),
-				'description' => get_the_title( $thumb_id ),
-			)
-		);
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 
-		// Send request.
-		$response = curl_exec( $ch );
-		curl_close( $ch );
-		// phpcs:enable WordPress.WP.AlternativeFunctions
+		if ( is_wp_error( $response ) ) {
+			// An error occurred.
+			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			return;
+		}
 
 		// Decode JSON, surpressing possible formatting errors.
-		$media = @json_decode( $response );
+		$media = @json_decode( $response['body'] );
 
 		if ( ! empty( $media->id ) ) {
 			return $media->id;
-		} else {
-			// Provided debugging's enabled, let's store the (somehow faulty)
-			// response.
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 		}
+
+		// Provided debugging's enabled, let's store the (somehow faulty)
+		// response.
+		error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 	}
 }
