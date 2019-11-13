@@ -235,8 +235,8 @@ class Post_Handler {
 
 		$body  = '--' . $boundary . $eol;
 		$body .= 'Content-Disposition: form-data; name="file"; filename="' . basename( $file_path ) . '"' . $eol;
-		$body .= 'Content-Type: '. mime_content_type( $file_path ) . $eol . $eol;
-		$body .= file_get_contents( $file_path ) . $eol;
+		$body .= 'Content-Type: ' . mime_content_type( $file_path ) . $eol . $eol;
+		$body .= file_get_contents( $file_path ) . $eol; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$body .= '--' . $boundary . '--';
 
 		$response = wp_remote_post(
