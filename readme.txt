@@ -25,5 +25,8 @@ More detailed instructions can be found on [this plugin's GitHub page](https://g
 
 == Changelog ==
 
+= 0.2 =
+Fix `transition_post_status` parameter order.
+
 = 0.1 =
 Initial release.
