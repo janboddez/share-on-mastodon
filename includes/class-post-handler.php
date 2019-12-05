@@ -76,11 +76,11 @@ class Post_Handler {
 	 * Handles metadata.
 	 *
 	 * @since 0.1.0
-	 * @param string  $old_status Old post status.
-	 * @param string  $new_status New post status.
+	 * @param string  $new_status Old post status.
+	 * @param string  $old_status New post status.
 	 * @param WP_Post $post       Post object.
 	 */
-	public function update_meta( $old_status, $new_status, $post ) {
+	public function update_meta( $new_status, $old_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
 			// Prevent double posting.
 			return;
@@ -112,11 +112,11 @@ class Post_Handler {
 	 * Shares a post on Mastodon.
 	 *
 	 * @since 0.1.0
-	 * @param string  $old_status Old post status.
 	 * @param string  $new_status New post status.
+	 * @param string  $old_status Old post status.
 	 * @param WP_Post $post       Post object.
 	 */
-	public function toot( $old_status, $new_status, $post ) {
+	public function toot( $new_status, $old_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
 			// Prevent accidental double posting.
 			return;
