@@ -18,7 +18,7 @@ add_filter( 'share_on_mastodon_status', function( $status, $post ) {
   return $status;
 }, 10, 2 );
 ```
-Prefer to add a permalink at the end?
+Same example, but with a permalink at the end:
 ```
 add_filter( 'share_on_mastodon_status', function( $status, $post ) {
   $status  = wp_strip_all_tags( $post->post_content );
