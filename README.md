@@ -27,6 +27,26 @@ add_filter( 'share_on_mastodon_status', function( $status, $post ) {
 }, 10, 2 );
 ```
 
+## Append Tags as Hashtags
+See the [Customize “Share on Mastodon” Statuses](https://janboddez.tech/articles/customize-share-on-mastodon-statuses) blog post, too.
+```
+add_filter( 'share_on_mastodon_status', function( $status, $post ) {
+  $tags = get_the_tags( $post->ID );
+
+  if ( $tags ) {
+    $status .= "\n\n";
+    
+    foreach ( $tags as $tag ) {
+      $status .= '#' . preg_replace( '/\s/', '', $tag->name ) . ' ';
+    }
+
+    $status = trim( $status );
+  }
+
+  return $status;
+}, 11, 2 );
+```
+
 ## Media
 When a Featured Image is set, Share on Mastodon will try to include it. Other media are not supported at the moment.
 
