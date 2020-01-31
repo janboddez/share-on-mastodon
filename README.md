@@ -47,6 +47,26 @@ add_filter( 'share_on_mastodon_status', function( $status, $post ) {
 }, 11, 2 );
 ```
 
+## Share Programmatically Created Posts, and More
+Even supported (per their Post Type) posts won't be shared if not posted through WP Admin, as the 'Share on Mastodon' checkbox value will not have been saved.
+
+To work around this, there's a `share_on_mastodon_enabled` filter:
+```
+// Always share supported Post Types.
+add_filter( 'share_on_mastodon_enabled', '__return_true' );
+```
+
+You could use the same filter to prevent, e.g., certain taxonomies from being shared.
+```
+add_filter( 'share_on_mastodon_enabled', function( $is_enabled, $post_id ) {
+	if ( has_category( 'my-category-slug', $post_id ) ) {
+		return false;
+	}
+
+	return $is_enabled;
+}, 10, 2 );
+```
+
 ## Media
 When a Featured Image is set, Share on Mastodon will try to include it. Other media are not supported at the moment.
 
