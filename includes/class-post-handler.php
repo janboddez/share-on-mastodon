@@ -200,7 +200,7 @@ class Post_Handler {
 			return;
 		}
 
-		// Decode JSON, supressing possible formatting errors.
+		// Decode JSON, suppressing possible formatting errors.
 		$status = @json_decode( $response['body'] );
 
 		if ( ! empty( $status->url ) && post_type_supports( $post->post_type, 'custom-fields' ) ) {
@@ -258,7 +258,7 @@ class Post_Handler {
 			return;
 		}
 
-		// Decode JSON, supressing possible formatting errors.
+		// Decode JSON, suppressing possible formatting errors.
 		$media = @json_decode( $response['body'] );
 
 		if ( ! empty( $media->id ) ) {
