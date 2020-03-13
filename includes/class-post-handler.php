@@ -12,6 +12,13 @@ namespace Share_On_Mastodon;
  */
 class Post_Handler {
 	/**
+	 * This plugin's single instance.
+	 *
+	 * @var Post_Handler $instance Plugin instance.
+	 */
+	private static $instance;
+
+	/**
 	 * Array that holds this plugin's settings.
 	 *
 	 * @since 0.1.0
@@ -20,14 +27,36 @@ class Post_Handler {
 	private $options = array();
 
 	/**
+	 * Returns the single instance of this class.
+	 *
+	 * @return Post_Handler Single class instance.
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 */
-	public function __construct() {
-		// Fetch settings from database. Fall back onto an empty array if none
-		// exist.
-		$this->options = get_option( 'share_on_mastodon_settings', array() );
+	private function __construct() {
+		// Nothing special here.
+	}
+
+	/**
+	 * Kicks off just about everything.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param array $options Plugin options.
+	 */
+	public function init( $options ) {
+		$this->options = $options;
 
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 
@@ -46,6 +75,7 @@ class Post_Handler {
 			return;
 		}
 
+		// Add meta box, for those post types that are supported.
 		add_meta_box(
 			'share-on-mastodon',
 			__( 'Share on Mastodon', 'share-on-mastodon' ),
@@ -57,7 +87,7 @@ class Post_Handler {
 	}
 
 	/**
-	 * Renders custom fields meta boxes on the custom post type edit page.
+	 * Renders meta box.
 	 *
 	 * @since 0.1.0
 	 * @param WP_Post $post Post being edited.

@@ -2,12 +2,12 @@
 /**
  * Plugin Name: Share on Mastodon
  * Description: Easily share WordPress posts on Mastodon.
- * Author: Jan Boddez
- * Author URI: https://janboddez.tech/
+ * Author:      Jan Boddez
+ * Author URI:  https://janboddez.tech/
  * License: GNU General Public License v3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: share-on-mastodon
- * Version: 0.2
+ * Version:     0.3
  *
  * @author  Jan Boddez <jan@janboddez.be>
  * @license http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0

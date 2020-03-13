@@ -1,7 +1,7 @@
 === Share on Mastodon ===
 Contributors: janboddez
 Tags: mastodon, share, publicize, crosspost, fediverse
-Tested up to: 5.3
+Tested up to: 5.4
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -24,6 +24,8 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.3 =
+Allow `Post_Handler` hooks to be removed, too.
 
 = 0.2 =
 Fix `transition_post_status` parameter order.

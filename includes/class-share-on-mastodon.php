@@ -20,10 +20,11 @@ class Share_On_Mastodon {
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 
 		// Register and handle plugin options.
-		new Options_Handler();
+		$options = ( new Options_Handler() )->get_options();
 
 		// Post-related functions.
-		new Post_Handler();
+		$post_handler = Post_Handler::get_instance();
+		$post_handler->init( $options );
 	}
 
 	/**

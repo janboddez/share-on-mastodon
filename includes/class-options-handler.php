@@ -35,7 +35,13 @@ class Options_Handler {
 	 * @since 0.1.0
 	 * @var   array $options Plugin options.
 	 */
-	private $options = array();
+	private $options = array(
+		'mastodon_host'          => '',
+		'mastodon_client_id'     => '',
+		'mastodon_client_secret' => '',
+		'mastodon_access_token'  => '',
+		'post_types'             => array(),
+	);
 
 	/**
 	 * Constructor.
@@ -43,15 +49,10 @@ class Options_Handler {
 	 * @since 0.1.0
 	 */
 	public function __construct() {
-		$default_options = array(
-			'mastodon_host'          => '',
-			'mastodon_client_id'     => '',
-			'mastodon_client_secret' => '',
-			'mastodon_access_token'  => '',
-			'post_types'             => array(),
+		$this->options = get_option(
+			'share_on_mastodon_settings',
+			$this->options
 		);
-
-		$this->options = get_option( 'share_on_mastodon_settings', $default_options );
 
 		add_action( 'admin_menu', array( $this, 'create_menu' ) );
 	}
@@ -430,5 +431,15 @@ class Options_Handler {
 
 		// Something went wrong.
 		return false;
+	}
+
+	/**
+	 * Returns the plugin options.
+	 *
+	 * @since  0.3.0
+	 * @return array Plugin options.
+	 */
+	public function get_options() {
+		return $this->options;
 	}
 }
