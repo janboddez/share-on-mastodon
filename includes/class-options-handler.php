@@ -147,6 +147,22 @@ class Options_Handler {
 			<h2><?php esc_html_e( 'Settings', 'share-on-mastodon' ); ?></h2>
 			<form method="post" action="options.php">
 				<?php
+				// if ( isset( $_GET['action'] ) && 'reset' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . 'reset' ) ) {
+				// 	// Reset all of this plugin's settings.
+				// 	$this->reset_options();
+				// 	wp_safe_redirect(
+				// 		esc_url(
+				// 			add_query_arg(
+				// 				array(
+				// 					'page' => 'share-on-mastodon',
+				// 				),
+				// 				admin_url( 'options-general.php' )
+				// 			)
+				// 		)
+				// 	);
+				// 	exit;
+				// }
+
 				// Print nonces and such.
 				settings_fields( 'share-on-mastodon-settings-group' );
 
@@ -182,11 +198,6 @@ class Options_Handler {
 
 			<h2><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h2>
 			<?php
-			if ( isset( $_GET['action'] ) && 'reset' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . 'reset' ) ) {
-				// Reset all of this plugin's settings.
-				$this->reset_options();
-			}
-
 			if ( ! empty( $this->options['mastodon_host'] ) ) {
 				// A valid instance URL was set.
 				if ( empty( $this->options['mastodon_client_id'] ) || empty( $this->options['mastodon_client_secret'] ) ) {
@@ -230,13 +241,13 @@ class Options_Handler {
 						);
 						?>
 						<p><?php esc_html_e( 'Authorize WordPress to read and write to your Mastodon timeline in order to enable crossposting.', 'share-on-mastodon' ); ?></p>
-						<p><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
+						<p style="margin-bottom: 2rem;"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
 						<?php
 					} else {
 						// An access token exists.
 						?>
 						<p><?php esc_html_e( 'You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline.', 'share-on-mastodon' ); ?></p>
-						<p class="submit">
+						<p style="margin-bottom: 2rem;">
 							<?php
 							printf(
 								'<a href="%1$s" class="button">%2$s</a>',
@@ -275,24 +286,24 @@ class Options_Handler {
 
 				<p><?php esc_html_e( 'Below information is not meant to be shared with anyone but may help when troubleshooting issues.', 'share-on-mastodon' ); ?></p>
 				<p><textarea class="widefat" rows="5"><?php print_r( $this->options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions ?>
-				<p class="submit">
+				<!-- <p style="margin-bottom: 2rem;">
 					<?php
-					printf(
-						'<a href="%1$s" class="button" style="color: #a00; border-color: #a00;">%2$s</a>',
-						esc_url(
-							add_query_arg(
-								array(
-									'page'     => 'share-on-mastodon',
-									'action'   => 'reset',
-									'_wpnonce' => wp_create_nonce( basename( __FILE__ ) . 'reset' ),
-								),
-								admin_url( 'options-general.php' )
-							)
-						),
-						esc_html__( 'Reset Settings', 'share-on-mastodon' )
-					);
+					// printf(
+					// 	'<a href="%1$s" class="button" style="color: #a00; border-color: #a00;">%2$s</a>',
+					// 	esc_url(
+					// 		add_query_arg(
+					// 			array(
+					// 				'page'     => 'share-on-mastodon',
+					// 				'action'   => 'reset',
+					// 				'_wpnonce' => wp_create_nonce( basename( __FILE__ ) . 'reset' ),
+					// 			),
+					// 			admin_url( 'options-general.php' )
+					// 		)
+					// 	),
+					// 	esc_html__( 'Reset Settings', 'share-on-mastodon' )
+					// );
 					?>
-				</p>
+				</p> -->
 				<?php
 			}
 			?>
