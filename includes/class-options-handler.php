@@ -12,6 +12,20 @@ namespace Share_On_Mastodon;
  */
 class Options_Handler {
 	/**
+	 * Plugin options.
+	 *
+	 * @since 0.1.0
+	 * @var   array $options Plugin options.
+	 */
+	private $options = array(
+		'mastodon_host'          => '',
+		'mastodon_client_id'     => '',
+		'mastodon_client_secret' => '',
+		'mastodon_access_token'  => '',
+		'post_types'             => array(),
+	);
+
+	/**
 	 * WordPress' default post types.
 	 *
 	 * @since 0.1.0
@@ -27,20 +41,6 @@ class Options_Handler {
 		'user_request',
 		'oembed_cache',
 		'wp_block',
-	);
-
-	/**
-	 * Plugin options.
-	 *
-	 * @since 0.1.0
-	 * @var   array $options Plugin options.
-	 */
-	private $options = array(
-		'mastodon_host'          => '',
-		'mastodon_client_id'     => '',
-		'mastodon_client_secret' => '',
-		'mastodon_access_token'  => '',
-		'post_types'             => array(),
 	);
 
 	/**
@@ -113,23 +113,20 @@ class Options_Handler {
 
 		if ( isset( $settings['mastodon_host'] ) ) {
 			if ( untrailingslashit( $settings['mastodon_host'] ) !== $this->options['mastodon_host'] && wp_http_validate_url( $settings['mastodon_host'] ) ) {
-				// The new URL differs from the old one. Someone's switched
-				// instances.
-				if ( $this->revoke_access() ) {
-					// Update instance URL, forget client ID and secret. A new
-					// client ID and secret will be requested the next time this
-					// page is visited.
-					$this->options['mastodon_host']          = untrailingslashit( $settings['mastodon_host'] );
-					$this->options['mastodon_client_id']     = '';
-					$this->options['mastodon_client_secret'] = '';
-				} elseif ( '' === $this->options['mastodon_host'] ) {
-					// First time instance's set?
-					$this->options['mastodon_host'] = untrailingslashit( $settings['mastodon_host'] );
-				}
-			} elseif ( '' === $settings['mastodon_host'] ) {
-				// Assuming sharing should be disabled.
-				$this->options['mastodon_host'] = '';
+				// (Try to) revoke access. Forget token regardless of the
+				// outcome.
 				$this->revoke_access();
+				$this->options['mastodon_access_token'] = '';
+
+				// Then, save the new URL.
+				$this->options['mastodon_host'] = untrailingslashit( $settings['mastodon_host'] );
+
+				// Forget client ID and secret. A new client ID and secret will
+				// be requested the next time this page is visited.
+				$this->options['mastodon_client_id']     = '';
+				$this->options['mastodon_client_secret'] = '';
+			} elseif ( '' === $settings['mastodon_host'] ) {
+				$this->options['mastodon_host'] = '';
 			}
 		}
 
@@ -185,6 +182,11 @@ class Options_Handler {
 
 			<h2><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h2>
 			<?php
+			if ( isset( $_GET['action'] ) && 'reset' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . 'reset' ) ) {
+				// Reset all of this plugin's settings.
+				$this->reset_options();
+			}
+
 			if ( ! empty( $this->options['mastodon_host'] ) ) {
 				// A valid instance URL was set.
 				if ( empty( $this->options['mastodon_client_id'] ) || empty( $this->options['mastodon_client_secret'] ) ) {
@@ -205,7 +207,7 @@ class Options_Handler {
 						}
 					}
 
-					if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) ) ) {
+					if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . 'revoke' ) ) {
 						// Request to revoke access.
 						$this->revoke_access();
 					}
@@ -243,7 +245,7 @@ class Options_Handler {
 										array(
 											'page'     => 'share-on-mastodon',
 											'action'   => 'revoke',
-											'_wpnonce' => wp_create_nonce( basename( __FILE__ ) ),
+											'_wpnonce' => wp_create_nonce( basename( __FILE__ ) . 'revoke' ),
 										),
 										admin_url( 'options-general.php' )
 									)
@@ -270,8 +272,27 @@ class Options_Handler {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) {
 				?>
 				<h2><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></h2>
+
 				<p><?php esc_html_e( 'Below information is not meant to be shared with anyone but may help when troubleshooting issues.', 'share-on-mastodon' ); ?></p>
 				<p><textarea class="widefat" rows="5"><?php print_r( $this->options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions ?>
+				<p class="submit">
+					<?php
+					printf(
+						'<a href="%1$s" class="button" style="color: #a00; border-color: #a00;">%2$s</a>',
+						esc_url(
+							add_query_arg(
+								array(
+									'page'     => 'share-on-mastodon',
+									'action'   => 'reset',
+									'_wpnonce' => wp_create_nonce( basename( __FILE__ ) . 'reset' ),
+								),
+								admin_url( 'options-general.php' )
+							)
+						),
+						esc_html__( 'Reset Settings', 'share-on-mastodon' )
+					);
+					?>
+				</p>
 				<?php
 			}
 			?>
@@ -318,8 +339,8 @@ class Options_Handler {
 
 		if ( isset( $app->client_id ) && isset( $app->client_secret ) ) {
 			// After successfully registering the App, store its keys.
-			$this->options['mastodon_client_id']     = sanitize_text_field( $app->client_id );
-			$this->options['mastodon_client_secret'] = sanitize_text_field( $app->client_secret );
+			$this->options['mastodon_client_id']     = $app->client_id;
+			$this->options['mastodon_client_secret'] = $app->client_secret;
 			update_option( 'share_on_mastodon_settings', $this->options );
 		} else {
 			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
@@ -431,6 +452,27 @@ class Options_Handler {
 
 		// Something went wrong.
 		return false;
+	}
+
+	/**
+	 * Resets all plugin options.
+	 *
+	 * @since  0.3.1
+	 */
+	private function reset_options() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+
+		$this->options = array(
+			'mastodon_host'          => '',
+			'mastodon_client_id'     => '',
+			'mastodon_client_secret' => '',
+			'mastodon_access_token'  => '',
+			'post_types'             => array(),
+		);
+
+		update_option( 'share_on_mastodon_settings', $this->options );
 	}
 
 	/**
