@@ -12,10 +12,20 @@ namespace Share_On_Mastodon;
  */
 class Options_Handler {
 	/**
+	 * This plugin's single instance.
+	 *
+	 * @since 0.4.0
+	 *
+	 * @var Options_Handler $instance Plugin instance.
+	 */
+	private static $instance;
+
+	/**
 	 * Plugin options.
 	 *
 	 * @since 0.1.0
-	 * @var   array $options Plugin options.
+	 *
+	 * @var array $options Plugin options.
 	 */
 	private $options = array(
 		'mastodon_host'          => '',
@@ -29,7 +39,8 @@ class Options_Handler {
 	 * WordPress' default post types.
 	 *
 	 * @since 0.1.0
-	 * @var   array WordPress' default post types, minus 'post' itself.
+	 *
+	 * @var array WordPress' default post types, minus 'post' itself.
 	 */
 	const DEFAULT_POST_TYPES = array(
 		'page',
@@ -44,11 +55,26 @@ class Options_Handler {
 	);
 
 	/**
+	 * Returns the single instance of this class.
+	 *
+	 * @since 0.4.0
+	 *
+	 * @return Options_Handler Single class instance.
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 */
-	public function __construct() {
+	private function __construct() {
 		$this->options = get_option(
 			'share_on_mastodon_settings',
 			$this->options
@@ -91,8 +117,10 @@ class Options_Handler {
 	/**
 	 * Handles submitted options.
 	 *
-	 * @since  0.1.0
-	 * @param  array $settings Settings as submitted through WP Admin.
+	 * @since 0.1.0
+	 *
+	 * @param array $settings Settings as submitted through WP Admin.
+	 *
 	 * @return array           Options to be stored.
 	 */
 	public function sanitize_settings( $settings ) {
@@ -371,6 +399,7 @@ class Options_Handler {
 	 * Requests a new access token.
 	 *
 	 * @since 0.1.0
+	 *
 	 * @param string $code Authorization code.
 	 */
 	private function request_access_token( $code ) {
@@ -420,6 +449,7 @@ class Options_Handler {
 	 * Revokes WordPress' access to Mastodon.
 	 *
 	 * @since  0.1.0
+	 *
 	 * @return boolean If access was revoked.
 	 */
 	private function revoke_access() {
@@ -494,6 +524,8 @@ class Options_Handler {
 
 	/**
 	 * `admin-post.php` callback.
+	 *
+	 * @since 0.3.1
 	 */
 	public function admin_post() {
 		if ( isset( $_GET['reset'] ) && 'true' === $_GET['reset'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . '#reset' ) ) {
@@ -515,9 +547,48 @@ class Options_Handler {
 	}
 
 	/**
+	 * Verifies Share on Mastodon's token status.
+	 *
+	 * Normally runs once a day.
+	 *
+	 * @since 0.4.0
+	 */
+	public function cron_verify_token() {
+		if ( empty( $this->options['mastodon_host'] ) ) {
+			return;
+		}
+
+		if ( empty( $this->options['mastodon_access_token'] ) ) {
+			return;
+		}
+
+		// Request an access token.
+		$response = wp_remote_get(
+			esc_url_raw( $this->options['mastodon_host'] ) . '/api/v1/accounts/verify_credentials',
+			array(
+				'headers' => array(
+					'Authorization' => 'Bearer ' . $this->options['mastodon_access_token'],
+				),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			return;
+		}
+
+		if ( in_array( wp_remote_retrieve_response_code( $response ), array( 401, 403 ), true ) ) {
+			// The current access token has somehow become invalid. Forget it.
+			$this->options['mastodon_access_token'] = '';
+			update_option( 'share_on_mastodon_settings', $this->options );
+		}
+	}
+
+	/**
 	 * Returns the plugin options.
 	 *
-	 * @since  0.3.0
+	 * @since 0.3.0
+	 *
 	 * @return array Plugin options.
 	 */
 	public function get_options() {

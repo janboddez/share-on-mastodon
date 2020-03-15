@@ -17,14 +17,34 @@ class Share_On_Mastodon {
 	 * @since 0.1.0
 	 */
 	public function __construct() {
+		register_activation_hook( dirname( dirname( __FILE__ ) ) . '/share-on-mastodon.php', array( $this, 'activate' ) );
+		register_deactivation_hook( dirname( dirname( __FILE__ ) ) . '/share-on-mastodon.php', array( $this, 'deactivate' ) );
+
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+		add_action( 'share_on_mastodon_daily_cron', array( Options_Handler::get_instance(), 'cron_verify_token' ) );
 
-		// Register and handle plugin options.
-		$options = ( new Options_Handler() )->get_options();
-
-		// Post-related functions.
 		$post_handler = Post_Handler::get_instance();
-		$post_handler->init( $options );
+	}
+
+	/**
+	 * Runs on activation.
+	 *
+	 * @since 0.4.0
+	 */
+	public function activate() {
+		// Schedule a daily cron job.
+		if ( false === wp_next_scheduled( 'share_on_mastodon_verify_token' ) ) {
+			wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'share_on_mastodon_daily_cron' );
+		}
+	}
+
+	/**
+	 * Runs on deactivation.
+	 *
+	 * @since 0.4.0
+	 */
+	public function deactivate() {
+		wp_clear_scheduled_hook( 'share_on_mastodon_daily_cron' );
 	}
 
 	/**

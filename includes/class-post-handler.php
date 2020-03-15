@@ -14,6 +14,8 @@ class Post_Handler {
 	/**
 	 * This plugin's single instance.
 	 *
+	 * @since 0.4.0
+	 *
 	 * @var Post_Handler $instance Plugin instance.
 	 */
 	private static $instance;
@@ -22,12 +24,15 @@ class Post_Handler {
 	 * Array that holds this plugin's settings.
 	 *
 	 * @since 0.1.0
+	 *
 	 * @var   array $options Plugin options.
 	 */
 	private $options = array();
 
 	/**
 	 * Returns the single instance of this class.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @return Post_Handler Single class instance.
 	 */
@@ -56,7 +61,7 @@ class Post_Handler {
 	 * @param array $options Plugin options.
 	 */
 	public function init( $options ) {
-		$this->options = $options;
+		$this->options = Options_Handler::get_instance()->get_options();
 
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 
@@ -90,6 +95,7 @@ class Post_Handler {
 	 * Renders meta box.
 	 *
 	 * @since 0.1.0
+	 *
 	 * @param WP_Post $post Post being edited.
 	 */
 	public function render_meta_box( $post ) {
@@ -106,6 +112,7 @@ class Post_Handler {
 	 * Handles metadata.
 	 *
 	 * @since 0.1.0
+	 *
 	 * @param string  $new_status Old post status.
 	 * @param string  $old_status New post status.
 	 * @param WP_Post $post       Post object.
@@ -142,6 +149,7 @@ class Post_Handler {
 	 * Shares a post on Mastodon.
 	 *
 	 * @since 0.1.0
+	 *
 	 * @param string  $new_status New post status.
 	 * @param string  $old_status Old post status.
 	 * @param WP_Post $post       Post object.
@@ -246,8 +254,10 @@ class Post_Handler {
 	 * Uploads a post thumbnail and returns a (single) media ID.
 	 *
 	 * @since  0.1.0
-	 * @param  int $post_id Post ID.
-	 * @return string|null  Unique media ID, or nothing on failure.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return string|null Unique media ID, or nothing on failure.
 	 */
 	private function upload_thumbnail( $post_id ) {
 		$thumb_id  = get_post_thumbnail_id( $post_id );
