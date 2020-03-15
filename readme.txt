@@ -24,7 +24,10 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
-= 0.4.0 =
+= 0.4.1 =
+Fix `Post_Handler` actions.
+
+= 0.4 =
 Added token verification cron job.
 
 = 0.3.1 =

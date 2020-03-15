@@ -50,17 +50,6 @@ class Post_Handler {
 	 * @since 0.1.0
 	 */
 	private function __construct() {
-		// Nothing special here.
-	}
-
-	/**
-	 * Kicks off just about everything.
-	 *
-	 * @since 0.3.0
-	 *
-	 * @param array $options Plugin options.
-	 */
-	public function init( $options ) {
 		$this->options = Options_Handler::get_instance()->get_options();
 
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
