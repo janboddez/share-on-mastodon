@@ -24,6 +24,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.3.1 =
+Added ability to add image descriptions, improved debugging.
+
 = 0.3 =
 Allow `Post_Handler` hooks to be removed, too.
 
