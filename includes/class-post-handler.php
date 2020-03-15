@@ -260,14 +260,25 @@ class Post_Handler {
 			return;
 		}
 
+		$alt = get_post_meta( $thumb_id, '_wp_attachment_image_alt', true );
+
 		$boundary = md5( time() );
 		$eol      = "\r\n";
 
-		$body  = '--' . $boundary . $eol;
+		$body = '--' . $boundary . $eol;
+
+		if ( '' !== $alt ) {
+			// Send along an image description, because accessibility.
+			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
+			$body .= $alt . $eol;
+			$body .= '--' . $boundary . $eol;
+		}
+
+		// The actual (binary) image data.
 		$body .= 'Content-Disposition: form-data; name="file"; filename="' . basename( $file_path ) . '"' . $eol;
 		$body .= 'Content-Type: ' . mime_content_type( $file_path ) . $eol . $eol;
 		$body .= file_get_contents( $file_path ) . $eol; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$body .= '--' . $boundary . '--';
+		$body .= '--' . $boundary . '--'; // Note the extra two hyphens at the end.
 
 		$response = wp_remote_post(
 			esc_url_raw( $this->options['mastodon_host'] . '/api/v1/media' ),
