@@ -55,6 +55,8 @@ class Options_Handler {
 		);
 
 		add_action( 'admin_menu', array( $this, 'create_menu' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action( 'admin_post_share_on_mastodon', array( $this, 'admin_post' ) );
 	}
 
 	/**
@@ -116,7 +118,6 @@ class Options_Handler {
 				// (Try to) revoke access. Forget token regardless of the
 				// outcome.
 				$this->revoke_access();
-				$this->options['mastodon_access_token'] = '';
 
 				// Then, save the new URL.
 				$this->options['mastodon_host'] = untrailingslashit( $settings['mastodon_host'] );
@@ -147,22 +148,6 @@ class Options_Handler {
 			<h2><?php esc_html_e( 'Settings', 'share-on-mastodon' ); ?></h2>
 			<form method="post" action="options.php">
 				<?php
-				// if ( isset( $_GET['action'] ) && 'reset' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . 'reset' ) ) {
-				// 	// Reset all of this plugin's settings.
-				// 	$this->reset_options();
-				// 	wp_safe_redirect(
-				// 		esc_url(
-				// 			add_query_arg(
-				// 				array(
-				// 					'page' => 'share-on-mastodon',
-				// 				),
-				// 				admin_url( 'options-general.php' )
-				// 			)
-				// 		)
-				// 	);
-				// 	exit;
-				// }
-
 				// Print nonces and such.
 				settings_fields( 'share-on-mastodon-settings-group' );
 
@@ -209,7 +194,7 @@ class Options_Handler {
 					// An app was successfully registered.
 					if ( ! empty( $_GET['code'] ) ) {
 						// Access token request.
-						if ( $this->request_access_token( sanitize_text_field( wp_unslash( $_GET['code'] ) ) ) ) {
+						if ( $this->request_access_token( wp_unslash( $_GET['code'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 							?>
 							<div class="notice notice-success is-dismissible">
 								<p><?php esc_html_e( 'Access granted!', 'share-on-mastodon' ); ?></p>
@@ -218,8 +203,9 @@ class Options_Handler {
 						}
 					}
 
-					if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . 'revoke' ) ) {
-						// Request to revoke access.
+					if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . '#revoke' ) ) {
+						// Revoke access. Forget access token regardless of the
+						// outcome.
 						$this->revoke_access();
 					}
 
@@ -256,7 +242,7 @@ class Options_Handler {
 										array(
 											'page'     => 'share-on-mastodon',
 											'action'   => 'revoke',
-											'_wpnonce' => wp_create_nonce( basename( __FILE__ ) . 'revoke' ),
+											'_wpnonce' => wp_create_nonce( basename( __FILE__ ) . '#revoke' ),
 										),
 										admin_url( 'options-general.php' )
 									)
@@ -280,35 +266,58 @@ class Options_Handler {
 				<?php
 			}
 
+			?>
+			<h2><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></h2>
+			<p><?php esc_html_e( 'Delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
+			<p style="margin-bottom: 2rem;">
+				<?php
+				printf(
+					'<a href="%1$s" class="button button-reset" style="color: #a00; border-color: #a00;">%2$s</a>',
+					esc_url(
+						add_query_arg(
+							array(
+								'action'   => 'share_on_mastodon',
+								'reset'    => 'true',
+								'_wpnonce' => wp_create_nonce( basename( __FILE__ ) . '#reset' ),
+							),
+							admin_url( 'admin-post.php' )
+						)
+					),
+					esc_html__( 'Reset Settings', 'share-on-mastodon' )
+				);
+				?>
+			</p>
+			<?php
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) {
 				?>
-				<h2><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></h2>
-
 				<p><?php esc_html_e( 'Below information is not meant to be shared with anyone but may help when troubleshooting issues.', 'share-on-mastodon' ); ?></p>
 				<p><textarea class="widefat" rows="5"><?php print_r( $this->options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions ?>
-				<!-- <p style="margin-bottom: 2rem;">
-					<?php
-					// printf(
-					// 	'<a href="%1$s" class="button" style="color: #a00; border-color: #a00;">%2$s</a>',
-					// 	esc_url(
-					// 		add_query_arg(
-					// 			array(
-					// 				'page'     => 'share-on-mastodon',
-					// 				'action'   => 'reset',
-					// 				'_wpnonce' => wp_create_nonce( basename( __FILE__ ) . 'reset' ),
-					// 			),
-					// 			admin_url( 'options-general.php' )
-					// 		)
-					// 	),
-					// 	esc_html__( 'Reset Settings', 'share-on-mastodon' )
-					// );
-					?>
-				</p> -->
 				<?php
 			}
 			?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Loads (admin) scripts.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $hook_suffix Current WP-Admin page.
+	 */
+	public function enqueue_scripts( $hook_suffix ) {
+		if ( 'settings_page_share-on-mastodon' !== $hook_suffix ) {
+			return;
+		}
+
+		wp_enqueue_script( 'share-on-mastodon-js', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), [ 'jquery' ], '0.3.1', true );
+
+		wp_localize_script(
+			'share-on-mastodon-js',
+			'share_on_mastodon_obj',
+			array( 'message' => esc_attr__( 'Are you sure you want to reset all settings?', 'share-on-mastodon' ) )
+		);
 	}
 
 	/**
@@ -414,10 +423,6 @@ class Options_Handler {
 	 * @return boolean If access was revoked.
 	 */
 	private function revoke_access() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return false;
-		}
-
 		if ( empty( $this->options['mastodon_host'] ) ) {
 			return false;
 		}
@@ -451,11 +456,12 @@ class Options_Handler {
 			return false;
 		}
 
-		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
-			// Success. Delete access token.
-			$this->options['mastodon_access_token'] = '';
-			update_option( 'share_on_mastodon_settings', $this->options );
+		// Delete access token, regardless of the outcome.
+		$this->options['mastodon_access_token'] = '';
+		update_option( 'share_on_mastodon_settings', $this->options );
 
+		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
+			// If we were actually successful.
 			return true;
 		} else {
 			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
@@ -484,6 +490,28 @@ class Options_Handler {
 		);
 
 		update_option( 'share_on_mastodon_settings', $this->options );
+	}
+
+	/**
+	 * `admin-post.php` callback.
+	 */
+	public function admin_post() {
+		if ( isset( $_GET['reset'] ) && 'true' === $_GET['reset'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . '#reset' ) ) {
+			// Reset all of this plugin's settings.
+			$this->reset_options();
+		}
+
+		wp_safe_redirect(
+			esc_url(
+				add_query_arg(
+					array(
+						'page' => 'share-on-mastodon',
+					),
+					admin_url( 'options-general.php' )
+				)
+			)
+		);
+		exit;
 	}
 
 	/**
