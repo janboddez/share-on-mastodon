@@ -220,7 +220,7 @@ class Options_Handler {
 
 				if ( ! empty( $this->options['mastodon_client_id'] ) && ! empty( $this->options['mastodon_client_secret'] ) ) {
 					// An app was successfully registered.
-					if ( ! empty( $_GET['code'] ) ) {
+					if ( ! empty( $_GET['code'] ) && '' === $this->options['mastodon_access_token'] ) {
 						// Access token request.
 						if ( $this->request_access_token( wp_unslash( $_GET['code'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 							?>
