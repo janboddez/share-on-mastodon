@@ -199,7 +199,7 @@ class Post_Handler {
 			array( 'status' => $status )
 		);
 
-		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', true ) ) {
+		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', true, $post ) ) {
 			// Upload the featured image.
 			$media_id = $this->upload_thumbnail( $post->ID );
 
@@ -224,9 +224,9 @@ class Post_Handler {
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
+		if ( is_wp_error( $response ) && ! empty( $response['body'] ) ) {
 			// An error occurred.
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			error_log( print_r( $response['body'], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return;
 		}
 
@@ -293,9 +293,9 @@ class Post_Handler {
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
+		if ( is_wp_error( $response ) && ! empty( $response['body'] ) ) {
 			// An error occurred.
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			error_log( print_r( $response['body'], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return;
 		}
 
