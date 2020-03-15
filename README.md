@@ -18,6 +18,17 @@ This behavior can be disabled using the `share_on_mastodon_featured_image` filte
 add_filter( 'share_on_mastodon_featured_image', '__return_false' );
 ```
 
+If wanted to disable images only for a certain post type, you could do so:
+```
+add_filter( 'share_on_mastodon_featured_image', function( $enabled, $post ) {
+  if ( 'post' === $post->post_type ) {
+    return false;
+  }
+
+  return $enabled;
+}, 10, 2 );
+```
+
 ## Privacy
 Currently, all toots sent via this plugin are **public**. [Unlisted or followers-only](https://docs.joinmastodon.org/usage/privacy/#publishing-levels) toots may become an option later on.
 
