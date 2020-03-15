@@ -23,7 +23,7 @@ class Share_On_Mastodon {
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		add_action( 'share_on_mastodon_verify_token', array( Options_Handler::get_instance(), 'cron_verify_token' ) );
 
-		$post_handler = Post_Handler::get_instance();
+		Post_Handler::get_instance();
 	}
 
 	/**
