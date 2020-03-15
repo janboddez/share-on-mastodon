@@ -350,8 +350,8 @@ class Options_Handler {
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+		if ( is_wp_error( $response ) && ! empty( $response['body'] ) ) {
+			error_log( print_r( $response['body'], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return;
 		}
 
@@ -397,8 +397,8 @@ class Options_Handler {
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+		if ( is_wp_error( $response ) && ! empty( $response['body'] ) ) {
+			error_log( print_r( $response['body'], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return false;
 		}
 
@@ -451,8 +451,8 @@ class Options_Handler {
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+		if ( is_wp_error( $response ) && ! empty( $response['body'] ) ) {
+			error_log( print_r( $response['body'], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return false;
 		}
 
