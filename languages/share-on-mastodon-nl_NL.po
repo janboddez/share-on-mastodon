@@ -5,8 +5,8 @@ msgstr ""
 "Project-Id-Version: Share on Mastodon 0.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/share-on-"
 "mastodon\n"
-"POT-Creation-Date: 2019-06-11T19:19:58+02:00\n"
-"PO-Revision-Date: 2019-06-11 19:22+0200\n"
+"POT-Creation-Date: 2020-03-15T11:44:26+01:00\n"
+"PO-Revision-Date: 2020-03-15 11:45+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nl_NL\n"
@@ -18,9 +18,24 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. Plugin Name of the plugin
-#: includes/class-post-handler.php:51 includes/class-post-handler.php:70
-#: includes/class-options-handler.php:66 includes/class-options-handler.php:67
-#: includes/class-options-handler.php:147
+#: svn/trunk/includes/class-post-handler.php:51
+#: svn/trunk/includes/class-post-handler.php:70
+#: svn/trunk/includes/class-options-handler.php:66
+#: svn/trunk/includes/class-options-handler.php:67
+#: svn/trunk/includes/class-options-handler.php:147
+#: svn/tags/0.2/includes/class-post-handler.php:51
+#: svn/tags/0.2/includes/class-post-handler.php:70
+#: svn/tags/0.2/includes/class-options-handler.php:66
+#: svn/tags/0.2/includes/class-options-handler.php:67
+#: svn/tags/0.2/includes/class-options-handler.php:147
+#: svn/tags/0.1/includes/class-post-handler.php:51
+#: svn/tags/0.1/includes/class-post-handler.php:70
+#: svn/tags/0.1/includes/class-options-handler.php:66
+#: svn/tags/0.1/includes/class-options-handler.php:67
+#: svn/tags/0.1/includes/class-options-handler.php:147
+#: includes/class-post-handler.php:81 includes/class-post-handler.php:100
+#: includes/class-options-handler.php:69 includes/class-options-handler.php:70
+#: includes/class-options-handler.php:146
 msgid "Share on Mastodon"
 msgstr "Delen op Mastodon"
 
@@ -36,23 +51,38 @@ msgstr ""
 msgid "https://janboddez.tech/"
 msgstr ""
 
-#: includes/class-options-handler.php:149
+#: svn/trunk/includes/class-options-handler.php:149
+#: svn/tags/0.2/includes/class-options-handler.php:149
+#: svn/tags/0.1/includes/class-options-handler.php:149
+#: includes/class-options-handler.php:148
 msgid "Settings"
 msgstr "Instellingen"
 
-#: includes/class-options-handler.php:163
+#: svn/trunk/includes/class-options-handler.php:163
+#: svn/tags/0.2/includes/class-options-handler.php:163
+#: svn/tags/0.1/includes/class-options-handler.php:163
+#: includes/class-options-handler.php:162
 msgid "Instance"
 msgstr "Instance"
 
-#: includes/class-options-handler.php:165
+#: svn/trunk/includes/class-options-handler.php:165
+#: svn/tags/0.2/includes/class-options-handler.php:165
+#: svn/tags/0.1/includes/class-options-handler.php:165
+#: includes/class-options-handler.php:164
 msgid "Your Mastodon instance&rsquo;s URL."
 msgstr "De URL van je Mastodon-instance."
 
-#: includes/class-options-handler.php:168
+#: svn/trunk/includes/class-options-handler.php:168
+#: svn/tags/0.2/includes/class-options-handler.php:168
+#: svn/tags/0.1/includes/class-options-handler.php:168
+#: includes/class-options-handler.php:167
 msgid "Supported Post Types"
 msgstr "Ondersteunde berichttypes"
 
-#: includes/class-options-handler.php:179
+#: svn/trunk/includes/class-options-handler.php:179
+#: svn/tags/0.2/includes/class-options-handler.php:179
+#: svn/tags/0.1/includes/class-options-handler.php:179
+#: includes/class-options-handler.php:178
 msgid ""
 "Post types for which sharing to Mastodon is possible. (Sharing can still be "
 "disabled on a per-post basis.)"
@@ -60,15 +90,27 @@ msgstr ""
 "Berichttypes die op Mastodon kunnen worden gedeeld. (Delen kan per bericht "
 "nog altijd worden uitgeschakeld.)"
 
-#: includes/class-options-handler.php:185
+#: svn/trunk/includes/class-options-handler.php:185
+#: svn/trunk/includes/class-options-handler.php:230
+#: svn/tags/0.2/includes/class-options-handler.php:185
+#: svn/tags/0.2/includes/class-options-handler.php:230
+#: svn/tags/0.1/includes/class-options-handler.php:185
+#: svn/tags/0.1/includes/class-options-handler.php:230
+#: includes/class-options-handler.php:184
 #: includes/class-options-handler.php:230
 msgid "Authorize Access"
 msgstr "Authoriseren"
 
-#: includes/class-options-handler.php:201
+#: svn/trunk/includes/class-options-handler.php:201
+#: svn/tags/0.2/includes/class-options-handler.php:201
+#: svn/tags/0.1/includes/class-options-handler.php:201
+#: includes/class-options-handler.php:200
 msgid "Access granted!"
 msgstr "Authoriseren gelukt!"
 
+#: svn/trunk/includes/class-options-handler.php:229
+#: svn/tags/0.2/includes/class-options-handler.php:229
+#: svn/tags/0.1/includes/class-options-handler.php:229
 #: includes/class-options-handler.php:229
 msgid ""
 "Authorize WordPress to read and write to your Mastodon timeline in order to "
@@ -77,6 +119,9 @@ msgstr ""
 "Laat WordPress toe om je Mastodon-tijdlijn te lezen en ernaartoe te "
 "schrijven."
 
+#: svn/trunk/includes/class-options-handler.php:235
+#: svn/tags/0.2/includes/class-options-handler.php:235
+#: svn/tags/0.1/includes/class-options-handler.php:235
 #: includes/class-options-handler.php:235
 msgid ""
 "You&rsquo;ve authorized WordPress to read and write to your Mastodon "
@@ -85,10 +130,16 @@ msgstr ""
 "Je hebt WordPress toelating gegeven om je Mastodon-tijdlijn te lezen en "
 "ernaartoe te schrijven."
 
+#: svn/trunk/includes/class-options-handler.php:250
+#: svn/tags/0.2/includes/class-options-handler.php:250
+#: svn/tags/0.1/includes/class-options-handler.php:250
 #: includes/class-options-handler.php:250
 msgid "Revoke Access"
 msgstr "Ongedaan maken"
 
+#: svn/trunk/includes/class-options-handler.php:259
+#: svn/tags/0.2/includes/class-options-handler.php:259
+#: svn/tags/0.1/includes/class-options-handler.php:259
 #: includes/class-options-handler.php:259
 msgid ""
 "Something went wrong contacting your Mastodon instance. Please reload this "
@@ -97,18 +148,47 @@ msgstr ""
 "Er ging iets mis met het contacteren van je Mastodon-instance. Herlaad deze "
 "pagina om het nog eens te proberen."
 
+#: svn/trunk/includes/class-options-handler.php:265
+#: svn/tags/0.2/includes/class-options-handler.php:265
+#: svn/tags/0.1/includes/class-options-handler.php:265
 #: includes/class-options-handler.php:265
 msgid "Please fill out and save your Mastodon instance&rsquo;s URL first."
 msgstr "Vul alsjeblieft eerst je Mastodon-instance in."
 
-#: includes/class-options-handler.php:271
+#: svn/trunk/includes/class-options-handler.php:271
+#: svn/tags/0.2/includes/class-options-handler.php:271
+#: svn/tags/0.1/includes/class-options-handler.php:271
+#: includes/class-options-handler.php:270
 msgid "Debugging"
 msgstr "Debuggen"
 
-#: includes/class-options-handler.php:272
+#: svn/trunk/includes/class-options-handler.php:272
+#: svn/tags/0.2/includes/class-options-handler.php:272
+#: svn/tags/0.1/includes/class-options-handler.php:272
+#: includes/class-options-handler.php:293
 msgid ""
 "Below information is not meant to be shared with anyone but may help when "
 "troubleshooting issues."
 msgstr ""
 "Onderstaande informatie hoor je met niemand te delen maar kan helpen met het "
 "troubleshooten van problemen."
+
+#: includes/class-options-handler.php:271
+msgid ""
+"Just in case, below button lets you delete Share on Mastodon&rsquo;s "
+"settings. Note: This will not invalidate previously issued tokens! (You can, "
+"however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; "
+"Authorized apps&rdquo; page.)"
+msgstr ""
+"Mocht dat nodig zijn, kun je met onderstaande knop de instellingen van Delen "
+"op Mastodon verwijderen. Let op: eerder uitgereikte tokens worden daarmee "
+"niet ongeldig gemaakt. (Dit kun je alsnog doen op de &lsquo;Account &gt; "
+"Authorized apps&rsquo;-pagina van je Mastodon-instance.)"
+
+#: includes/class-options-handler.php:286
+msgid "Reset Settings"
+msgstr "Instellingen resetten"
+
+#: includes/class-options-handler.php:319
+msgid "Are you sure you want to reset all settings?"
+msgstr "Weet je zeker dat je alle instellingen wilt resetten?"
