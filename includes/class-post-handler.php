@@ -224,9 +224,9 @@ class Post_Handler {
 			)
 		);
 
-		if ( is_wp_error( $response ) && ! empty( $response['body'] ) ) {
+		if ( is_wp_error( $response ) ) {
 			// An error occurred.
-			error_log( print_r( $response['body'], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return;
 		}
 
@@ -293,9 +293,9 @@ class Post_Handler {
 			)
 		);
 
-		if ( is_wp_error( $response ) && ! empty( $response['body'] ) ) {
+		if ( is_wp_error( $response ) ) {
 			// An error occurred.
-			error_log( print_r( $response['body'], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return;
 		}
 

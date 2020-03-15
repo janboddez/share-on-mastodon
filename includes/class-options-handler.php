@@ -350,8 +350,8 @@ class Options_Handler {
 			)
 		);
 
-		if ( is_wp_error( $response ) && ! empty( $response['body'] ) ) {
-			error_log( print_r( $response['body'], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+		if ( is_wp_error( $response ) ) {
+			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return;
 		}
 
@@ -397,8 +397,8 @@ class Options_Handler {
 			)
 		);
 
-		if ( is_wp_error( $response ) && ! empty( $response['body'] ) ) {
-			error_log( print_r( $response['body'], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+		if ( is_wp_error( $response ) ) {
+			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return false;
 		}
 
@@ -451,14 +451,14 @@ class Options_Handler {
 			)
 		);
 
-		if ( is_wp_error( $response ) && ! empty( $response['body'] ) ) {
-			error_log( print_r( $response['body'], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
-			return false;
-		}
-
 		// Delete access token, regardless of the outcome.
 		$this->options['mastodon_access_token'] = '';
 		update_option( 'share_on_mastodon_settings', $this->options );
+
+		if ( is_wp_error( $response ) ) {
+			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			return false;
+		}
 
 		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 			// If we were actually successful.
