@@ -268,7 +268,7 @@ class Options_Handler {
 
 			?>
 			<h2><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></h2>
-			<p><?php esc_html_e( 'Delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
+			<p><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
 			<p style="margin-bottom: 2rem;">
 				<?php
 				printf(
