@@ -501,8 +501,8 @@ class Options_Handler {
 			$this->reset_options();
 		}
 
-		wp_safe_redirect(
-			esc_url(
+		wp_redirect( // phpcs:ignore WordPress.Security.SafeRedirect
+			esc_url_raw(
 				add_query_arg(
 					array(
 						'page' => 'share-on-mastodon',
