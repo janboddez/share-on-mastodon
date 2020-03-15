@@ -272,7 +272,7 @@ class Options_Handler {
 			<p style="margin-bottom: 2rem;">
 				<?php
 				printf(
-					'<a href="%1$s" class="button button-reset" style="color: #a00; border-color: #a00;">%2$s</a>',
+					'<a href="%1$s" class="button button-reset-settings" style="color: #a00; border-color: #a00;">%2$s</a>',
 					esc_url(
 						add_query_arg(
 							array(
