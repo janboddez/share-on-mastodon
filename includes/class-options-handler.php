@@ -562,7 +562,7 @@ class Options_Handler {
 			return;
 		}
 
-		// Request an access token.
+		// Verify the current access token.
 		$response = wp_remote_get(
 			esc_url_raw( $this->options['mastodon_host'] ) . '/api/v1/accounts/verify_credentials',
 			array(
