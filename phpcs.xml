@@ -14,4 +14,7 @@
 	<rule ref="PHPCompatibilityWP">
 		<include-pattern>*\.php$</include-pattern>
 	</rule>
+
+	<exclude-pattern>tests/*</exclude-pattern>
+	<exclude-pattern>bootstrap\.php$</exclude-pattern>
 </ruleset>
