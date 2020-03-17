@@ -25,4 +25,4 @@ require dirname( __FILE__ ) . '/includes/class-options-handler.php';
 require dirname( __FILE__ ) . '/includes/class-post-handler.php';
 require dirname( __FILE__ ) . '/includes/class-share-on-mastodon.php';
 
-new Share_On_Mastodon();
+Share_On_Mastodon::get_instance();

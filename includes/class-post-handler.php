@@ -12,50 +12,36 @@ namespace Share_On_Mastodon;
  */
 class Post_Handler {
 	/**
-	 * This plugin's single instance.
-	 *
-	 * @since 0.4.0
-	 *
-	 * @var Post_Handler $instance Plugin instance.
-	 */
-	private static $instance;
-
-	/**
 	 * Array that holds this plugin's settings.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @var   array $options Plugin options.
+	 * @var array $options Plugin options.
 	 */
 	private $options = array();
-
-	/**
-	 * Returns the single instance of this class.
-	 *
-	 * @since 0.4.0
-	 *
-	 * @return Post_Handler Single class instance.
-	 */
-	public static function get_instance() {
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
-	}
 
 	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
+	 *
+	 * @param Options_Handler $options_handler This plugin's `Options_Handler`.
 	 */
-	private function __construct() {
-		$this->options = Options_Handler::get_instance()->get_options();
+	public function __construct( Options_Handler $options_handler = null ) {
+		if ( null !== $options_handler ) {
+			$this->options = $options_handler->get_options();
+		}
+	}
 
+	/**
+	 * Interacts with WordPress's Plugin API.
+	 *
+	 * @since 0.5.0
+	 */
+	public function register() {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
-
 		add_action( 'transition_post_status', array( $this, 'update_meta' ), 11, 3 );
-		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
+		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 ); // After the previous function's run.
 	}
 
 	/**
@@ -242,7 +228,7 @@ class Post_Handler {
 	/**
 	 * Uploads a post thumbnail and returns a (single) media ID.
 	 *
-	 * @since  0.1.0
+	 * @since 0.1.0
 	 *
 	 * @param int $post_id Post ID.
 	 *

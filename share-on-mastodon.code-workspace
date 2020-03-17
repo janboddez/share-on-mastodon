@@ -3,5 +3,12 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"files.exclude": {
+			".phpunit.result.cache": true,
+			"svn": true,
+			"vendor": true,
+		}
+	}
 }

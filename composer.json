@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "10up/wp_mock": "0.4.2"
+    }
+}

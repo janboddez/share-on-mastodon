@@ -12,15 +12,6 @@ namespace Share_On_Mastodon;
  */
 class Options_Handler {
 	/**
-	 * This plugin's single instance.
-	 *
-	 * @since 0.4.0
-	 *
-	 * @var Options_Handler $instance Plugin instance.
-	 */
-	private static $instance;
-
-	/**
 	 * Plugin options.
 	 *
 	 * @since 0.1.0
@@ -55,31 +46,23 @@ class Options_Handler {
 	);
 
 	/**
-	 * Returns the single instance of this class.
-	 *
-	 * @since 0.4.0
-	 *
-	 * @return Options_Handler Single class instance.
-	 */
-	public static function get_instance() {
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
-	}
-
-	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 */
-	private function __construct() {
+	public function __construct() {
 		$this->options = get_option(
 			'share_on_mastodon_settings',
 			$this->options
 		);
+	}
 
+	/**
+	 * Interacts with WordPress's Plugin API.
+	 *
+	 * @since 0.5.0
+	 */
+	public function register() {
 		add_action( 'admin_menu', array( $this, 'create_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'admin_post_share_on_mastodon', array( $this, 'admin_post' ) );
@@ -121,7 +104,7 @@ class Options_Handler {
 	 *
 	 * @param array $settings Settings as submitted through WP Admin.
 	 *
-	 * @return array           Options to be stored.
+	 * @return array Options to be stored.
 	 */
 	public function sanitize_settings( $settings ) {
 		$this->options['post_types'] = array();
@@ -231,7 +214,7 @@ class Options_Handler {
 						}
 					}
 
-					if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . '#revoke' ) ) {
+					if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'share-on-mastodon-reset' ) ) {
 						// Revoke access. Forget access token regardless of the
 						// outcome.
 						$this->revoke_access();
@@ -270,7 +253,7 @@ class Options_Handler {
 										array(
 											'page'     => 'share-on-mastodon',
 											'action'   => 'revoke',
-											'_wpnonce' => wp_create_nonce( basename( __FILE__ ) . '#revoke' ),
+											'_wpnonce' => wp_create_nonce( 'share-on-mastodon-reset' ),
 										),
 										admin_url( 'options-general.php' )
 									)
@@ -306,7 +289,7 @@ class Options_Handler {
 							array(
 								'action'   => 'share_on_mastodon',
 								'reset'    => 'true',
-								'_wpnonce' => wp_create_nonce( basename( __FILE__ ) . '#reset' ),
+								'_wpnonce' => wp_create_nonce( 'share-on-mastodon-reset' ),
 							),
 							admin_url( 'admin-post.php' )
 						)
@@ -448,7 +431,7 @@ class Options_Handler {
 	/**
 	 * Revokes WordPress' access to Mastodon.
 	 *
-	 * @since  0.1.0
+	 * @since 0.1.0
 	 *
 	 * @return boolean If access was revoked.
 	 */
@@ -504,7 +487,7 @@ class Options_Handler {
 	/**
 	 * Resets all plugin options.
 	 *
-	 * @since  0.3.1
+	 * @since 0.3.1
 	 */
 	private function reset_options() {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -528,7 +511,7 @@ class Options_Handler {
 	 * @since 0.3.1
 	 */
 	public function admin_post() {
-		if ( isset( $_GET['reset'] ) && 'true' === $_GET['reset'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), basename( __FILE__ ) . '#reset' ) ) {
+		if ( isset( $_GET['reset'] ) && 'true' === $_GET['reset'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'share-on-mastodon-reset' ) ) {
 			// Reset all of this plugin's settings.
 			$this->reset_options();
 		}
