@@ -59,14 +59,23 @@ class Share_On_Mastodon {
 	 * @since 0.1.0
 	 */
 	private function __construct() {
-		register_activation_hook( dirname( dirname( __FILE__ ) ) . '/share-on-mastodon.php', array( $this, 'activate' ) );
-		register_deactivation_hook( dirname( dirname( __FILE__ ) ) . '/share-on-mastodon.php', array( $this, 'deactivate' ) );
 
 		$this->options_handler = new Options_Handler();
 		$this->options_handler->register();
 
 		$this->post_handler = new Post_Handler( $this->options_handler );
 		$this->post_handler->register();
+
+	}
+
+	/**
+	 * Interacts with WordPress's Plugin API.
+	 *
+	 * @since 0.5.0
+	 */
+	public function register() {
+		register_activation_hook( dirname( dirname( __FILE__ ) ) . '/share-on-mastodon.php', array( $this, 'activate' ) );
+		register_deactivation_hook( dirname( dirname( __FILE__ ) ) . '/share-on-mastodon.php', array( $this, 'deactivate' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		add_action( 'share_on_mastodon_verify_token', array( $this->options_handler, 'cron_verify_token' ) );
