@@ -27,11 +27,11 @@ class Options_Handler {
 	);
 
 	/**
-	 * WordPress' default post types.
+	 * WordPress's default post types.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @var array WordPress' default post types, minus 'post' itself.
+	 * @var array WordPress's default post types, minus "post" itself.
 	 */
 	const DEFAULT_POST_TYPES = array(
 		'page',
@@ -278,6 +278,7 @@ class Options_Handler {
 			}
 
 			?>
+
 			<h2><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></h2>
 			<p><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
 			<p style="margin-bottom: 2rem;">
@@ -337,11 +338,7 @@ class Options_Handler {
 	 * @since 0.1.0
 	 */
 	private function register_app() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		// Register a new app. Should only run once (per host)!
+		// Register a new app. Should probably only run once (per host).
 		$response = wp_remote_post(
 			esc_url_raw( $this->options['mastodon_host'] ) . '/api/v1/apps',
 			array(
@@ -386,10 +383,6 @@ class Options_Handler {
 	 * @param string $code Authorization code.
 	 */
 	private function request_access_token( $code ) {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return false;
-		}
-
 		// Request an access token.
 		$response = wp_remote_post(
 			esc_url_raw( $this->options['mastodon_host'] ) . '/oauth/token',
@@ -429,11 +422,11 @@ class Options_Handler {
 	}
 
 	/**
-	 * Revokes WordPress' access to Mastodon.
+	 * Revokes WordPress's access to Mastodon.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return boolean If access was revoked.
+	 * @return boolean Whether access was revoked.
 	 */
 	private function revoke_access() {
 		if ( empty( $this->options['mastodon_host'] ) ) {
@@ -545,7 +538,7 @@ class Options_Handler {
 			return;
 		}
 
-		// Request an access token.
+		// Verify the current access token.
 		$response = wp_remote_get(
 			esc_url_raw( $this->options['mastodon_host'] ) . '/api/v1/accounts/verify_credentials',
 			array(
