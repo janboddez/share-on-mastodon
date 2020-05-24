@@ -267,7 +267,7 @@ class Post_Handler {
 			$url = $image[0];
 		} else {
 			// Get the original image URL.
-			wp_get_attachment_url( $image_id );
+			$url = wp_get_attachment_url( $image_id );
 		}
 
 		$uploads   = wp_upload_dir();
