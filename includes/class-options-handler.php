@@ -276,7 +276,6 @@ class Options_Handler {
 				<p><?php esc_html_e( 'Please fill out and save your Mastodon instance&rsquo;s URL first.', 'share-on-mastodon' ); ?></p>
 				<?php
 			}
-
 			?>
 
 			<h2><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></h2>
@@ -323,7 +322,7 @@ class Options_Handler {
 			return;
 		}
 
-		wp_enqueue_script( 'share-on-mastodon-js', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), [ 'jquery' ], '0.3.1', true );
+		wp_enqueue_script( 'share-on-mastodon-js', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.5.0', true );
 
 		wp_localize_script(
 			'share-on-mastodon-js',
