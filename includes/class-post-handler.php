@@ -176,19 +176,45 @@ class Post_Handler {
 
 		$status = wp_strip_all_tags( get_the_title( $post->ID ) ) . ' ' . esc_url_raw( get_permalink( $post->ID ) );
 		$status = apply_filters( 'share_on_mastodon_status', $status, $post );
+		$args   = apply_filters( 'share_on_mastodon_toot_args', array( 'status' => $status ) );
 
 		// Encode, build query string.
-		$query_string = http_build_query(
-			array( 'status' => $status )
-		);
+		$query_string = http_build_query( $args );
+
+		// And now, images. Note that this'll have to be rewritten for the new
+		// media API.
+		$thumbnail = null;
+		$media     = array();
 
 		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', true, $post ) ) {
-			// Upload the featured image.
-			$media_id = $this->upload_thumbnail( $post->ID );
+			// Include featured image.
+			$thumbnail = get_post_thumbnail_id( $post->ID );
+			$media[]   = $thumbnail;
+		}
+
+		if ( apply_filters( 'share_on_mastodon_attached_images', true, $post ) ) {
+			// Include all attached images.
+			$images = get_attached_media( 'image', $post->ID );
+
+			if ( ! empty( $images ) && is_array( $images ) ) {
+				foreach ( $images as $image ) {
+					// Skip the post's featured image, which we tackle
+					// separately.
+					if ( ! empty( $thumbnail ) && $thumbnail === $image->ID ) {
+						continue;
+					}
+
+					$media[] = $image->ID;
+				}
+			}
+		}
+
+		// Loop through the resulting image IDs.
+		for ( $i = 0; $i < 4; $i++ ) {
+			$media_id = $this->upload_image( $media[ $i ] );
 
 			if ( ! empty( $media_id ) ) {
-				// Handle after `http_build_query()`, as apparently Mastodon
-				// doesn't like numbers for query string array keys.
+				// The image got uploaded OK.
 				$query_string .= '&media_ids[]=' . rawurlencode( $media_id );
 			}
 		}
@@ -199,11 +225,10 @@ class Post_Handler {
 				'headers'     => array(
 					'Authorization' => 'Bearer ' . $this->options['mastodon_access_token'],
 				),
-				// Prevent WordPress from applying `http_build_query()`, for the
-				// same reason.
+				// Prevent WordPress from applying `http_build_query()`.
 				'data_format' => 'body',
 				'body'        => $query_string,
-				'timeout'     => 30,
+				'timeout'     => 15,
 			)
 		);
 
@@ -226,17 +251,25 @@ class Post_Handler {
 	}
 
 	/**
-	 * Uploads a post thumbnail and returns a (single) media ID.
+	 * Uploads an image and returns a (single) media ID.
 	 *
-	 * @since 0.1.0
+	 * @since  0.5.0
 	 *
-	 * @param int $post_id Post ID.
+	 * @param int $image_id Image ID.
 	 *
 	 * @return string|null Unique media ID, or nothing on failure.
 	 */
-	private function upload_thumbnail( $post_id ) {
-		$thumb_id  = get_post_thumbnail_id( $post_id );
-		$url       = wp_get_attachment_url( $thumb_id );
+	private function upload_image( $image_id ) {
+		$url   = '';
+		$image = wp_get_attachment_image_src( $image_id, 'large' );
+
+		if ( ! empty( $image[0] ) ) {
+			$url = $image[0];
+		} else {
+			// Get the original image URL.
+			wp_get_attachment_url( $image_id );
+		}
+
 		$uploads   = wp_upload_dir();
 		$file_path = str_replace( $uploads['baseurl'], $uploads['basedir'], $url );
 
@@ -245,7 +278,7 @@ class Post_Handler {
 			return;
 		}
 
-		$alt = get_post_meta( $thumb_id, '_wp_attachment_image_alt', true );
+		$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 
 		$boundary = md5( time() );
 		$eol      = "\r\n";
@@ -274,7 +307,7 @@ class Post_Handler {
 				),
 				'data_format' => 'body',
 				'body'        => $body,
-				'timeout'     => 30,
+				'timeout'     => 15,
 			)
 		);
 

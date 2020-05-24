@@ -59,13 +59,11 @@ class Share_On_Mastodon {
 	 * @since 0.1.0
 	 */
 	private function __construct() {
-
 		$this->options_handler = new Options_Handler();
 		$this->options_handler->register();
 
 		$this->post_handler = new Post_Handler( $this->options_handler );
 		$this->post_handler->register();
-
 	}
 
 	/**
