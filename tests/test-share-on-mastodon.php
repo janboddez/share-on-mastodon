@@ -32,5 +32,7 @@ class Test_Share_On_Mastodon extends \WP_Mock\Tools\TestCase {
 		\WP_Mock::expectActionAdded( 'share_on_mastodon_verify_token', array( $plugin->get_options_handler(), 'cron_verify_token' ) );
 
 		$plugin->register();
+
+		$this->assertHooksAdded();
 	}
 }

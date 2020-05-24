@@ -34,6 +34,8 @@ class Test_Options_Handler extends \WP_Mock\Tools\TestCase {
 		\WP_Mock::expectActionAdded( 'admin_post_share_on_mastodon', array( $options_handler, 'admin_post' ) );
 
 		$options_handler->register();
+
+		$this->assertHooksAdded();
 	}
 
 	public function test_options_handler_add_settings() {
@@ -53,5 +55,7 @@ class Test_Options_Handler extends \WP_Mock\Tools\TestCase {
 		\WP_Mock::expectActionAdded( 'admin_init', array( $options_handler, 'add_settings' ) );
 
 		$options_handler->create_menu();
+
+		$this->assertHooksAdded();
 	}
 }

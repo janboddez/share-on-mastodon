@@ -17,5 +17,7 @@ class Test_Post_Handler extends \WP_Mock\Tools\TestCase {
 		\WP_Mock::expectActionAdded( 'transition_post_status', array( $post_handler, 'toot' ), 999, 3 );
 
 		$post_handler->register();
+
+		$this->assertHooksAdded();
 	}
 }
