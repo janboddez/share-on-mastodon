@@ -10,7 +10,7 @@ Tell the Share on Mastodon settings page about your instance URL, and make sure 
 Select the Post Types for which sharing to Mastodon should be possible, too. (Sharing can still be disabled on a per-post basis.)
 
 ## Media
-When a Featured Image is set, Share on Mastodon will try to include it. Other media are not supported at the moment.
+When a Featured Image is set, Share on Mastodon will try to include it.
 
 This behavior can be disabled using the `share_on_mastodon_featured_image` filter.
 ```
@@ -18,7 +18,7 @@ This behavior can be disabled using the `share_on_mastodon_featured_image` filte
 add_filter( 'share_on_mastodon_featured_image', '__return_false' );
 ```
 
-If you wanted to disable images only for a certain post type, you could do so:
+If you wanted to disable including featured images for a certain post type only, you could do that:
 ```
 add_filter( 'share_on_mastodon_featured_image', function( $enabled, $post ) {
   if ( 'post' === $post->post_type ) {
@@ -28,6 +28,19 @@ add_filter( 'share_on_mastodon_featured_image', function( $enabled, $post ) {
   return $enabled;
 }, 10, 2 );
 ```
+
+The same goes for any other images _attached to the post_. (Note: _Attached_ images aren't necessarily part of the post content. They're typically uploaded through the Edit Post screen when editing the post in question.)
+```
+add_filter( 'share_on_mastodon_attached_images', function( $enabled, $post ) {
+  if ( 'post' === $post->post_type ) {
+    return false;
+  }
+
+  return $enabled;
+}, 10, 2 );
+```
+
+Regardless of what images are enabled (the default is _both_ featured and regular attached images), no more than four images will ever be included, even if the number of attached images is larger.
 
 ## Privacy
 Currently, all toots sent via this plugin are **public**. [Unlisted or followers-only](https://docs.joinmastodon.org/usage/privacy/#publishing-levels) toots may become an option later on.
