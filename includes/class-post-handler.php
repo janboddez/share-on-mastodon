@@ -182,9 +182,11 @@ class Post_Handler {
 		$status = apply_filters( 'share_on_mastodon_status', $status, $post );
 		$args   = apply_filters( 'share_on_mastodon_toot_args', array( 'status' => $status ) );
 
-		if ( apply_filters( 'share_on_mastodon_cutoff', true ) ) {
-			// May render hashtags or URLs, or unfiltered HTML, at the very end of a toot unusable.
-			$args['status'] = mb_substr( $args['status'], 0, 498, get_bloginfo( 'charset' ) ) . ' …';
+		if ( apply_filters( 'share_on_mastodon_cutoff', false ) ) {
+			// May render hashtags or URLs, or unfiltered HTML, at the very end
+			// of a toot unusable. Also, Mastodon may not even use a multibyte
+			// check. To do: test better?
+			$args['status'] = mb_substr( $args['status'], 0, 499, get_bloginfo( 'charset' ) ) . '…';
 		}
 
 		// Encode, build query string.
