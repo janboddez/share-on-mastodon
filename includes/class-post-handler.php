@@ -174,7 +174,11 @@ class Post_Handler {
 			return;
 		}
 
-		$status = wp_strip_all_tags( get_the_title( $post->ID ) ) . ' ' . esc_url_raw( get_permalink( $post->ID ) );
+		$status  = wp_strip_all_tags(
+			html_entity_decode( get_the_title( $post->ID ), ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ) // Avoid double-encoded HTML entities.
+		);
+		$status .= ' ' . esc_url_raw( get_permalink( $post->ID ) );
+
 		$status = apply_filters( 'share_on_mastodon_status', $status, $post );
 		$args   = apply_filters( 'share_on_mastodon_toot_args', array( 'status' => $status ) );
 

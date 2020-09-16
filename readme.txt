@@ -24,6 +24,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.5.1 =
+Avoid double-encoded HTML entities.
+
 = 0.5.0 =
 Support uploading of up to 4 attached images. Add additional arguments filter, e.g, for toot threading.
 
