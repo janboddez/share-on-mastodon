@@ -322,10 +322,10 @@ class Options_Handler {
 			return;
 		}
 
-		wp_enqueue_script( 'share-on-mastodon-js', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.5.0', true );
+		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.5.2', true );
 
 		wp_localize_script(
-			'share-on-mastodon-js',
+			'share-on-mastodon',
 			'share_on_mastodon_obj',
 			array( 'message' => esc_attr__( 'Are you sure you want to reset all settings?', 'share-on-mastodon' ) )
 		);

@@ -42,6 +42,9 @@ class Post_Handler {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'transition_post_status', array( $this, 'update_meta' ), 11, 3 );
 		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 ); // After the previous function's run.
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
 	}
 
 	/**
@@ -67,6 +70,39 @@ class Post_Handler {
 	}
 
 	/**
+	 * Deletes a post's Mastodon URL.
+	 *
+	 * Should only ever be called through AJAX.
+	 *
+	 * @since 0.5.2
+	 */
+	public function unlink_url() {
+		if ( ! isset( $_POST['share_on_mastodon_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['share_on_mastodon_nonce'] ), basename( __FILE__ ) ) ) {
+			status_header( 400 );
+			esc_html_e( 'Missing or invalid nonce.', 'share-on-mastodon' );
+			wp_die();
+		}
+
+		if ( ! isset( $_POST['post_id'] ) || ! ctype_digit( $_POST['post_id'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			status_header( 400 );
+			esc_html_e( 'Missing or incorrect post ID.', 'share-on-mastodon' );
+			wp_die();
+		}
+
+		if ( ! current_user_can( 'edit_post', intval( $_POST['post_id'] ) ) ) {
+			status_header( 400 );
+			esc_html_e( 'Insufficient rights.', 'share-on-mastodon' );
+			wp_die();
+		}
+
+		if ( '' !== get_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url', true ) ) {
+			delete_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url' );
+		}
+
+		wp_die();
+	}
+
+	/**
 	 * Renders meta box.
 	 *
 	 * @since 0.1.0
@@ -74,13 +110,60 @@ class Post_Handler {
 	 * @param WP_Post $post Post being edited.
 	 */
 	public function render_meta_box( $post ) {
+		wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' );
 		?>
-			<?php wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' ); ?>
-			<label>
-				<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( in_array( get_post_meta( $post->ID, '_share_on_mastodon', true ), array( '', '1' ), true ) ); ?>>
-				<?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?>
-			</label>
+		<label>
+			<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( in_array( get_post_meta( $post->ID, '_share_on_mastodon', true ), array( '', '1' ), true ) ); ?>>
+			<?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?>
+		</label>
 		<?php
+		$url = get_post_meta( $post->ID, '_share_on_mastodon_url', true );
+
+		if ( '' !== $url ) :
+			$url_parts    = wp_parse_url( $url );
+			$display_url  = '<span class="screen-reader-text">' . $url_parts['scheme'] . '://';
+			$display_url .= ( $url_parts['user'] ? $url_parts['user'] . ( $url_parts['pass'] ? ':' . $url_parts['pass'] : '' ) . '@' : '' ) . '</span>';
+			$display_url .= '<span class="ellipsis">' . substr( $url_parts['host'] . $url_parts['path'], 0, 20 ) . '</span><span class="screen-reader-text">' . substr( $url_parts['host'] . $url_parts['path'], 20 ) . '</span>';
+			?>
+			<p class="description">
+				<?php /* translators: toot URL */ ?>
+				<?php printf( esc_html__( 'Shared at %s', 'share-on-mastodon' ), '<a class="url" href="' . esc_url( $url ) . '">' . $display_url . '</a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php /* translators: "unlink" link text */ ?>
+				<a href="#" class="unlink"><?php esc_html_e( 'Unlink', 'share-on-mastodon' ); ?></a>
+			</p>
+			<?php
+		endif;
+	}
+
+	/**
+	 * Adds admin scripts and styles.
+	 *
+	 * @since 0.5.2
+	 *
+	 * @param string $hook_suffix Current WP-Admin page.
+	 */
+	public function enqueue_scripts( $hook_suffix ) {
+		if ( 'post-new.php' !== $hook_suffix && 'post.php' !== $hook_suffix ) {
+			return;
+		}
+
+		global $post;
+
+		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
+			return;
+		}
+
+		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), '0.5.2' );
+
+		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.5.2', false );
+		wp_localize_script(
+			'share-on-mastodon',
+			'share_on_mastodon_obj',
+			array(
+				'message' => esc_attr__( 'Forget this URL?', 'share-on-mastodon' ),
+				'post_id' => $post->ID,
+			)
+		);
 	}
 
 	/**
@@ -117,6 +200,11 @@ class Post_Handler {
 			update_post_meta( $post->ID, '_share_on_mastodon', '1' );
 		} else {
 			update_post_meta( $post->ID, '_share_on_mastodon', '0' );
+
+			// Delete previous Mastodon URL, if any.
+			if ( '' !== get_post_meta( $post->ID, '_share_on_mastodon_url', true ) ) {
+				delete_post_meta( $post->ID, '_share_on_mastodon_url' );
+			}
 		}
 	}
 

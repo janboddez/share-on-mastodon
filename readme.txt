@@ -12,7 +12,7 @@ Automatically share WordPress posts on [Mastodon](https://joinmastodon.org/).
 
 You choose which Post Types are shared—though sharing can still be disabled on a per-post basis.
 
-Supports a number of filter hooks for developers, and Featured Images, and is fully compatible with WordPress's new block editor.
+Supports image uploads, WordPress's new block editor, and comes with a number of filter hooks for developers.
 
 More details can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 

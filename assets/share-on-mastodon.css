@@ -1,0 +1,11 @@
+#share-on-mastodon .description {
+	margin: 1em 0 1px;
+}
+
+#share-on-mastodon .url .ellipsis::after {
+	content: "…";
+}
+
+#share-on-mastodon .unlink {
+	color: #a00;
+}
