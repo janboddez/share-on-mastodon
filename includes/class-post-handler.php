@@ -70,39 +70,6 @@ class Post_Handler {
 	}
 
 	/**
-	 * Deletes a post's Mastodon URL.
-	 *
-	 * Should only ever be called through AJAX.
-	 *
-	 * @since 0.5.2
-	 */
-	public function unlink_url() {
-		if ( ! isset( $_POST['share_on_mastodon_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['share_on_mastodon_nonce'] ), basename( __FILE__ ) ) ) {
-			status_header( 400 );
-			esc_html_e( 'Missing or invalid nonce.', 'share-on-mastodon' );
-			wp_die();
-		}
-
-		if ( ! isset( $_POST['post_id'] ) || ! ctype_digit( $_POST['post_id'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			status_header( 400 );
-			esc_html_e( 'Missing or incorrect post ID.', 'share-on-mastodon' );
-			wp_die();
-		}
-
-		if ( ! current_user_can( 'edit_post', intval( $_POST['post_id'] ) ) ) {
-			status_header( 400 );
-			esc_html_e( 'Insufficient rights.', 'share-on-mastodon' );
-			wp_die();
-		}
-
-		if ( '' !== get_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url', true ) ) {
-			delete_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url' );
-		}
-
-		wp_die();
-	}
-
-	/**
 	 * Renders meta box.
 	 *
 	 * @since 0.1.0
@@ -137,6 +104,39 @@ class Post_Handler {
 	}
 
 	/**
+	 * Deletes a post's Mastodon URL.
+	 *
+	 * Should only ever be called through AJAX.
+	 *
+	 * @since 0.5.2
+	 */
+	public function unlink_url() {
+		if ( ! isset( $_POST['share_on_mastodon_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['share_on_mastodon_nonce'] ), basename( __FILE__ ) ) ) {
+			status_header( 400 );
+			esc_html_e( 'Missing or invalid nonce.', 'share-on-mastodon' );
+			wp_die();
+		}
+
+		if ( ! isset( $_POST['post_id'] ) || ! ctype_digit( $_POST['post_id'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			status_header( 400 );
+			esc_html_e( 'Missing or incorrect post ID.', 'share-on-mastodon' );
+			wp_die();
+		}
+
+		if ( ! current_user_can( 'edit_post', intval( $_POST['post_id'] ) ) ) {
+			status_header( 400 );
+			esc_html_e( 'Insufficient rights.', 'share-on-mastodon' );
+			wp_die();
+		}
+
+		if ( '' !== get_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url', true ) ) {
+			delete_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url' );
+		}
+
+		wp_die();
+	}
+
+	/**
 	 * Adds admin scripts and styles.
 	 *
 	 * @since 0.5.2
@@ -149,6 +149,10 @@ class Post_Handler {
 		}
 
 		global $post;
+
+		if ( empty( $post ) ) {
+			return;
+		}
 
 		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
 			return;
