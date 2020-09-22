@@ -120,7 +120,8 @@ class Post_Handler {
 		$url = get_post_meta( $post->ID, '_share_on_mastodon_url', true );
 
 		if ( '' !== $url ) :
-			$url_parts    = wp_parse_url( $url );
+			$url_parts = wp_parse_url( $url );
+
 			$display_url  = '<span class="screen-reader-text">' . $url_parts['scheme'] . '://';
 			$display_url .= ( $url_parts['user'] ? $url_parts['user'] . ( $url_parts['pass'] ? ':' . $url_parts['pass'] : '' ) . '@' : '' ) . '</span>';
 			$display_url .= '<span class="ellipsis">' . substr( $url_parts['host'] . $url_parts['path'], 0, 20 ) . '</span><span class="screen-reader-text">' . substr( $url_parts['host'] . $url_parts['path'], 20 ) . '</span>';
@@ -156,6 +157,7 @@ class Post_Handler {
 		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), '0.5.2' );
 
 		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.5.2', false );
+
 		wp_localize_script(
 			'share-on-mastodon',
 			'share_on_mastodon_obj',
