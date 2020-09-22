@@ -1,6 +1,8 @@
 # Share on Mastodon
 Automatically share WordPress posts on [Mastodon](https://joinmastodon.org/). You choose which Post Types are shared—though sharing can still be disabled on a per-post basis.
 
+Custom formatting is done through filter hooks rather than the options page UI, and requires some familiarity with PHP. (Always here to help, though!) Benefits are things like infinite flexibility, _version control_, and, frankly, less code and thus an easier to maintain plugin.
+
 ## Documentation
 Complete documentation, and code examples, can be found at https://jan.boddez.net/wordpress/share-on-mastodon.
 
