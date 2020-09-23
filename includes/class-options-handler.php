@@ -319,15 +319,16 @@ class Options_Handler {
 	 */
 	public function enqueue_scripts( $hook_suffix ) {
 		if ( 'settings_page_share-on-mastodon' !== $hook_suffix ) {
+			// Not the "Share on Mastodon" settings page.
 			return;
 		}
 
+		// Enqueue JS.
 		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.5.2', true );
-
 		wp_localize_script(
 			'share-on-mastodon',
 			'share_on_mastodon_obj',
-			array( 'message' => esc_attr__( 'Are you sure you want to reset all settings?', 'share-on-mastodon' ) )
+			array( 'message' => esc_attr__( 'Are you sure you want to reset all settings?', 'share-on-mastodon' ) ) // Confirmation message.
 		);
 	}
 

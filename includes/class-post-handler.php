@@ -129,6 +129,7 @@ class Post_Handler {
 			wp_die();
 		}
 
+		// Have WordPress forget the Mastodon URL.
 		if ( '' !== get_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url', true ) ) {
 			delete_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url' );
 		}
@@ -145,29 +146,31 @@ class Post_Handler {
 	 */
 	public function enqueue_scripts( $hook_suffix ) {
 		if ( 'post-new.php' !== $hook_suffix && 'post.php' !== $hook_suffix ) {
+			// Not an "Edit Post" screen.
 			return;
 		}
 
 		global $post;
 
 		if ( empty( $post ) ) {
+			// Can't do much without a `$post` object.
 			return;
 		}
 
 		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
+			// Unsupported post type.
 			return;
 		}
 
+		// Enqueue CSS and JS.
 		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), '0.5.2' );
-
 		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.5.2', false );
-
 		wp_localize_script(
 			'share-on-mastodon',
 			'share_on_mastodon_obj',
 			array(
-				'message' => esc_attr__( 'Forget this URL?', 'share-on-mastodon' ),
-				'post_id' => $post->ID,
+				'message' => esc_attr__( 'Forget this URL?', 'share-on-mastodon' ), // Confirmation message.
+				'post_id' => $post->ID, // Pass current post ID to JS.
 			)
 		);
 	}
@@ -206,11 +209,6 @@ class Post_Handler {
 			update_post_meta( $post->ID, '_share_on_mastodon', '1' );
 		} else {
 			update_post_meta( $post->ID, '_share_on_mastodon', '0' );
-
-			// Delete previous Mastodon URL, if any.
-			if ( '' !== get_post_meta( $post->ID, '_share_on_mastodon_url', true ) ) {
-				delete_post_meta( $post->ID, '_share_on_mastodon_url' );
-			}
 		}
 	}
 
