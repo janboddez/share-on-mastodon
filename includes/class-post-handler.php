@@ -108,7 +108,7 @@ class Post_Handler {
 	 *
 	 * Should only ever be called through AJAX.
 	 *
-	 * @since 0.5.2
+	 * @since 0.6.0
 	 */
 	public function unlink_url() {
 		if ( ! isset( $_POST['share_on_mastodon_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['share_on_mastodon_nonce'] ), basename( __FILE__ ) ) ) {
@@ -140,7 +140,7 @@ class Post_Handler {
 	/**
 	 * Adds admin scripts and styles.
 	 *
-	 * @since 0.5.2
+	 * @since 0.6.0
 	 *
 	 * @param string $hook_suffix Current WP-Admin page.
 	 */
@@ -163,8 +163,8 @@ class Post_Handler {
 		}
 
 		// Enqueue CSS and JS.
-		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), '0.5.2' );
-		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.5.2', false );
+		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), '0.6.0' );
+		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.6.0', false );
 		wp_localize_script(
 			'share-on-mastodon',
 			'share_on_mastodon_obj',

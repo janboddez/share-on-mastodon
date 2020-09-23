@@ -324,7 +324,7 @@ class Options_Handler {
 		}
 
 		// Enqueue JS.
-		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.5.2', true );
+		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.6.0', true );
 		wp_localize_script(
 			'share-on-mastodon',
 			'share_on_mastodon_obj',
