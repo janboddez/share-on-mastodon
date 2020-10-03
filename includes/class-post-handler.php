@@ -86,11 +86,11 @@ class Post_Handler {
 		<?php
 		$url = get_post_meta( $post->ID, '_share_on_mastodon_url', true );
 
-		if ( '' !== $url ) :
+		if ( '' !== $url && false !== wp_http_validate_url( $url ) ) :
 			$url_parts = wp_parse_url( $url );
 
 			$display_url  = '<span class="screen-reader-text">' . $url_parts['scheme'] . '://';
-			$display_url .= ( $url_parts['user'] ? $url_parts['user'] . ( $url_parts['pass'] ? ':' . $url_parts['pass'] : '' ) . '@' : '' ) . '</span>';
+			$display_url .= ( ! empty( $url_parts['user'] ) ? $url_parts['user'] . ( ! empty( $url_parts['pass'] ) ? ':' . $url_parts['pass'] : '' ) . '@' : '' ) . '</span>';
 			$display_url .= '<span class="ellipsis">' . substr( $url_parts['host'] . $url_parts['path'], 0, 20 ) . '</span><span class="screen-reader-text">' . substr( $url_parts['host'] . $url_parts['path'], 20 ) . '</span>';
 			?>
 			<p class="description">
@@ -163,8 +163,8 @@ class Post_Handler {
 		}
 
 		// Enqueue CSS and JS.
-		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), '0.6.0' );
-		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.6.0', false );
+		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), '0.6.1' );
+		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.6.1', false );
 		wp_localize_script(
 			'share-on-mastodon',
 			'share_on_mastodon_obj',
@@ -312,13 +312,15 @@ class Post_Handler {
 			}
 		}
 
-		// Loop through the resulting image IDs.
-		for ( $i = 0; $i < 4; $i++ ) {
-			$media_id = $this->upload_image( $media[ $i ] );
+		if ( ! empty( $media ) ) {
+			// Loop through the resulting image IDs.
+			for ( $i = 0; $i < 4; $i++ ) {
+				$media_id = $this->upload_image( $media[ $i ] );
 
-			if ( ! empty( $media_id ) ) {
-				// The image got uploaded OK.
-				$query_string .= '&media_ids[]=' . rawurlencode( $media_id );
+				if ( ! empty( $media_id ) ) {
+					// The image got uploaded OK.
+					$query_string .= '&media_ids[]=' . rawurlencode( $media_id );
+				}
 			}
 		}
 
