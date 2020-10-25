@@ -316,10 +316,10 @@ class Post_Handler {
 			$count = count( $media );
 
 			if ( $count > 4 ) {
+				// Limit the number of images to four.
 				$count = 4;
 			}
 
-			// Loop through the resulting image IDs.
 			for ( $i = 0; $i < $count; $i++ ) {
 				$media_id = $this->upload_image( $media[ $i ] );
 

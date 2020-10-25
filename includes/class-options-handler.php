@@ -125,20 +125,42 @@ class Options_Handler {
 		}
 
 		if ( isset( $settings['mastodon_host'] ) ) {
-			if ( untrailingslashit( $settings['mastodon_host'] ) !== $this->options['mastodon_host'] && wp_http_validate_url( $settings['mastodon_host'] ) ) {
-				// (Try to) revoke access. Forget token regardless of the
-				// outcome.
-				$this->revoke_access();
+			$mastodon_host = untrailingslashit( trim( $settings['mastodon_host'] ) );
 
-				// Then, save the new URL.
-				$this->options['mastodon_host'] = untrailingslashit( $settings['mastodon_host'] );
-
-				// Forget client ID and secret. A new client ID and secret will
-				// be requested the next time this page is visited.
-				$this->options['mastodon_client_id']     = '';
-				$this->options['mastodon_client_secret'] = '';
-			} elseif ( '' === $settings['mastodon_host'] ) {
+			if ( '' === $mastodon_host ) {
+				// Removing the instance URL. Might be done to temporarily
+				// disable crossposting. Let's not revoke access just yet.
 				$this->options['mastodon_host'] = '';
+			} else {
+				if ( 0 !== strpos( $mastodon_host, 'https://' ) && 0 !== strpos( $mastodon_host, 'http://' ) ) {
+					// Missing protocol. Try adding `https://`.
+					$mastodon_host = 'https://' . $mastodon_host;
+				}
+
+				if ( wp_http_validate_url( $mastodon_host ) ) {
+					if ( $mastodon_host !== $this->options['mastodon_host'] ) {
+						// Updated URL.
+
+						// (Try to) revoke access. Forget token regardless of the
+						// outcome.
+						$this->revoke_access();
+
+						// Then, save the new URL.
+						$this->options['mastodon_host'] = untrailingslashit( $mastodon_host );
+
+						// Forget client ID and secret. A new client ID and secret will
+						// be requested next time the page is loaded.
+						$this->options['mastodon_client_id']     = '';
+						$this->options['mastodon_client_secret'] = '';
+					}
+				} else {
+					// Invalid URL. Display error message.
+					add_settings_error(
+						'share-on-mastodon-mastodon-host',
+						'invalid-url',
+						esc_html__( 'Please provide a valid URL.', 'share-on-mastodon' )
+					);
+				}
 			}
 		}
 
@@ -171,7 +193,7 @@ class Options_Handler {
 				<table class="form-table">
 					<tr valign="top">
 						<th scope="row"><label for="share_on_mastodon_settings[mastodon_host]"><?php esc_html_e( 'Instance', 'share-on-mastodon' ); ?></label></th>
-						<td><input type="text" id="share_on_mastodon_settings[mastodon_host]" name="share_on_mastodon_settings[mastodon_host]" style="min-width: 33%;" value="<?php echo esc_attr( $this->options['mastodon_host'] ); ?>" />
+						<td><input type="url" id="share_on_mastodon_settings[mastodon_host]" name="share_on_mastodon_settings[mastodon_host]" style="min-width: 33%;" value="<?php echo esc_attr( $this->options['mastodon_host'] ); ?>" />
 						<p class="description"><?php esc_html_e( 'Your Mastodon instance&rsquo;s URL.', 'share-on-mastodon' ); ?></p></td>
 					</tr>
 					<tr valign="top">

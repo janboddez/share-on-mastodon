@@ -10,7 +10,7 @@ Automatically share WordPress posts on Mastodon.
 == Description ==
 Automatically share WordPress posts on [Mastodon](https://joinmastodon.org/).
 
-You choose which Post Types are shared—though sharing can still be disabled on a per-post basis.
+You choose which Post Types are shared, though sharing can still be disabled on a per-post basis.
 
 Supports image uploads, WordPress's new block editor, and comes with a number of filter hooks for developers.
 
@@ -24,6 +24,15 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.6.2 =
+Slightly more robust Mastodon host URL handling.
+
+= 0.6.1 =
+Fix array notices.
+
+= 0.6.0 =
+Add URL information in meta box.
+
 = 0.5.1 =
 Avoid double-encoded HTML entities.
 

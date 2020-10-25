@@ -16,6 +16,9 @@ class Test_Post_Handler extends \WP_Mock\Tools\TestCase {
 		\WP_Mock::expectActionAdded( 'transition_post_status', array( $post_handler, 'update_meta' ), 11, 3 );
 		\WP_Mock::expectActionAdded( 'transition_post_status', array( $post_handler, 'toot' ), 999, 3 );
 
+		\WP_Mock::expectActionAdded( 'admin_enqueue_scripts', array( $post_handler, 'enqueue_scripts' ) );
+		\WP_Mock::expectActionAdded( 'wp_ajax_share_on_mastodon_unlink_url', array( $post_handler, 'unlink_url' ) );
+
 		$post_handler->register();
 
 		$this->assertHooksAdded();
