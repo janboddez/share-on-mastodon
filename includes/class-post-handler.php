@@ -40,6 +40,7 @@ class Post_Handler {
 	 */
 	public function register() {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
+
 		add_action( 'transition_post_status', array( $this, 'update_meta' ), 11, 3 );
 		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 ); // After the previous function's run.
 
