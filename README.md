@@ -3,6 +3,8 @@ Automatically share WordPress posts on [Mastodon](https://joinmastodon.org/). Yo
 
 Custom formatting is done through filter hooks rather than the options page UI, and requires some familiarity with PHP. (Always here to help, though!) Benefits are things like infinite flexibility, _version control_, and, frankly, less code for me to maintain.
 
+Share on Mastodon is compatible with both the Classic and the Block Editor (Gutenberg). It supports mobile apps, too; this [requires a so-called filter callback](https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_enabled)—literally, a single line of PHP!—which you'd typically add to either your theme's `functions.php` or a site-specific plugin. 
+
 ## Documentation
 Complete documentation, and code examples, can be found at https://jan.boddez.net/wordpress/share-on-mastodon.
 
@@ -16,9 +18,6 @@ Then, select the Post Types for which sharing to Mastodon should be possible. (S
 
 ## Media
 When a Featured Image is set, Share on Mastodon will try to include it. The same goes for any other images _attached to the post_. This behavior can be modified through filter hooks.
-
-## Gutenberg
-This plugin now uses WordPress' Meta Box API—supported by Gutenberg—to store per-post sharing settings, which makes it 100% compatible with the new block editor.
 
 ## Advanced
 _Share on Mastodon_ comes with a fair number of **filters** that allow tweaking its behavior. The code examples on the [official documentation](https://jan.boddez.net/wordpress/share-on-mastodon) page should be enough to get you going. Please file a GitHub issue if you need help, still.
