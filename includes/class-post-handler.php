@@ -79,9 +79,15 @@ class Post_Handler {
 	 */
 	public function render_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' );
+
+		$check = array( '', '1' );
+
+		if ( apply_filters( 'share_on_mastodon_optin', false ) ) {
+			$check = array( '1' ); // Make sharing opt-in.
+		}
 		?>
 		<label>
-			<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( in_array( get_post_meta( $post->ID, '_share_on_mastodon', true ), array( '', '1' ), true ) ); ?>>
+			<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( in_array( get_post_meta( $post->ID, '_share_on_mastodon', true ), $check, true ) ); ?>>
 			<?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?>
 		</label>
 		<?php
