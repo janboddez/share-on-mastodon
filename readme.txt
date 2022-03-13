@@ -1,7 +1,7 @@
 === Share on Mastodon ===
 Contributors: janboddez
 Tags: mastodon, share, publicize, crosspost, fediverse
-Tested up to: 5.8
+Tested up to: 5.9
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -27,6 +27,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.6.5 =
+Prevent older WP versions from adding featured images twice.
+
 = 0.6.4 =
 Provide filter for "opt-in" sharing.
 

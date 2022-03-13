@@ -298,7 +298,7 @@ class Post_Handler {
 
 		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', true, $post ) ) {
 			// Include featured image.
-			$thumbnail = get_post_thumbnail_id( $post->ID );
+			$thumbnail = (int) get_post_thumbnail_id( $post->ID );
 			$media[]   = $thumbnail;
 		}
 
