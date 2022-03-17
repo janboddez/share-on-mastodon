@@ -378,17 +378,19 @@ class Post_Handler {
 	 * @return string|null Unique media ID, or nothing on failure.
 	 */
 	private function upload_image( $image_id ) {
-		$url   = '';
-		$image = wp_get_attachment_image_src( $image_id, 'large' );
+		$image   = wp_get_attachment_image_src( $image_id, 'large' );
+		$uploads = wp_upload_dir();
 
-		if ( ! empty( $image[0] ) ) {
+		if ( ! empty( $image[0] ) && 0 === strpos( $image[0], $uploads['baseurl'] ) ) {
+			// Found a "large" thumbnail that lives on our own site (and not,
+			// e.g., a CDN).
 			$url = $image[0];
 		} else {
-			// Get the original image URL.
+			// Get the original image URL. Note that Mastodon has an upload
+			// limit of, I believe, 8 MB.
 			$url = wp_get_attachment_url( $image_id );
 		}
 
-		$uploads   = wp_upload_dir();
 		$file_path = str_replace( $uploads['baseurl'], $uploads['basedir'], $url );
 
 		if ( ! is_file( $file_path ) ) {
