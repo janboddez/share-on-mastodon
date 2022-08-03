@@ -600,13 +600,16 @@ class Options_Handler {
 		}
 
 		// Store username. Isn't actually used, yet, but may very well be in the
-		// near future. Another thing is this code only runs once a day, and
-		// not, say, when the plugin is first set up.
-		if ( isset( $response->username ) ) {
-			if ( empty( $this->options['mastodon_username'] ) || $response->username !== $this->options['username'] ) {
-				$this->options['mastodon_username'] = $response->username;
+		// near future.
+		$account = json_decode( $response['body'] );
+
+		if ( isset( $account->username ) ) {
+			if ( empty( $this->options['mastodon_username'] ) || $account->username !== $this->options['username'] ) {
+				$this->options['mastodon_username'] = $account->username;
 				update_option( 'share_on_mastodon_settings', $this->options );
 			}
+		} else {
+			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 		}
 	}
 
