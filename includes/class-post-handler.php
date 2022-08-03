@@ -75,6 +75,16 @@ class Post_Handler {
 		foreach ( $post_types as $post_type ) {
 			register_post_meta(
 				$post_type,
+				'_share_on_mastodon',
+				array(
+					'single'       => true,
+					'show_in_rest' => true,
+					'type'         => 'string', // Well, it's a boolean, but it _is_ a string.
+				)
+			);
+
+			register_post_meta(
+				$post_type,
 				'_share_on_mastodon_url',
 				array(
 					'single'       => true,
