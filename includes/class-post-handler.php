@@ -59,15 +59,30 @@ class Post_Handler {
 			return;
 		}
 
+		$post_types = (array) $this->options['post_types'];
+
 		// Add meta box, for those post types that are supported.
 		add_meta_box(
 			'share-on-mastodon',
 			__( 'Share on Mastodon', 'share-on-mastodon' ),
 			array( $this, 'render_meta_box' ),
-			(array) $this->options['post_types'],
+			$post_types,
 			'side',
 			'default'
 		);
+
+		// Make `_share_on_mastodon_url` available in the REST API, too.
+		foreach ( $post_types as $post_type ) {
+			register_post_meta(
+				$post_type,
+				'_share_on_mastodon_url',
+				array(
+					'single'       => true,
+					'show_in_rest' => true,
+					'type'         => 'string',
+				)
+			);
+		}
 	}
 
 	/**
