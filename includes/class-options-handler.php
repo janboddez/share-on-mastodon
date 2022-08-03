@@ -24,6 +24,7 @@ class Options_Handler {
 		'mastodon_client_secret' => '',
 		'mastodon_access_token'  => '',
 		'post_types'             => array(),
+		'mastodon_username'      => '',
 	);
 
 	/**
@@ -444,6 +445,12 @@ class Options_Handler {
 			// Success. Store access token.
 			$this->options['mastodon_access_token'] = $token->access_token;
 			update_option( 'share_on_mastodon_settings', $this->options );
+
+			$this->cron_verify_token(); // In order to get and Store a username.
+										// @todo: This function **might** delete
+										// our token, we should take that into
+										// account somehow.
+
 			return true;
 		} else {
 			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
@@ -488,8 +495,9 @@ class Options_Handler {
 			)
 		);
 
-		// Delete access token, regardless of the outcome.
+		// Delete access token and username, regardless of the outcome.
 		$this->options['mastodon_access_token'] = '';
+		$this->options['mastodon_username']     = '';
 		update_option( 'share_on_mastodon_settings', $this->options );
 
 		if ( is_wp_error( $response ) ) {
@@ -588,6 +596,17 @@ class Options_Handler {
 			// The current access token has somehow become invalid. Forget it.
 			$this->options['mastodon_access_token'] = '';
 			update_option( 'share_on_mastodon_settings', $this->options );
+			return;
+		}
+
+		// Store username. Isn't actually used, yet, but may very well be in the
+		// near future. Another thing is this code only runs once a day, and
+		// not, say, when the plugin is first set up.
+		if ( isset( $response->username ) ) {
+			if ( empty( $this->options['mastodon_username'] ) || $response->username !== $this->options['username'] ) {
+				$this->options['mastodon_username'] = $response->username;
+				update_option( 'share_on_mastodon_settings', $this->options );
+			}
 		}
 	}
 
