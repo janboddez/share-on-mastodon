@@ -43,6 +43,15 @@ class Options_Handler {
 		'user_request',
 		'oembed_cache',
 		'wp_block',
+		'wp_global_styles',
+		'wp_template',
+		'wp_template_part',
+		'wp_navigation',
+		'jp_mem_plan',
+		'jp_pay_order',
+		'jp_pay_product',
+		'coblocks_pattern',
+		'genesis_custom_block',
 	);
 
 	/**
