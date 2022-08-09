@@ -27,6 +27,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.7.0 =
+Include option to delay crossposting. Might be used to try to fix issues with slow image uploads and the like.
+
 = 0.6.6 =
 Exclude more default post types. Store Mastodon username in settings.
 
