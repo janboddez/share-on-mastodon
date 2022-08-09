@@ -25,6 +25,7 @@ class Options_Handler {
 		'mastodon_access_token'  => '',
 		'post_types'             => array(),
 		'mastodon_username'      => '',
+		'delay_sharing'          => 0,
 	);
 
 	/**
@@ -174,6 +175,12 @@ class Options_Handler {
 			}
 		}
 
+		$this->options['delay_sharing'] = 0;
+
+		if ( isset( $settings['delay_sharing'] ) && ctype_digit( $settings['delay_sharing'] ) ) {
+			$this->options['delay_sharing'] = (int) $settings['delay_sharing'];
+		}
+
 		// Updated settings.
 		return $this->options;
 	}
@@ -219,6 +226,11 @@ class Options_Handler {
 							?>
 						</ul>
 						<p class="description"><?php esc_html_e( 'Post types for which sharing to Mastodon is possible. (Sharing can still be disabled on a per-post basis.)', 'share-on-mastodon' ); ?></p></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><label for="share_on_mastodon_settings[delay_sharing]"><?php esc_html_e( 'Delayed Sharing', 'share-on-mastodon' ); ?></label></th>
+						<td><input type="number" id="share_on_mastodon_settings[delay_sharing]" name="share_on_mastodon_settings[delay_sharing]" style="min-width: 33%;" value="<?php echo esc_attr( isset( $this->options['delay_sharing'] ) ? $this->options['delay_sharing'] : 0 ); ?>" />
+						<p class="description"><?php esc_html_e( 'The time, in seconds, WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;or 5 minutes&mdash;might resolve issues with image uploads.)', 'share-on-mastodon' ); ?></p></td>
 					</tr>
 				</table>
 				<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
@@ -526,12 +538,15 @@ class Options_Handler {
 			return false;
 		}
 
+		/* @todo: Store defaults as a class constant. Currently, they're defined twice. */
 		$this->options = array(
 			'mastodon_host'          => '',
 			'mastodon_client_id'     => '',
 			'mastodon_client_secret' => '',
 			'mastodon_access_token'  => '',
 			'post_types'             => array(),
+			'mastodon_username'      => '',
+			'delay_sharing'          => 0,
 		);
 
 		update_option( 'share_on_mastodon_settings', $this->options );

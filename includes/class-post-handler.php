@@ -42,7 +42,8 @@ class Post_Handler {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 
 		add_action( 'transition_post_status', array( $this, 'update_meta' ), 11, 3 );
-		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 ); // After the previous function's run.
+		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
+		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ), 10, 3 );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
@@ -245,7 +246,7 @@ class Post_Handler {
 	}
 
 	/**
-	 * Shares a post on Mastodon.
+	 * Schedules sharing to Mastodon.
 	 *
 	 * @since 0.1.0
 	 *
@@ -259,6 +260,30 @@ class Post_Handler {
 			return;
 		}
 
+		if ( ! empty( $this->options['delay_sharing'] ) ) {
+			// Since version 0.7.0, there's an option to "schedule" sharing
+			// rather than do everything inline.
+			wp_schedule_single_event(
+				time() + $this->options['delay_sharing'],
+				'share_on_mastodon_post',
+				array( $post->ID )
+			);
+		} else {
+			// Share immediately.
+			$this->post_to_mastodon( $post->ID );
+		}
+	}
+
+	/**
+	 * Shares a post on Mastodon.
+	 *
+	 * @since 0.7.0
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function post_to_mastodon( $post_id ) {
+		$post = get_post( $post_id );
+
 		$is_enabled = ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ? true : false );
 
 		if ( ! apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID ) ) {
@@ -271,7 +296,7 @@ class Post_Handler {
 			return;
 		}
 
-		if ( 'publish' !== $new_status ) {
+		if ( 'publish' !== $post->post_status ) {
 			// Status is something other than `publish`.
 			return;
 		}
