@@ -7,8 +7,6 @@
 
 namespace Share_On_Mastodon;
 
-use Error;
-
 /**
  * Micropub goodies.
  */
