@@ -26,6 +26,7 @@ class Options_Handler {
 		'post_types'             => array(),
 		'mastodon_username'      => '',
 		'delay_sharing'          => 0,
+		'micropub_compat'        => false,
 	);
 
 	/**
@@ -181,6 +182,8 @@ class Options_Handler {
 			$this->options['delay_sharing'] = (int) $settings['delay_sharing'];
 		}
 
+		$this->options['micropub_compat'] = isset( $settings['micropub_compat'] ) ? true : false;
+
 		// Updated settings.
 		return $this->options;
 	}
@@ -220,7 +223,7 @@ class Options_Handler {
 							foreach ( $supported_post_types as $post_type ) :
 								$post_type = get_post_type_object( $post_type );
 								?>
-								<li><label><input type="checkbox" name="share_on_mastodon_settings[post_types][]" value="<?php echo esc_attr( $post_type->name ); ?>" <?php checked( in_array( $post_type->name, $this->options['post_types'], true ) ); ?>><?php echo esc_html( $post_type->labels->singular_name ); ?></label></li>
+								<li><label><input type="checkbox" name="share_on_mastodon_settings[post_types][]" value="<?php echo esc_attr( $post_type->name ); ?>" <?php checked( in_array( $post_type->name, $this->options['post_types'], true ) ); ?> /> <?php echo esc_html( $post_type->labels->singular_name ); ?></label></li>
 								<?php
 							endforeach;
 							?>
@@ -230,8 +233,15 @@ class Options_Handler {
 					<tr valign="top">
 						<th scope="row"><label for="share_on_mastodon_settings[delay_sharing]"><?php esc_html_e( 'Delayed Sharing', 'share-on-mastodon' ); ?></label></th>
 						<td><input type="number" id="share_on_mastodon_settings[delay_sharing]" name="share_on_mastodon_settings[delay_sharing]" value="<?php echo esc_attr( isset( $this->options['delay_sharing'] ) ? $this->options['delay_sharing'] : 0 ); ?>" />
-						<p class="description"><?php esc_html_e( 'The time, in seconds, WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;or 5 minutes&mdash;might resolve issues with image uploads.)', 'share-on-mastodon' ); ?></p></td>
+						<p class="description"><?php esc_html_e( 'The time, in seconds, WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;that&rsquo;s 5 minutes&mdash;might resolve issues with image uploads.)', 'share-on-mastodon' ); ?></p></td>
 					</tr>
+					<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Micropub', 'share-on-mastodon' ); ?></label></th>
+							<td><label><input type="checkbox" id="share_on_mastodon_settings[micropub_compat]" name="share_on_mastodon_settings[micropub_compat]" value="1" <?php checked( ! empty( $this->options['micropub_compat'] ) ); ?> /> <?php esc_html_e( 'Add syndication target', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php esc_html_e( '(Experimental) Add &ldquo;Mastodon&rdquo; as a Micropub syndication target.', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+					<?php endif; ?>
 				</table>
 				<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
 			</form>

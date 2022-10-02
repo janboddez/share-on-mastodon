@@ -77,6 +77,12 @@ class Share_On_Mastodon {
 
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		add_action( 'share_on_mastodon_verify_token', array( $this->options_handler, 'cron_verify_token' ) );
+
+		$options = $this->options_handler->get_options();
+
+		if ( ! empty( $options['micropub_compat'] ) ) {
+			Micropub_Compat::register();
+		}
 	}
 
 	/**

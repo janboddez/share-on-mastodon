@@ -27,7 +27,7 @@ class Post_Handler {
 	 *
 	 * @param Options_Handler $options_handler This plugin's `Options_Handler`.
 	 */
-	public function __construct( Options_Handler $options_handler = null ) {
+	public function __construct( $options_handler = null ) {
 		if ( null !== $options_handler ) {
 			$this->options = $options_handler->get_options();
 		}
