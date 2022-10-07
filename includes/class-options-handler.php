@@ -468,7 +468,7 @@ class Options_Handler {
 			$this->options['mastodon_access_token'] = $token->access_token;
 			update_option( 'share_on_mastodon_settings', $this->options );
 
-			$this->cron_verify_token(); // In order to get and Store a username.
+			$this->cron_verify_token(); // In order to get and store a username.
 										// @todo: This function **might** delete
 										// our token, we should take that into
 										// account somehow.
