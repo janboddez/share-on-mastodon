@@ -30,31 +30,13 @@ class Options_Handler {
 	);
 
 	/**
-	 * WordPress's default post types.
+	 * WordPress's default post types, minus "post" itself.
 	 *
 	 * @since 0.1.0
-	 *
-	 * @var array WordPress's default post types, minus "post" itself.
 	 */
 	const DEFAULT_POST_TYPES = array(
 		'page',
 		'attachment',
-		'revision',
-		'nav_menu_item',
-		'custom_css',
-		'customize_changeset',
-		'user_request',
-		'oembed_cache',
-		'wp_block',
-		'wp_global_styles',
-		'wp_template',
-		'wp_template_part',
-		'wp_navigation',
-		'jp_mem_plan',
-		'jp_pay_order',
-		'jp_pay_product',
-		'coblocks_pattern',
-		'genesis_custom_block',
 	);
 
 	/**
@@ -123,10 +105,8 @@ class Options_Handler {
 
 		if ( isset( $settings['post_types'] ) && is_array( $settings['post_types'] ) ) {
 			// Post types considered valid.
-			$supported_post_types = array_diff(
-				get_post_types(),
-				self::DEFAULT_POST_TYPES
-			);
+			$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
+			$supported_post_types = array_diff( $supported_post_types, self::DEFAULT_POST_TYPES );
 
 			foreach ( $settings['post_types'] as $post_type ) {
 				if ( in_array( $post_type, $supported_post_types, true ) ) {
@@ -205,10 +185,8 @@ class Options_Handler {
 				settings_fields( 'share-on-mastodon-settings-group' );
 
 				// Post types considered valid.
-				$supported_post_types = array_diff(
-					get_post_types(),
-					self::DEFAULT_POST_TYPES
-				);
+				$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
+				$supported_post_types = array_diff( $supported_post_types, self::DEFAULT_POST_TYPES );
 				?>
 				<table class="form-table">
 					<tr valign="top">
