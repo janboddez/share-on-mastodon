@@ -423,9 +423,8 @@ class Post_Handler {
 	 *
 	 * @since  0.5.0
 	 *
-	 * @param int $image_id Image ID.
-	 *
-	 * @return string|null Unique media ID, or nothing on failure.
+	 * @param  int $image_id Image ID.
+	 * @return string|null   Unique media ID, or nothing on failure.
 	 */
 	private function upload_image( $image_id ) {
 		$image   = wp_get_attachment_image_src( $image_id, 'large' );

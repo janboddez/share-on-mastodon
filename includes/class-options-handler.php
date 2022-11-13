@@ -96,8 +96,7 @@ class Options_Handler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array $settings Settings as submitted through WP Admin.
-	 *
+	 * @param  array $settings Settings as submitted through WP Admin.
 	 * @return array Options to be stored.
 	 */
 	public function sanitize_settings( $settings ) {
