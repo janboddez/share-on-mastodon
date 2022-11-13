@@ -329,7 +329,7 @@ class Post_Handler {
 		$status .= ' ' . esc_url_raw( get_permalink( $post->ID ) );
 
 		$status = apply_filters( 'share_on_mastodon_status', $status, $post );
-		$args   = apply_filters( 'share_on_mastodon_toot_args', array( 'status' => $status ) );
+		$args   = apply_filters( 'share_on_mastodon_toot_args', array( 'status' => $status ), $post );
 
 		if ( apply_filters( 'share_on_mastodon_cutoff', false ) ) {
 			// May render hashtags or URLs, or unfiltered HTML, at the very end

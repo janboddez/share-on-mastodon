@@ -1,7 +1,8 @@
 === Share on Mastodon ===
 Contributors: janboddez
 Tags: mastodon, share, publicize, crosspost, fediverse
-Tested up to: 6.0
+Tested up to: 6.1
+Stable tag: 0.9.0
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -27,6 +28,12 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.9.0 -
+Additional `share_on_mastodon_toot_args` filter argument. Add stable tag.
+
+= 0.8.0 =
+Add as Micropub syndication target.
+
 = 0.7.0 =
 Include option to delay crossposting. Might be used to try to fix issues with slow image uploads and the like.
 
