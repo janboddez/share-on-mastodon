@@ -448,17 +448,26 @@ class Post_Handler {
 		}
 
 		$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
+		if ( '' === $alt ) {
+			$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption.
+		}
 
 		$boundary = md5( time() );
 		$eol      = "\r\n";
 
 		$body = '--' . $boundary . $eol;
 
-		if ( '' !== $alt ) {
+		if ( false !== $alt && '' !== $alt ) {
+			error_log( "[Share on Mastodon] Found the following alt text for the attachement with ID $image_id: $alt" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+
+			$alt = trim( preg_replace( '~\s+~', ' ', $alt ) ); // See if this somehow fixes the "disappearing alt" issue.
+
 			// Send along an image description, because accessibility.
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
 			$body .= $alt . $eol;
 			$body .= '--' . $boundary . $eol;
+		} else {
+			error_log( "[Share on Mastodon] Did not find alt text for the attachement with ID $image_id" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 
 		// The actual (binary) image data.
