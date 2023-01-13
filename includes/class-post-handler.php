@@ -196,8 +196,8 @@ class Post_Handler {
 		}
 
 		// Enqueue CSS and JS.
-		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), '0.6.1' );
-		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), '0.6.1', false );
+		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), Share_On_Mastodon::PLUGIN_VERSION );
+		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array( 'jquery' ), Share_On_Mastodon::PLUGIN_VERSION, false );
 		wp_localize_script(
 			'share-on-mastodon',
 			'share_on_mastodon_obj',
@@ -369,13 +369,25 @@ class Post_Handler {
 			}
 		}
 
-		if ( ! empty( $media ) ) {
-			$count = count( $media );
+		if ( apply_filters( 'share_on_mastodon_referenced_images', false, $post ) ) {
+			// Look for in-post, i.e., referenced, images.
+			$image_ids = $this->get_referenced_images( $post );
 
-			if ( $count > 4 ) {
-				// Limit the number of images to four.
-				$count = 4;
+			if ( ! empty( $image_ids ) && is_array( $image_ids ) ) {
+				foreach ( $image_ids as $image_id ) {
+					// Skip images included earlier.
+					if ( in_array( $image_id, $media, true ) ) {
+						continue;
+					}
+
+					$media[] = $image_id;
+				}
 			}
+		}
+
+		if ( ! empty( $media ) ) {
+			$max   = (int) apply_filters( 'share_on_mastodon_num_images', 4, $post );
+			$count = min( count( $media ), $max );
 
 			for ( $i = 0; $i < $count; $i++ ) {
 				$media_id = $this->upload_image( $media[ $i ] );
@@ -407,7 +419,7 @@ class Post_Handler {
 		}
 
 		// Decode JSON, suppressing possible formatting errors.
-		$status = @json_decode( $response['body'] );
+		$status = json_decode( $response['body'] );
 
 		if ( ! empty( $status->url ) && post_type_supports( $post->post_type, 'custom-fields' ) ) {
 			update_post_meta( $post->ID, '_share_on_mastodon_url', $status->url );
@@ -448,17 +460,26 @@ class Post_Handler {
 		}
 
 		$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
+		if ( '' === $alt ) {
+			$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption.
+		}
 
 		$boundary = md5( time() );
 		$eol      = "\r\n";
 
 		$body = '--' . $boundary . $eol;
 
-		if ( '' !== $alt ) {
+		if ( false !== $alt && '' !== $alt ) {
+			error_log( "[Share on Mastodon] Found the following alt text for the attachement with ID $image_id: $alt" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+
+			$alt = trim( preg_replace( '~\s+~', ' ', $alt ) ); // See if this somehow fixes the "disappearing alt" issue.
+
 			// Send along an image description, because accessibility.
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
 			$body .= $alt . $eol;
 			$body .= '--' . $boundary . $eol;
+		} else {
+			error_log( "[Share on Mastodon] Did not find alt text for the attachement with ID $image_id" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 
 		// The actual (binary) image data.
@@ -487,7 +508,7 @@ class Post_Handler {
 		}
 
 		// Decode JSON, suppressing possible formatting errors.
-		$media = @json_decode( $response['body'] );
+		$media = json_decode( $response['body'] );
 
 		if ( ! empty( $media->id ) ) {
 			return $media->id;
@@ -496,5 +517,44 @@ class Post_Handler {
 		// Provided debugging's enabled, let's store the (somehow faulty)
 		// response.
 		error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+	}
+
+	/**
+	 * Attempts to find and return in-post images.
+	 *
+	 * @since 0.10.0
+	 *
+	 * @param  WP_Post $post Post object.
+	 * @return array         Array of image IDs.
+	 */
+	private function get_referenced_images( $post ) {
+		// Assumes `src` value is wrapped in quotes. This will almost always be
+		// the case.
+		preg_match_all( '~<img(?:.+?)src=[\'"]([^\'"]+)[\'"](?:.*?)>~i', $post->post_content, $matches );
+
+		if ( empty( $matches[1] ) ) {
+			return array();
+		}
+
+		$images = array();
+
+		foreach ( $matches[1] as $match ) {
+			$filename = pathinfo( $match, PATHINFO_FILENAME );
+			$original = preg_replace( '~-(?:\d+x\d+|scaled|rotated)$~', '', $filename );
+
+			$url = str_replace( $filename, $original, $match );
+
+			// Convert URL back to attachment ID.
+			$image_id = attachment_url_to_postid( $url );
+
+			if ( 0 === $image_id ) {
+				// Unknown to WordPress.
+				continue;
+			}
+
+			$images[] = $image_id;
+		}
+
+		return $images;
 	}
 }
