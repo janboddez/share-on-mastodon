@@ -343,8 +343,7 @@ class Post_Handler {
 
 		// And now, images. Note that this'll have to be rewritten for the new
 		// media API.
-		$thumbnail = null;
-		$media     = array();
+		$media = array();
 
 		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', true, $post ) ) {
 			// Include featured image.
@@ -370,7 +369,7 @@ class Post_Handler {
 		}
 
 		if ( apply_filters( 'share_on_mastodon_referenced_images', false, $post ) ) {
-			// Look for in-post, i.e., referenced, images.
+			// Include in-post, i.e., referenced, images.
 			$image_ids = $this->get_referenced_images( $post );
 
 			if ( ! empty( $image_ids ) && is_array( $image_ids ) ) {
@@ -540,7 +539,7 @@ class Post_Handler {
 
 		foreach ( $matches[1] as $match ) {
 			$filename = pathinfo( $match, PATHINFO_FILENAME );
-			$original = preg_replace( '~-(?:\d+x\d+|scaled|rotated)$~', '', $filename );
+			$original = preg_replace( '~-(?:\d+x\d+|scaled|rotated)$~', '', $filename ); // Strip dimensions, etc., off resized images.
 
 			$url = str_replace( $filename, $original, $match );
 
