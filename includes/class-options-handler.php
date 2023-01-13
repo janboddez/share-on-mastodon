@@ -534,6 +534,7 @@ class Options_Handler {
 			'post_types'             => array(),
 			'mastodon_username'      => '',
 			'delay_sharing'          => 0,
+			'micropub_compat'        => false,
 		);
 
 		update_option( 'share_on_mastodon_settings', $this->options );
