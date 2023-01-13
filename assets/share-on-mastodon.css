@@ -2,7 +2,8 @@
 	margin: 1em 0 1px;
 }
 
-#share-on-mastodon .url .ellipsis::after {
+#share-on-mastodon .url .ellipsis::after,
+.share-on-mastodon-url .ellipsis::after {
 	content: "…";
 }
 

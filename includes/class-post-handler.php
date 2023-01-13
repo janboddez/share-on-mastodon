@@ -43,10 +43,16 @@ class Post_Handler {
 
 		add_action( 'transition_post_status', array( $this, 'update_meta' ), 11, 3 );
 		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
-		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ), 10, 3 );
+		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
+
+		if ( defined( 'SHARE_ON_MASTODON_ADMIN_NOTICES' ) && SHARE_ON_MASTODON_ADMIN_NOTICES ) {
+			add_action( 'admin_notices', array( $this, 'admin_notice' ) );
+		}
+
+		add_filter( 'removable_query_args', array( $this, 'removable_query_args' ) );
 	}
 
 	/**
@@ -97,6 +103,107 @@ class Post_Handler {
 	}
 
 	/**
+	 * Renders an admin notice upon success.
+	 *
+	 * @since 0.10.0
+	 */
+	public function admin_notice() {
+		if ( ! isset( $_GET['share_on_mastodon_success'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		global $post;
+
+		if ( empty( $post ) ) {
+			return;
+		}
+
+		if ( '0' === $_GET['share_on_mastodon_success'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// Oops.
+			$error_message = get_post_meta( $post->ID, '_share_on_mastodon_error', true );
+
+			if ( '' === $error_message ) {
+				return;
+			}
+			?>
+			<div class="notice notice-error is-dismissible">
+				<?php /* translators: %s: error message */ ?>
+				<p><?php echo sprintf( esc_html__( 'Share on Mastodon ran into the following error: %s', 'share-on-mastodon' ), '<i>' . esc_html( $error_message ) . '</i>' ); ?></p>
+			</div>
+			<?php
+			return;
+		}
+
+		if ( '1' === $_GET['share_on_mastodon_success'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$url = get_post_meta( $post->ID, '_share_on_mastodon_url', true );
+
+			if ( '' === $url || ! wp_http_validate_url( $url ) ) {
+				return;
+			}
+
+			$url_parts = wp_parse_url( $url );
+
+			$display_url  = '<span class="screen-reader-text">' . $url_parts['scheme'] . '://';
+			$display_url .= ( ! empty( $url_parts['user'] ) ? $url_parts['user'] . ( ! empty( $url_parts['pass'] ) ? ':' . $url_parts['pass'] : '' ) . '@' : '' ) . '</span>';
+			$display_url .= '<span class="ellipsis">' . substr( $url_parts['host'] . $url_parts['path'], 0, 20 ) . '</span><span class="screen-reader-text">' . substr( $url_parts['host'] . $url_parts['path'], 20 ) . '</span>';
+			?>
+			<div class="notice notice-success is-dismissible">
+				<?php /* translators: %s: link to Mastodon status */ ?>
+				<p><?php printf( esc_html__( 'Shared on Mastodon at %s.', 'share-on-mastodon' ), '<a class="share-on-mastodon-url" href="' . esc_url( $url ) . '">' . $display_url . '</a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+			</div>
+			<?php
+		}
+	}
+
+	/**
+	 * Tells WordPress when to display the "success" notice.
+	 *
+	 * @since 0.10.0
+	 *
+	 * @param  string $location The destination URL.
+	 * @return string           Updated destination URL.
+	 */
+	public function add_success_query_var( $location ) {
+		remove_filter( 'redirect_post_location', array( $this, 'add_success_query_var' ) );
+
+		return add_query_arg(
+			array( 'share_on_mastodon_success' => '1' ),
+			esc_url_raw( $location )
+		);
+	}
+
+	/**
+	 * Tells WordPress when to display the "error" notice.
+	 *
+	 * @since 0.10.0
+	 *
+	 * @param  string $location The destination URL.
+	 * @return string           Updated destination URL.
+	 */
+	public function add_error_query_var( $location ) {
+		remove_filter( 'redirect_post_location', array( $this, 'add_error_query_var' ) );
+
+		return add_query_arg(
+			array( 'share_on_mastodon_success' => '0' ),
+			esc_url_raw( $location )
+		);
+	}
+
+	/**
+	 * Adds our query arguments to WordPress' so-called removable query
+	 * arguments.
+	 *
+	 * @since 0.10.0
+	 *
+	 * @param array $args Array of query variables to remove from a URL.
+	 */
+	public function removable_query_args( $args ) {
+		$args[] = 'share_on_mastodon_success';
+
+		return $args;
+	}
+
+	/**
 	 * Renders meta box.
 	 *
 	 * @since 0.1.0
@@ -119,7 +226,7 @@ class Post_Handler {
 		<?php
 		$url = get_post_meta( $post->ID, '_share_on_mastodon_url', true );
 
-		if ( '' !== $url && false !== wp_http_validate_url( $url ) ) :
+		if ( '' !== $url && wp_http_validate_url( $url ) ) :
 			$url_parts = wp_parse_url( $url );
 
 			$display_url  = '<span class="screen-reader-text">' . $url_parts['scheme'] . '://';
@@ -133,6 +240,14 @@ class Post_Handler {
 				<a href="#" class="unlink"><?php esc_html_e( 'Unlink', 'share-on-mastodon' ); ?></a>
 			</p>
 			<?php
+		else :
+			$error_message = get_post_meta( $post->ID, '_share_on_mastodon_error', true );
+
+			if ( '' !== $error_message ) :
+				?>
+				<p class="description"><i><?php echo esc_html( $error_message ); ?></i></p>
+				<?php
+			endif;
 		endif;
 	}
 
@@ -241,6 +356,7 @@ class Post_Handler {
 			// If sharing enabled and post not password-protected.
 			update_post_meta( $post->ID, '_share_on_mastodon', '1' );
 		} else {
+			delete_post_meta( $post->ID, '_share_on_mastodon_error' );
 			update_post_meta( $post->ID, '_share_on_mastodon', '0' );
 		}
 	}
@@ -419,8 +535,21 @@ class Post_Handler {
 		$status = json_decode( $response['body'] );
 
 		if ( ! empty( $status->url ) && post_type_supports( $post->post_type, 'custom-fields' ) ) {
+			delete_post_meta( $post->ID, '_share_on_mastodon_error' );
 			update_post_meta( $post->ID, '_share_on_mastodon_url', $status->url );
-		} else {
+
+			if ( 'share_on_mastodon_post' !== current_filter() ) {
+				// This function was called directly.
+				add_filter( 'redirect_post_location', array( $this, 'add_success_query_var' ) );
+			}
+		} elseif ( ! empty( $status->error ) && post_type_supports( $post->post_type, 'custom-fields' ) ) {
+			update_post_meta( $post->ID, '_share_on_mastodon_error', sanitize_text_field( $status->error ) );
+
+			if ( 'share_on_mastodon_post' !== current_filter() ) {
+				// This function was called directly.
+				add_filter( 'redirect_post_location', array( $this, 'add_error_query_var' ) );
+			}
+
 			// Provided debugging's enabled, let's store the (somehow faulty)
 			// response.
 			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
@@ -456,7 +585,9 @@ class Post_Handler {
 			return;
 		}
 
+		// Fetch alt text.
 		$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
+
 		if ( '' === $alt ) {
 			$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption.
 		}
@@ -469,7 +600,7 @@ class Post_Handler {
 		if ( false !== $alt && '' !== $alt ) {
 			error_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
-			$alt = trim( preg_replace( '~\s+~', ' ', $alt ) ); // See if this somehow fixes the "disappearing alt" issue.
+			$alt = sanitize_text_field( $alt );
 
 			// Send along an image description, because accessibility.
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
