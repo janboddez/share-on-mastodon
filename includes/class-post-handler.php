@@ -347,8 +347,7 @@ class Post_Handler {
 
 		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', true, $post ) ) {
 			// Include featured image.
-			$thumbnail = (int) get_post_thumbnail_id( $post->ID );
-			$media[]   = $thumbnail;
+			$media[] = get_post_thumbnail_id( $post->ID );
 		}
 
 		if ( apply_filters( 'share_on_mastodon_attached_images', true, $post ) ) {
@@ -357,9 +356,8 @@ class Post_Handler {
 
 			if ( ! empty( $images ) && is_array( $images ) ) {
 				foreach ( $images as $image ) {
-					// Skip the post's featured image, which we tackle
-					// separately.
-					if ( ! empty( $thumbnail ) && $thumbnail === $image->ID ) {
+					// Skip images included earlier.
+					if ( in_array( $image->ID, $media, true ) ) {
 						continue;
 					}
 
@@ -469,7 +467,7 @@ class Post_Handler {
 		$body = '--' . $boundary . $eol;
 
 		if ( false !== $alt && '' !== $alt ) {
-			error_log( "[Share on Mastodon] Found the following alt text for the attachement with ID $image_id: $alt" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
 			$alt = trim( preg_replace( '~\s+~', ' ', $alt ) ); // See if this somehow fixes the "disappearing alt" issue.
 
@@ -478,7 +476,7 @@ class Post_Handler {
 			$body .= $alt . $eol;
 			$body .= '--' . $boundary . $eol;
 		} else {
-			error_log( "[Share on Mastodon] Did not find alt text for the attachement with ID $image_id" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 
 		// The actual (binary) image data.
@@ -544,7 +542,7 @@ class Post_Handler {
 			$url = str_replace( $filename, $original, $match );
 
 			// Convert URL back to attachment ID.
-			$image_id = attachment_url_to_postid( $url );
+			$image_id = (int) attachment_url_to_postid( $url );
 
 			if ( 0 === $image_id ) {
 				// Unknown to WordPress.
