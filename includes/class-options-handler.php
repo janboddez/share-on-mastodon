@@ -45,10 +45,7 @@ class Options_Handler {
 	 * @since 0.1.0
 	 */
 	public function __construct() {
-		$this->options = get_option(
-			'share_on_mastodon_settings',
-			$this->options
-		);
+		$this->options = get_option( 'share_on_mastodon_settings', $this->options );
 	}
 
 	/**

@@ -64,7 +64,7 @@ class Share_On_Mastodon {
 		$this->options_handler = new Options_Handler();
 		$this->options_handler->register();
 
-		$this->post_handler = new Post_Handler( $this->options_handler );
+		$this->post_handler = new Post_Handler();
 		$this->post_handler->register();
 	}
 

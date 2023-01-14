@@ -22,6 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require dirname( __FILE__ ) . '/includes/class-image-handler.php';
 require dirname( __FILE__ ) . '/includes/class-micropub-compat.php';
 require dirname( __FILE__ ) . '/includes/class-options-handler.php';
 require dirname( __FILE__ ) . '/includes/class-post-handler.php';
