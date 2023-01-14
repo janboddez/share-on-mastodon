@@ -43,10 +43,7 @@ class Post_Handler {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
 
-		if ( apply_filters( 'share_on_mastodon_admin_notices', false ) ) {
-			add_action( 'admin_notices', array( $this, 'admin_notice' ) );
-		}
-
+		add_action( 'admin_notices', array( $this, 'admin_notice' ) );
 		add_filter( 'removable_query_args', array( $this, 'removable_query_args' ) );
 	}
 
@@ -464,6 +461,11 @@ class Post_Handler {
 	 * @since 0.10.0
 	 */
 	public function admin_notice() {
+		if ( ! apply_filters( 'share_on_mastodon_admin_notices', false ) ) {
+			// Disabled.
+			return;
+		}
+
 		if ( ! isset( $_GET['share_on_mastodon_success'] ) || ! in_array( $_GET['share_on_mastodon_success'], array( '0', '1' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			// Nothing to do.
 			return;
