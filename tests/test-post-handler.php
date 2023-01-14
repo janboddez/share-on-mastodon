@@ -20,9 +20,6 @@ class Test_Post_Handler extends \WP_Mock\Tools\TestCase {
 		\WP_Mock::expectActionAdded( 'admin_enqueue_scripts', array( $post_handler, 'enqueue_scripts' ) );
 		\WP_Mock::expectActionAdded( 'wp_ajax_share_on_mastodon_unlink_url', array( $post_handler, 'unlink_url' ) );
 
-		\WP_Mock::expectActionAdded( 'admin_notices', array( $post_handler, 'admin_notice' ) );
-		\WP_Mock::expectFilterAdded( 'removable_query_args', array( $post_handler, 'removable_query_args' ) );
-
 		$post_handler->register();
 
 		$this->assertHooksAdded();
