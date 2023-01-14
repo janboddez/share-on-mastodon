@@ -8,7 +8,7 @@
 namespace Share_On_Mastodon;
 
 /**
- * Post handler class.
+ * Notices class.
  */
 class Notices {
 	/**
