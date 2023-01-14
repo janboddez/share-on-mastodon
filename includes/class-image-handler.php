@@ -47,7 +47,7 @@ class Image_Handler {
 			}
 		}
 
-		return array_unique( $media );
+		return array_values( array_unique( $media ) );
 	}
 
 	/**
