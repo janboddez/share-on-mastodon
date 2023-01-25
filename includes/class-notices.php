@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles "classic editor" notices.
+ * Handles (only) "classic editor" notices.
  *
  * @package Share_On_Mastodon
  */

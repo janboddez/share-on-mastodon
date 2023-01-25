@@ -460,7 +460,7 @@ class Options_Handler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return boolean Whether access was revoked.
+	 * @return bool Whether access was revoked.
 	 */
 	private function revoke_access() {
 		if ( empty( $this->options['mastodon_host'] ) ) {

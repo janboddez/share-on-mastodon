@@ -72,6 +72,7 @@ class Micropub_Compat {
 
 		if ( in_array( "{$options['mastodon_host']}/@{$options['mastodon_username']}", $synd_requested, true ) ) {
 			update_post_meta( $post_id, '_share_on_mastodon', '1' );
+			delete_post_meta( $post_id, '_share_on_mastodon_error' ); // Clear previous errors, if any.
 
 			$post = get_post( $post_id );
 

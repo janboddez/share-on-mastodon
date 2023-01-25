@@ -79,7 +79,7 @@ class Post_Handler {
 			// If sharing enabled and post not password-protected.
 			update_post_meta( $post->ID, '_share_on_mastodon', '1' );
 		} else {
-			delete_post_meta( $post->ID, '_share_on_mastodon_error' ); // Reset previous errors, if any.
+			delete_post_meta( $post->ID, '_share_on_mastodon_error' ); // Clear previous errors, if any.
 			update_post_meta( $post->ID, '_share_on_mastodon', '0' );
 		}
 	}
@@ -277,7 +277,7 @@ class Post_Handler {
 			update_post_meta( $post->ID, '_share_on_mastodon_error', sanitize_text_field( $status->error ) );
 
 			if ( 'share_on_mastodon_post' !== current_filter() ) {
-				// This function was called directly.
+				// Show a notice only when this function was called directly.
 				add_filter( 'redirect_post_location', array( Notices::class, 'add_error_query_var' ) );
 			}
 
@@ -325,6 +325,16 @@ class Post_Handler {
 			register_post_meta(
 				$post_type,
 				'_share_on_mastodon_url',
+				array(
+					'single'       => true,
+					'show_in_rest' => true,
+					'type'         => 'string',
+				)
+			);
+
+			register_post_meta(
+				$post_type,
+				'_share_on_mastodon_error',
 				array(
 					'single'       => true,
 					'show_in_rest' => true,

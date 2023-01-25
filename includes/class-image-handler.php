@@ -103,7 +103,8 @@ class Image_Handler {
 			$url = $image[0];
 		} else {
 			// Get the original image URL. Note that Mastodon has an upload
-			// limit of, I believe, 8 MB.
+			// limit of, I believe, 8 MB. Either way, this should return a
+			// _local_ image.
 			$url = wp_get_attachment_url( $image_id );
 		}
 
@@ -135,6 +136,8 @@ class Image_Handler {
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
 			$body .= $alt . $eol;
 			$body .= '--' . $boundary . $eol;
+
+			error_log( "[Share on Mastodon] Here's the `alt` bit of what we're about to send the Mastodon API: `$body`" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		} else {
 			error_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
@@ -145,7 +148,8 @@ class Image_Handler {
 		$body .= file_get_contents( $file_path ) . $eol; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$body .= '--' . $boundary . '--'; // Note the extra two hyphens at the end.
 
-		$options = get_option( 'share_on_mastodon_settings' );
+		$plugin  = Share_On_Mastodon::get_instance();
+		$options = $plugin->get_options_handler()->get_options();
 
 		$response = wp_remote_post(
 			esc_url_raw( $options['mastodon_host'] . '/api/v1/media' ),

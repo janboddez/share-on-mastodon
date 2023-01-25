@@ -29,7 +29,7 @@ More detailed instructions can be found on [this plugin's GitHub page](https://g
 
 == Changelog ==
 = 0.10.0 =
-Add (experimental) support for in-post images.
+Add (experimental) support for in-post images, and alt text fallback.
 
 = 0.9.0 =
 Additional `share_on_mastodon_toot_args` filter argument. Add stable tag.
