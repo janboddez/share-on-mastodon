@@ -130,7 +130,10 @@ class Image_Handler {
 		if ( false !== $alt && '' !== $alt ) {
 			error_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
-			$alt = sanitize_text_field( $alt );
+			// $alt = sanitize_text_field( $alt ); // Some instance don't like our alt texts, thought maybe avoiding newline chars would help, but alas.
+			// $alt = esc_attr( $alt ); // Leads to double-escaped entities.
+			// $alt = wp_strip_all_tags(); // We could probably leave this in, but entities seem to be escaped okay.
+			// $alt = str_replace( array( "\r", "\n", '"' ), array( '%0D', '%0A', '%22' ), $alt ); // Also doesn't work, as these aren't unencoded by Mastodon.
 
 			// Send along an image description, because accessibility.
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
