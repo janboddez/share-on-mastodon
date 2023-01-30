@@ -2,7 +2,7 @@
 Contributors: janboddez
 Tags: mastodon, share, publicize, crosspost, fediverse, syndication
 Tested up to: 6.1
-Stable tag: 0.10.0
+Stable tag: 0.10.1
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -28,6 +28,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.10.1 =
+Avoid duplicate posts CPT without explicit custom field support.
+
 = 0.10.0 =
 Add (experimental) support for in-post images, and alt text fallback.
 
