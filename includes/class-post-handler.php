@@ -265,7 +265,7 @@ class Post_Handler {
 		// Decode JSON, suppressing possible formatting errors.
 		$status = json_decode( $response['body'] );
 
-		if ( ! empty( $status->url ) && post_type_supports( $post->post_type, 'custom-fields' ) ) {
+		if ( ! empty( $status->url ) ) {
 			delete_post_meta( $post->ID, '_share_on_mastodon_error' );
 			update_post_meta( $post->ID, '_share_on_mastodon_url', $status->url );
 
@@ -273,7 +273,7 @@ class Post_Handler {
 				// This function was called directly.
 				add_filter( 'redirect_post_location', array( Notices::class, 'add_success_query_var' ) );
 			}
-		} elseif ( ! empty( $status->error ) && post_type_supports( $post->post_type, 'custom-fields' ) ) {
+		} elseif ( ! empty( $status->error ) ) {
 			update_post_meta( $post->ID, '_share_on_mastodon_error', sanitize_text_field( $status->error ) );
 
 			if ( 'share_on_mastodon_post' !== current_filter() ) {
