@@ -4,6 +4,7 @@
 
 	<rule ref="WordPress">
 		<exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
+		<exclude name="WordPress.WP.DeprecatedFunctions.sanitize_urlFound" />
 	</rule>
 
 	<exclude-pattern>tests/*</exclude-pattern>

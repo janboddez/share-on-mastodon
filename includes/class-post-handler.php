@@ -270,7 +270,7 @@ class Post_Handler {
 			update_post_meta( $post->ID, '_share_on_mastodon_url', $status->url );
 
 			if ( 'share_on_mastodon_post' !== current_filter() ) {
-				// This function was called directly.
+				// Show a notice only when this function was called directly.
 				add_filter( 'redirect_post_location', array( Notices::class, 'add_success_query_var' ) );
 			}
 		} elseif ( ! empty( $status->error ) ) {

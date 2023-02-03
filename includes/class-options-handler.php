@@ -113,42 +113,34 @@ class Options_Handler {
 		}
 
 		if ( isset( $settings['mastodon_host'] ) ) {
-			$mastodon_host = untrailingslashit( trim( $settings['mastodon_host'] ) );
+			// Clean up and sanitize the user-submitted URL.
+			$mastodon_host = $this->clean_url( $settings['mastodon_host'] );
 
 			if ( '' === $mastodon_host ) {
 				// Removing the instance URL. Might be done to temporarily
 				// disable crossposting. Let's not revoke access just yet.
 				$this->options['mastodon_host'] = '';
+			} elseif ( wp_http_validate_url( $mastodon_host ) ) {
+				if ( $mastodon_host !== $this->options['mastodon_host'] ) {
+					// Updated URL. (Try to) revoke access. Forget token
+					// regardless of the outcome.
+					$this->revoke_access();
+
+					// Then, save the new URL.
+					$this->options['mastodon_host'] = esc_url_raw( $mastodon_host );
+
+					// Forget client ID and secret. A new client ID and
+					// secret will be requested next time the page loads.
+					$this->options['mastodon_client_id']     = '';
+					$this->options['mastodon_client_secret'] = '';
+				}
 			} else {
-				if ( 0 !== strpos( $mastodon_host, 'https://' ) && 0 !== strpos( $mastodon_host, 'http://' ) ) {
-					// Missing protocol. Try adding `https://`.
-					$mastodon_host = 'https://' . $mastodon_host;
-				}
-
-				if ( wp_http_validate_url( $mastodon_host ) ) {
-					if ( $mastodon_host !== $this->options['mastodon_host'] ) {
-						// Updated URL.
-
-						// (Try to) revoke access. Forget token regardless of the
-						// outcome.
-						$this->revoke_access();
-
-						// Then, save the new URL.
-						$this->options['mastodon_host'] = untrailingslashit( $mastodon_host );
-
-						// Forget client ID and secret. A new client ID and secret will
-						// be requested next time the page is loaded.
-						$this->options['mastodon_client_id']     = '';
-						$this->options['mastodon_client_secret'] = '';
-					}
-				} else {
-					// Invalid URL. Display error message.
-					add_settings_error(
-						'share-on-mastodon-mastodon-host',
-						'invalid-url',
-						esc_html__( 'Please provide a valid URL.', 'share-on-mastodon' )
-					);
-				}
+				// Not a valid URL. Display error message.
+				add_settings_error(
+					'share-on-mastodon-mastodon-host',
+					'invalid-url',
+					esc_html__( 'Please provide a valid URL.', 'share-on-mastodon' )
+				);
 			}
 		}
 
@@ -175,7 +167,7 @@ class Options_Handler {
 			<h1><?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?></h1>
 
 			<h2><?php esc_html_e( 'Settings', 'share-on-mastodon' ); ?></h2>
-			<form method="post" action="options.php">
+			<form method="post" action="options.php" novalidate="novalidate">
 				<?php
 				// Print nonces and such.
 				settings_fields( 'share-on-mastodon-settings-group' );
@@ -188,7 +180,8 @@ class Options_Handler {
 					<tr valign="top">
 						<th scope="row"><label for="share_on_mastodon_settings[mastodon_host]"><?php esc_html_e( 'Instance', 'share-on-mastodon' ); ?></label></th>
 						<td><input type="url" id="share_on_mastodon_settings[mastodon_host]" name="share_on_mastodon_settings[mastodon_host]" style="min-width: 33%;" value="<?php echo esc_attr( $this->options['mastodon_host'] ); ?>" />
-						<p class="description"><?php esc_html_e( 'Your Mastodon instance&rsquo;s URL.', 'share-on-mastodon' ); ?></p></td>
+						<?php /* translators: %s: example URL. */ ?>
+						<p class="description"><?php printf( esc_html__( 'Your Mastodon instance&rsquo;s URL. E.g., %s.', 'share-on-mastodon' ), '<code>https://mastodon.online</code>' ); ?></p></td>
 					</tr>
 					<tr valign="top">
 						<th scope="row"><?php esc_html_e( 'Supported Post Types', 'share-on-mastodon' ); ?></th>
@@ -255,17 +248,19 @@ class Options_Handler {
 								'response_type' => 'code',
 								'client_id'     => $this->options['mastodon_client_id'],
 								'client_secret' => $this->options['mastodon_client_secret'],
-								'redirect_uri'  => add_query_arg(
-									array(
-										'page' => 'share-on-mastodon',
-									),
-									admin_url( 'options-general.php' )
+								'redirect_uri'  => esc_url_raw(
+									add_query_arg(
+										array(
+											'page' => 'share-on-mastodon',
+										),
+										admin_url( 'options-general.php' )
+									)
 								), // Redirect here after authorization.
 								'scope'         => 'write:media write:statuses read:accounts read:statuses',
 							)
 						);
 						?>
-						<p><?php esc_html_e( 'Authorize WordPress to read and write to your Mastodon timeline in order to enable crossposting.', 'share-on-mastodon' ); ?></p>
+						<p><?php esc_html_e( 'Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication.', 'share-on-mastodon' ); ?></p>
 						<p style="margin-bottom: 2rem;"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
 						<?php
 					} else {
@@ -622,5 +617,49 @@ class Options_Handler {
 	 */
 	public function get_options() {
 		return $this->options;
+	}
+
+	/**
+	 * Preps user-submitted instance URLs for validation.
+	 *
+	 * @since 0.11.0
+	 *
+	 * @param  string $url Input URL.
+	 * @return string      Sanitized URL, or an empty string on failure.
+	 */
+	public function clean_url( $url ) {
+		$url = untrailingslashit( trim( $url ) );
+
+		// So, it looks like `wp_parse_url()` always expects a protocol.
+		if ( 0 === strpos( $url, '//' ) ) {
+			$url = 'https:' . $url;
+		}
+
+		if ( 0 !== strpos( $url, 'https://' ) && 0 !== strpos( $url, 'http://' ) ) {
+			$url = 'https://' . $url;
+		}
+
+		// Take apart, then reassemble the URL, and drop anything (a path, query
+		// string, etc.) beyond the host.
+		$parsed_url = wp_parse_url( $url );
+
+		if ( empty( $parsed_url['host'] ) ) {
+			// Invalid URL.
+			return '';
+		}
+
+		if ( ! empty( $parsed_url['scheme'] ) ) {
+			$url = $parsed_url['scheme'] . ':';
+		} else {
+			$url = 'https:';
+		}
+
+		$url .= '//' . $parsed_url['host'];
+
+		if ( ! empty( $parsed_url['port'] ) ) {
+			$url .= ':' . $parsed_url['port'];
+		}
+
+		return sanitize_url( $url );
 	}
 }
