@@ -28,6 +28,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.11.0 =
+More flexible/robust instance URL handling. New plugin options.
+
 = 0.10.1 =
 Avoid duplicate posts CPT without explicit custom field support.
 
