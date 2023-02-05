@@ -106,7 +106,7 @@ class Post_Handler {
 
 		$is_enabled = ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ? true : false );
 
-		if ( isset( $this->options['share_always'] ) && $this->options['share_always'] ) {
+		if ( ! empty( $this->options['share_always'] ) ) {
 			$is_enabled = true;
 		}
 
@@ -359,7 +359,7 @@ class Post_Handler {
 	public function render_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' );
 
-		$enabled = isset( $this->options['optin'] ) && $this->options['optin'];
+		$enabled = ! empty( $this->options['optin'] );
 		$check   = array( '', '1' );
 
 		if ( apply_filters( 'share_on_mastodon_optin', $enabled ) ) {
