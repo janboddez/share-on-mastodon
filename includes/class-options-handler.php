@@ -12,21 +12,26 @@ namespace Share_On_Mastodon;
  */
 class Options_Handler {
 	/**
-	 * Plugin options.
+	 * This plugin's default options.
 	 *
-	 * @since 0.1.0
-	 *
-	 * @var array $options Plugin options.
+	 * @since 0.11.0
 	 */
-	private $options = array(
+	const DEFAULT_OPTIONS = array(
 		'mastodon_host'          => '',
 		'mastodon_client_id'     => '',
 		'mastodon_client_secret' => '',
 		'mastodon_access_token'  => '',
-		'post_types'             => array(),
 		'mastodon_username'      => '',
+		'post_types'             => array(),
+		'featured_images'        => true,
+		'attached_images'        => true,
+		'referenced_images'      => false,
+		'max_images'             => 4,
+		'optin'                  => false,
+		'share_always'           => false,
 		'delay_sharing'          => 0,
 		'micropub_compat'        => false,
+		'syn_links_compat'       => false,
 	);
 
 	/**
@@ -40,12 +45,21 @@ class Options_Handler {
 	);
 
 	/**
+	 * Plugin options.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @var array $options Plugin options.
+	 */
+	private $options = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 */
 	public function __construct() {
-		$this->options = get_option( 'share_on_mastodon_settings', $this->options );
+		$this->options = get_option( 'share_on_mastodon_settings', self::DEFAULT_OPTIONS );
 	}
 
 	/**
@@ -153,6 +167,28 @@ class Options_Handler {
 	}
 
 	/**
+	 * Handles submitted "images" options.
+	 *
+	 * @since 0.11.0
+	 *
+	 * @param  array $settings Settings as submitted through WP Admin.
+	 * @return array Options to be stored.
+	 */
+	public function sanitize_images_settings( $settings ) {
+		$options = array(
+			'featured_images'   => isset( $settings['featured_images'] ) ? true : false,
+			'attached_images'   => isset( $settings['attached_images'] ) ? true : false,
+			'referenced_images' => isset( $settings['referenced_images'] ) ? true : false,
+			'max_images'        => isset( $settings['max_images'] ) && ctype_digit( $settings['max_images'] )
+				? min( (int) $settings['max_images'], 4 )
+				: 4,
+		);
+
+		// Updated settings.
+		return array_merge( $this->options, $options );
+	}
+
+	/**
 	 * Handles submitted "advanced" options.
 	 *
 	 * @since 0.11.0
@@ -162,18 +198,13 @@ class Options_Handler {
 	 */
 	public function sanitize_advanced_settings( $settings ) {
 		$options = array(
-			'optin'             => isset( $settings['optin'] ) ? true : false,
-			'share_always'      => isset( $settings['share_always'] ) ? true : false,
-			'delay_sharing'     => isset( $settings['delay_sharing'] ) && ctype_digit( $settings['delay_sharing'] )
+			'optin'            => isset( $settings['optin'] ) ? true : false,
+			'share_always'     => isset( $settings['share_always'] ) ? true : false,
+			'delay_sharing'    => isset( $settings['delay_sharing'] ) && ctype_digit( $settings['delay_sharing'] )
 				? (int) $settings['delay_sharing']
 				: 0,
-			'micropub_compat'   => isset( $settings['micropub_compat'] ) ? true : false,
-			'featured_images'   => isset( $settings['featured_images'] ) ? true : false,
-			'attached_images'   => isset( $settings['attached_images'] ) ? true : false,
-			'referenced_images' => isset( $settings['referenced_images'] ) ? true : false,
-			'max_images'        => isset( $settings['max_images'] ) && ctype_digit( $settings['max_images'] )
-				? min( (int) $settings['max_images'], 4 )
-				: 4,
+			'micropub_compat'  => isset( $settings['micropub_compat'] ) ? true : false,
+			'syn_links_compat' => isset( $settings['syn_links_compat'] ) ? true : false,
 		);
 
 		// Updated settings.
@@ -193,6 +224,7 @@ class Options_Handler {
 
 			<h2 class="nav-tab-wrapper">
 				<a href="<?php echo esc_url( $this->get_options_url( 'setup' ) ); ?>" class="nav-tab <?php echo esc_attr( 'setup' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Setup', 'share-on-mastodon' ); ?></a>
+				<a href="<?php echo esc_url( $this->get_options_url( 'images' ) ); ?>" class="nav-tab <?php echo esc_attr( 'images' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Images', 'share-on-mastodon' ); ?></a>
 				<a href="<?php echo esc_url( $this->get_options_url( 'advanced' ) ); ?>" class="nav-tab <?php echo esc_attr( 'advanced' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Advanced', 'share-on-mastodon' ); ?></a>
 				<a href="<?php echo esc_url( $this->get_options_url( 'debug' ) ); ?>" class="nav-tab <?php echo esc_attr( 'debug' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></a>
 			</h2>
@@ -320,9 +352,43 @@ class Options_Handler {
 				}
 			endif;
 
+			if ( 'images' === $active_tab ) :
+				?>
+				<form method="post" action="options.php">
+					<?php
+					// Print nonces and such.
+					settings_fields( 'share-on-mastodon-settings-group' );
+					?>
+					<table class="form-table">
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Featured Images', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[featured_images]" value="1" <?php checked( ! isset( $this->options['featured_images'] ) || $this->options['featured_images'] ); ?> /> <?php esc_html_e( 'Include featured images', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Upload syndicated posts&rsquo; featured images.', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Attached Images', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[attached_images]" value="1" <?php checked( ! isset( $this->options['attached_images'] ) || $this->options['attached_images'] ); ?> /> <?php esc_html_e( 'Include attached images', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Upload syndicated posts&rsquo; attached images.', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'In-Post Images', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[referenced_images]" value="1" <?php checked( ! empty( $this->options['referenced_images'] ) ); ?> /> <?php esc_html_e( 'Include &ldquo;in-post&rdquo; images', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php esc_html_e( '(Experimental) Upload syndicated posts&rsquo; &ldquo;in-content&rdquo; images.', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><label for="share_on_mastodon_settings[max_images]"><?php esc_html_e( 'Max. No. of Images', 'share-on-mastodon' ); ?></label></th>
+							<td><input type="number" min="0" max="4" style="width: 6em;" id="share_on_mastodon_settings[max_images]" name="share_on_mastodon_settings[max_images]" value="<?php echo esc_attr( ! empty( $this->options['max_images'] ) ? $this->options['max_images'] : '4' ); ?>" />
+							<p class="description"><?php esc_html_e( 'The maximum number of images that will be uploaded. (Mastodon supports a up to 4 images.)', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+					</table>
+					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+				</form>
+				<?php
+			endif;
+
 			if ( 'advanced' === $active_tab ) :
 				?>
-				<form method="post" action="options.php" novalidate="novalidate">
+				<form method="post" action="options.php">
 					<?php
 					// Print nonces and such.
 					settings_fields( 'share-on-mastodon-settings-group' );
@@ -352,26 +418,13 @@ class Options_Handler {
 							</tr>
 						<?php endif; ?>
 
-						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Featured Images', 'share-on-mastodon' ); ?></th>
-							<td><label><input type="checkbox" name="share_on_mastodon_settings[featured_images]" value="1" <?php checked( ! isset( $this->options['featured_images'] ) || $this->options['featured_images'] ); ?> /> <?php esc_html_e( 'Include featured images', 'share-on-mastodon' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Upload syndicated posts&rsquo; featured images.', 'share-on-mastodon' ); ?></p></td>
-						</tr>
-						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Attached Images', 'share-on-mastodon' ); ?></th>
-							<td><label><input type="checkbox" name="share_on_mastodon_settings[attached_images]" value="1" <?php checked( ! isset( $this->options['attached_images'] ) || $this->options['attached_images'] ); ?> /> <?php esc_html_e( 'Include attached images', 'share-on-mastodon' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Upload syndicated posts&rsquo; attached images.', 'share-on-mastodon' ); ?></p></td>
-						</tr>
-						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'In-Post Images', 'share-on-mastodon' ); ?></th>
-							<td><label><input type="checkbox" name="share_on_mastodon_settings[referenced_images]" value="1" <?php checked( ! empty( $this->options['referenced_images'] ) ); ?> /> <?php esc_html_e( 'Include &ldquo;in-post&rdquo; images', 'share-on-mastodon' ); ?></label>
-							<p class="description"><?php esc_html_e( '(Experimental) Upload syndicated posts&rsquo; &ldquo;in-content&rdquo; images.', 'share-on-mastodon' ); ?></p></td>
-						</tr>
-						<tr valign="top">
-							<th scope="row"><label for="share_on_mastodon_settings[max_images]"><?php esc_html_e( 'Max. No. of Images', 'share-on-mastodon' ); ?></label></th>
-							<td><input type="number" min="0" max="4" style="width: 6em;" id="share_on_mastodon_settings[max_images]" name="share_on_mastodon_settings[max_images]" value="<?php echo esc_attr( ! empty( $this->options['max_images'] ) ? $this->options['max_images'] : '4' ); ?>" />
-							<p class="description"><?php esc_html_e( 'The maximum number of images that will be uploaded. (Mastodon supports a up to 4 images.)', 'share-on-mastodon' ); ?></p></td>
-						</tr>
+						<?php if ( function_exists( 'get_syndication_links' ) ) : ?>
+							<tr valign="top">
+								<th scope="row"><?php esc_html_e( 'Syndication Links', 'share-on-mastodon' ); ?></label></th>
+								<td><label><input type="checkbox" id="share_on_mastodon_settings[syn_links_compat]" name="share_on_mastodon_settings[syn_links_compat]" value="1" <?php checked( ! empty( $this->options['syn_links_compat'] ) ); ?> /> <?php esc_html_e( 'Add Mastodon URLs to syndication links', 'share-on-mastodon' ); ?></label>
+								<p class="description"><?php esc_html_e( '(Experimental) Add Mastodon URLs to Syndication Links&rsquo; list of syndication links.', 'share-on-mastodon' ); ?></p></td>
+							</tr>
+						<?php endif; ?>
 					</table>
 					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
 				</form>
@@ -598,16 +651,7 @@ class Options_Handler {
 		}
 
 		/* @todo: Store defaults as a class constant. Currently, they're defined twice. */
-		$this->options = array(
-			'mastodon_host'          => '',
-			'mastodon_client_id'     => '',
-			'mastodon_client_secret' => '',
-			'mastodon_access_token'  => '',
-			'post_types'             => array(),
-			'mastodon_username'      => '',
-			'delay_sharing'          => 0,
-			'micropub_compat'        => false,
-		);
+		$this->options = self::DEFAULT_OPTIONS;
 
 		update_option( 'share_on_mastodon_settings', $this->options );
 	}
@@ -774,7 +818,7 @@ class Options_Handler {
 
 			parse_str( $query_string, $query_vars );
 
-			if ( isset( $query_vars['tab'] ) && in_array( $query_vars['tab'], array( 'advanced', 'debug' ), true ) ) {
+			if ( isset( $query_vars['tab'] ) && in_array( $query_vars['tab'], array( 'images', 'advanced', 'debug' ), true ) ) {
 				return $query_vars['tab'];
 			}
 
@@ -782,7 +826,7 @@ class Options_Handler {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['tab'] ) && in_array( $_GET['tab'], array( 'advanced', 'debug' ), true ) ) {
+		if ( isset( $_GET['tab'] ) && in_array( $_GET['tab'], array( 'images', 'advanced', 'debug' ), true ) ) {
 			return $_GET['tab']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 

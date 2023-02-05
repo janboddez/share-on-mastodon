@@ -85,6 +85,10 @@ class Share_On_Mastodon {
 		if ( ! empty( $options['micropub_compat'] ) ) {
 			Micropub_Compat::register();
 		}
+
+		if ( ! empty( $options['syn_links_compat'] ) ) {
+			Syn_Links_Compat::register();
+		}
 	}
 
 	/**

@@ -10,24 +10,13 @@ class Test_Options_Handler extends \WP_Mock\Tools\TestCase {
 	}
 
 	public function test_options_handler_register() {
-		$options = array(
-			'mastodon_host'          => '',
-			'mastodon_client_id'     => '',
-			'mastodon_client_secret' => '',
-			'mastodon_access_token'  => '',
-			'post_types'             => array(),
-			'mastodon_username'      => '',
-			'delay_sharing'          => 0,
-			'micropub_compat'        => false,
-		);
-
 		\WP_Mock::userFunction( 'get_option', array(
 			'times'  => 1,
 			'args'   => array(
 				'share_on_mastodon_settings',
-				$options,
+				\Share_On_Mastodon\Options_Handler::DEFAULT_OPTIONS,
 			),
-			'return' => $options,
+			'return' => \Share_On_Mastodon\Options_Handler::DEFAULT_OPTIONS,
 		) );
 
 		$options_handler = new \Share_On_Mastodon\Options_Handler();

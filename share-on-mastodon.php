@@ -28,5 +28,6 @@ require dirname( __FILE__ ) . '/includes/class-notices.php';
 require dirname( __FILE__ ) . '/includes/class-options-handler.php';
 require dirname( __FILE__ ) . '/includes/class-post-handler.php';
 require dirname( __FILE__ ) . '/includes/class-share-on-mastodon.php';
+require dirname( __FILE__ ) . '/includes/class-syn-links-compat.php';
 
 Share_On_Mastodon::get_instance()->register();
