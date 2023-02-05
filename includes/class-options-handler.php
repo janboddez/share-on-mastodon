@@ -412,16 +412,16 @@ class Options_Handler {
 
 						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
 							<tr valign="top">
-								<th scope="row"><?php esc_html_e( 'Micropub', 'share-on-mastodon' ); ?></label></th>
-								<td><label><input type="checkbox" id="share_on_mastodon_settings[micropub_compat]" name="share_on_mastodon_settings[micropub_compat]" value="1" <?php checked( ! empty( $this->options['micropub_compat'] ) ); ?> /> <?php esc_html_e( 'Add syndication target', 'share-on-mastodon' ); ?></label>
+								<th scope="row"><?php esc_html_e( 'Micropub', 'share-on-mastodon' ); ?></th>
+								<td><label><input type="checkbox" name="share_on_mastodon_settings[micropub_compat]" value="1" <?php checked( ! empty( $this->options['micropub_compat'] ) ); ?> /> <?php esc_html_e( 'Add syndication target', 'share-on-mastodon' ); ?></label>
 								<p class="description"><?php esc_html_e( '(Experimental) Add &ldquo;Mastodon&rdquo; as a Micropub syndication target.', 'share-on-mastodon' ); ?></p></td>
 							</tr>
 						<?php endif; ?>
 
 						<?php if ( function_exists( 'get_syndication_links' ) ) : ?>
 							<tr valign="top">
-								<th scope="row"><?php esc_html_e( 'Syndication Links', 'share-on-mastodon' ); ?></label></th>
-								<td><label><input type="checkbox" id="share_on_mastodon_settings[syn_links_compat]" name="share_on_mastodon_settings[syn_links_compat]" value="1" <?php checked( ! empty( $this->options['syn_links_compat'] ) ); ?> /> <?php esc_html_e( 'Add Mastodon URLs to syndication links', 'share-on-mastodon' ); ?></label>
+								<th scope="row"><?php esc_html_e( 'Syndication Links', 'share-on-mastodon' ); ?></th>
+								<td><label><input type="checkbox" name="share_on_mastodon_settings[syn_links_compat]" value="1" <?php checked( ! empty( $this->options['syn_links_compat'] ) ); ?> /> <?php esc_html_e( 'Add Mastodon URLs to syndication links', 'share-on-mastodon' ); ?></label>
 								<p class="description"><?php esc_html_e( '(Experimental) Add Mastodon URLs to Syndication Links&rsquo; list of syndication links.', 'share-on-mastodon' ); ?></p></td>
 							</tr>
 						<?php endif; ?>
