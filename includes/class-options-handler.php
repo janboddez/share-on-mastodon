@@ -81,22 +81,26 @@ class Options_Handler {
 	 * @since 0.1.0
 	 */
 	public function add_settings() {
+		add_option( 'share_on_mastodon_settings', $this->options );
+
+		$active_tab = $this->get_active_tab();
+
 		register_setting(
 			'share-on-mastodon-settings-group',
 			'share_on_mastodon_settings',
-			array( 'sanitize_callback' => array( $this, 'sanitize_settings' ) )
+			array( 'sanitize_callback' => array( $this, "sanitize_{$active_tab}_settings" ) )
 		);
 	}
 
 	/**
-	 * Handles submitted options.
+	 * Handles submitted "setup" options.
 	 *
-	 * @since 0.1.0
+	 * @since 0.11.0
 	 *
 	 * @param  array $settings Settings as submitted through WP Admin.
 	 * @return array Options to be stored.
 	 */
-	public function sanitize_settings( $settings ) {
+	public function sanitize_setup_settings( $settings ) {
 		$this->options['post_types'] = array();
 
 		if ( isset( $settings['post_types'] ) && is_array( $settings['post_types'] ) ) {
@@ -144,16 +148,36 @@ class Options_Handler {
 			}
 		}
 
-		$this->options['delay_sharing'] = 0;
-
-		if ( isset( $settings['delay_sharing'] ) && ctype_digit( $settings['delay_sharing'] ) ) {
-			$this->options['delay_sharing'] = (int) $settings['delay_sharing'];
-		}
-
-		$this->options['micropub_compat'] = isset( $settings['micropub_compat'] ) ? true : false;
-
 		// Updated settings.
 		return $this->options;
+	}
+
+	/**
+	 * Handles submitted "advanced" options.
+	 *
+	 * @since 0.11.0
+	 *
+	 * @param  array $settings Settings as submitted through WP Admin.
+	 * @return array Options to be stored.
+	 */
+	public function sanitize_advanced_settings( $settings ) {
+		$options = array(
+			'optin'             => isset( $settings['optin'] ) ? true : false,
+			'share_always'      => isset( $settings['share_always'] ) ? true : false,
+			'delay_sharing'     => isset( $settings['delay_sharing'] ) && ctype_digit( $settings['delay_sharing'] )
+				? (int) $settings['delay_sharing']
+				: 0,
+			'micropub_compat'   => isset( $settings['micropub_compat'] ) ? true : false,
+			'featured_images'   => isset( $settings['featured_images'] ) ? true : false,
+			'attached_images'   => isset( $settings['attached_images'] ) ? true : false,
+			'referenced_images' => isset( $settings['referenced_images'] ) ? true : false,
+			'max_images'        => isset( $settings['max_images'] ) && ctype_digit( $settings['max_images'] )
+				? min( (int) $settings['max_images'], 4 )
+				: 4,
+		);
+
+		// Updated settings.
+		return array_merge( $this->options, $options );
 	}
 
 	/**
@@ -162,172 +186,228 @@ class Options_Handler {
 	 * @since 0.1.0
 	 */
 	public function settings_page() {
+		$active_tab = $this->get_active_tab();
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?></h1>
 
-			<h2><?php esc_html_e( 'Settings', 'share-on-mastodon' ); ?></h2>
-			<form method="post" action="options.php" novalidate="novalidate">
-				<?php
-				// Print nonces and such.
-				settings_fields( 'share-on-mastodon-settings-group' );
+			<h2 class="nav-tab-wrapper">
+				<a href="<?php echo esc_url( $this->get_options_url( 'setup' ) ); ?>" class="nav-tab <?php echo esc_attr( 'setup' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Setup', 'share-on-mastodon' ); ?></a>
+				<a href="<?php echo esc_url( $this->get_options_url( 'advanced' ) ); ?>" class="nav-tab <?php echo esc_attr( 'advanced' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Advanced', 'share-on-mastodon' ); ?></a>
+				<a href="<?php echo esc_url( $this->get_options_url( 'debug' ) ); ?>" class="nav-tab <?php echo esc_attr( 'debug' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></a>
+			</h2>
 
-				// Post types considered valid.
-				$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
-				$supported_post_types = array_diff( $supported_post_types, self::DEFAULT_POST_TYPES );
-				?>
-				<table class="form-table">
-					<tr valign="top">
-						<th scope="row"><label for="share_on_mastodon_settings[mastodon_host]"><?php esc_html_e( 'Instance', 'share-on-mastodon' ); ?></label></th>
-						<td><input type="url" id="share_on_mastodon_settings[mastodon_host]" name="share_on_mastodon_settings[mastodon_host]" style="min-width: 33%;" value="<?php echo esc_attr( $this->options['mastodon_host'] ); ?>" />
-						<?php /* translators: %s: example URL. */ ?>
-						<p class="description"><?php printf( esc_html__( 'Your Mastodon instance&rsquo;s URL. E.g., %s.', 'share-on-mastodon' ), '<code>https://mastodon.online</code>' ); ?></p></td>
-					</tr>
-					<tr valign="top">
-						<th scope="row"><?php esc_html_e( 'Supported Post Types', 'share-on-mastodon' ); ?></th>
-						<td><ul style="list-style: none; margin-top: 4px;">
-							<?php
-							foreach ( $supported_post_types as $post_type ) :
-								$post_type = get_post_type_object( $post_type );
-								?>
-								<li><label><input type="checkbox" name="share_on_mastodon_settings[post_types][]" value="<?php echo esc_attr( $post_type->name ); ?>" <?php checked( in_array( $post_type->name, $this->options['post_types'], true ) ); ?> /> <?php echo esc_html( $post_type->labels->singular_name ); ?></label></li>
-								<?php
-							endforeach;
-							?>
-						</ul>
-						<p class="description"><?php esc_html_e( 'Post types for which sharing to Mastodon is possible. (Sharing can still be disabled on a per-post basis.)', 'share-on-mastodon' ); ?></p></td>
-					</tr>
-					<tr valign="top">
-						<th scope="row"><label for="share_on_mastodon_settings[delay_sharing]"><?php esc_html_e( 'Delayed Sharing', 'share-on-mastodon' ); ?></label></th>
-						<td><input type="number" id="share_on_mastodon_settings[delay_sharing]" name="share_on_mastodon_settings[delay_sharing]" value="<?php echo esc_attr( isset( $this->options['delay_sharing'] ) ? $this->options['delay_sharing'] : 0 ); ?>" />
-						<p class="description"><?php esc_html_e( 'The time, in seconds, WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;that&rsquo;s 5 minutes&mdash;might resolve issues with image uploads.)', 'share-on-mastodon' ); ?></p></td>
-					</tr>
-					<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
+			<?php if ( 'setup' === $active_tab ) : ?>
+				<form method="post" action="options.php" novalidate="novalidate">
+					<?php
+					// Print nonces and such.
+					settings_fields( 'share-on-mastodon-settings-group' );
+					?>
+					<table class="form-table">
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Micropub', 'share-on-mastodon' ); ?></label></th>
-							<td><label><input type="checkbox" id="share_on_mastodon_settings[micropub_compat]" name="share_on_mastodon_settings[micropub_compat]" value="1" <?php checked( ! empty( $this->options['micropub_compat'] ) ); ?> /> <?php esc_html_e( 'Add syndication target', 'share-on-mastodon' ); ?></label>
-							<p class="description"><?php esc_html_e( '(Experimental) Add &ldquo;Mastodon&rdquo; as a Micropub syndication target.', 'share-on-mastodon' ); ?></p></td>
+							<th scope="row"><label for="share_on_mastodon_settings[mastodon_host]"><?php esc_html_e( 'Instance', 'share-on-mastodon' ); ?></label></th>
+							<td><input type="url" id="share_on_mastodon_settings[mastodon_host]" name="share_on_mastodon_settings[mastodon_host]" style="min-width: 33%;" value="<?php echo esc_attr( $this->options['mastodon_host'] ); ?>" />
+							<?php /* translators: %s: example URL. */ ?>
+							<p class="description"><?php printf( esc_html__( 'Your Mastodon instance&rsquo;s URL. E.g., %s.', 'share-on-mastodon' ), '<code>https://mastodon.online</code>' ); ?></p></td>
 						</tr>
-					<?php endif; ?>
-				</table>
-				<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
-			</form>
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Supported Post Types', 'share-on-mastodon' ); ?></th>
+							<td><ul style="list-style: none; margin-top: 4px;">
+								<?php
+								// Post types considered valid.
+								$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
+								$supported_post_types = array_diff( $supported_post_types, self::DEFAULT_POST_TYPES );
 
-			<h2><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h2>
-			<?php
-			if ( ! empty( $this->options['mastodon_host'] ) ) {
-				// A valid instance URL was set.
-				if ( empty( $this->options['mastodon_client_id'] ) || empty( $this->options['mastodon_client_secret'] ) ) {
-					// No app is currently registered. Let's try to fix that!
-					$this->register_app();
-				}
+								foreach ( $supported_post_types as $post_type ) :
+									$post_type = get_post_type_object( $post_type );
+									?>
+									<li><label><input type="checkbox" name="share_on_mastodon_settings[post_types][]" value="<?php echo esc_attr( $post_type->name ); ?>" <?php checked( in_array( $post_type->name, $this->options['post_types'], true ) ); ?> /> <?php echo esc_html( $post_type->labels->singular_name ); ?></label></li>
+									<?php
+								endforeach;
+								?>
+							</ul>
+							<p class="description"><?php esc_html_e( 'Post types for which sharing to Mastodon is possible. (Sharing can still be disabled on a per-post basis.)', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+					</table>
+					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+				</form>
 
-				if ( ! empty( $this->options['mastodon_client_id'] ) && ! empty( $this->options['mastodon_client_secret'] ) ) {
-					// An app was successfully registered.
-					if ( ! empty( $_GET['code'] ) && '' === $this->options['mastodon_access_token'] ) {
-						// Access token request.
-						if ( $this->request_access_token( wp_unslash( $_GET['code'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-							?>
-							<div class="notice notice-success is-dismissible">
-								<p><?php esc_html_e( 'Access granted!', 'share-on-mastodon' ); ?></p>
-							</div>
-							<?php
+				<h3><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h3>
+				<?php
+				if ( ! empty( $this->options['mastodon_host'] ) ) {
+					// A valid instance URL was set.
+					if ( empty( $this->options['mastodon_client_id'] ) || empty( $this->options['mastodon_client_secret'] ) ) {
+						// No app is currently registered. Let's try to fix that!
+						$this->register_app();
+					}
+
+					if ( ! empty( $this->options['mastodon_client_id'] ) && ! empty( $this->options['mastodon_client_secret'] ) ) {
+						// An app was successfully registered.
+						if ( ! empty( $_GET['code'] ) && '' === $this->options['mastodon_access_token'] ) {
+							// Access token request.
+							if ( $this->request_access_token( wp_unslash( $_GET['code'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+								?>
+								<div class="notice notice-success is-dismissible">
+									<p><?php esc_html_e( 'Access granted!', 'share-on-mastodon' ); ?></p>
+								</div>
+								<?php
+							}
 						}
-					}
 
-					if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'share-on-mastodon-reset' ) ) {
-						// Revoke access. Forget access token regardless of the
-						// outcome.
-						$this->revoke_access();
-					}
+						if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'share-on-mastodon-reset' ) ) {
+							// Revoke access. Forget access token regardless of the
+							// outcome.
+							$this->revoke_access();
+						}
 
-					if ( empty( $this->options['mastodon_access_token'] ) ) {
-						// No access token exists. Echo authorization link.
-						$url = $this->options['mastodon_host'] . '/oauth/authorize?' . http_build_query(
-							array(
-								'response_type' => 'code',
-								'client_id'     => $this->options['mastodon_client_id'],
-								'client_secret' => $this->options['mastodon_client_secret'],
-								'redirect_uri'  => esc_url_raw(
-									add_query_arg(
-										array(
-											'page' => 'share-on-mastodon',
-										),
-										admin_url( 'options-general.php' )
-									)
-								), // Redirect here after authorization.
-								'scope'         => 'write:media write:statuses read:accounts read:statuses',
-							)
-						);
-						?>
-						<p><?php esc_html_e( 'Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication.', 'share-on-mastodon' ); ?></p>
-						<p style="margin-bottom: 2rem;"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
-						<?php
-					} else {
-						// An access token exists.
-						?>
-						<p><?php esc_html_e( 'You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline.', 'share-on-mastodon' ); ?></p>
-						<p style="margin-bottom: 2rem;">
-							<?php
-							printf(
-								'<a href="%1$s" class="button">%2$s</a>',
-								esc_url(
-									add_query_arg(
-										array(
-											'page'     => 'share-on-mastodon',
-											'action'   => 'revoke',
-											'_wpnonce' => wp_create_nonce( 'share-on-mastodon-reset' ),
-										),
-										admin_url( 'options-general.php' )
-									)
-								),
-								esc_html__( 'Revoke Access', 'share-on-mastodon' )
+						if ( empty( $this->options['mastodon_access_token'] ) ) {
+							// No access token exists. Echo authorization link.
+							$url = $this->options['mastodon_host'] . '/oauth/authorize?' . http_build_query(
+								array(
+									'response_type' => 'code',
+									'client_id'     => $this->options['mastodon_client_id'],
+									'client_secret' => $this->options['mastodon_client_secret'],
+									'redirect_uri'  => esc_url_raw(
+										add_query_arg(
+											array(
+												'page' => 'share-on-mastodon',
+											),
+											admin_url( 'options-general.php' )
+										)
+									), // Redirect here after authorization.
+									'scope'         => 'write:media write:statuses read:accounts read:statuses',
+								)
 							);
 							?>
-						</p>
+							<p><?php esc_html_e( 'Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication.', 'share-on-mastodon' ); ?></p>
+							<p style="margin-bottom: 2rem;"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
+							<?php
+						} else {
+							// An access token exists.
+							?>
+							<p><?php esc_html_e( 'You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline.', 'share-on-mastodon' ); ?></p>
+							<p style="margin-bottom: 2rem;">
+								<?php
+								printf(
+									'<a href="%1$s" class="button">%2$s</a>',
+									esc_url(
+										add_query_arg(
+											array(
+												'page'     => 'share-on-mastodon',
+												'action'   => 'revoke',
+												'_wpnonce' => wp_create_nonce( 'share-on-mastodon-reset' ),
+											),
+											admin_url( 'options-general.php' )
+										)
+									),
+									esc_html__( 'Revoke Access', 'share-on-mastodon' )
+								);
+								?>
+							</p>
+							<?php
+						}
+					} else {
+						// Still couldn't register our app.
+						?>
+						<p><?php esc_html_e( 'Something went wrong contacting your Mastodon instance. Please reload this page to try again.', 'share-on-mastodon' ); ?></p>
 						<?php
 					}
 				} else {
-					// Still couldn't register our app.
+					// We can't do much without an instance URL.
 					?>
-					<p><?php esc_html_e( 'Something went wrong contacting your Mastodon instance. Please reload this page to try again.', 'share-on-mastodon' ); ?></p>
+					<p><?php esc_html_e( 'Please fill out and save your Mastodon instance&rsquo;s URL first.', 'share-on-mastodon' ); ?></p>
 					<?php
 				}
-			} else {
-				// We can't do much without an instance URL.
-				?>
-				<p><?php esc_html_e( 'Please fill out and save your Mastodon instance&rsquo;s URL first.', 'share-on-mastodon' ); ?></p>
-				<?php
-			}
-			?>
+			endif;
 
-			<h2><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></h2>
-			<p><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
-			<p style="margin-bottom: 2rem;">
-				<?php
-				printf(
-					'<a href="%1$s" class="button button-reset-settings" style="color: #a00; border-color: #a00;">%2$s</a>',
-					esc_url(
-						add_query_arg(
-							array(
-								'action'   => 'share_on_mastodon',
-								'reset'    => 'true',
-								'_wpnonce' => wp_create_nonce( 'share-on-mastodon-reset' ),
-							),
-							admin_url( 'admin-post.php' )
-						)
-					),
-					esc_html__( 'Reset Settings', 'share-on-mastodon' )
-				);
+			if ( 'advanced' === $active_tab ) :
 				?>
-			</p>
-			<?php
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) {
-				?>
-				<p><?php esc_html_e( 'Below information is not meant to be shared with anyone but may help when troubleshooting issues.', 'share-on-mastodon' ); ?></p>
-				<p><textarea class="widefat" rows="5"><?php print_r( $this->options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions ?>
+				<form method="post" action="options.php" novalidate="novalidate">
+					<?php
+					// Print nonces and such.
+					settings_fields( 'share-on-mastodon-settings-group' );
+					?>
+					<table class="form-table">
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Opt-In', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[optin]" value="1" <?php checked( ! isset( $this->options['optin'] ) || $this->options['optin'] ); ?> /> <?php esc_html_e( 'Make syndication opt-in rather than opt-out', 'share-on-mastodon' ); ?></label></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Share Always', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[share_always]" value="1" <?php checked( ! empty( $this->options['share_always'] ) ); ?> /> <?php esc_html_e( 'Always syndicate to Mastodon', 'share-on-mastodon' ); ?></label>
+							<?php /* translators: %s: link to the `share_on_mastodon_enabled` documentation */ ?>
+							<p class="description"><?php printf( esc_html__( ' &ldquo;Force&rdquo; syndication, like when posting from a mobile app. For more fine-grained control, have a look at the %s filter hook.', 'share-on-mastodon' ), '<a target="_blank" href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_enabled"><code>share_on_mastodon_enabled</code></a>' ); ?></p></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><label for="share_on_mastodon_settings[delay_sharing]"><?php esc_html_e( 'Delayed Sharing', 'share-on-mastodon' ); ?></label></th>
+							<td><input type="number" style="width: 6em;" id="share_on_mastodon_settings[delay_sharing]" name="share_on_mastodon_settings[delay_sharing]" value="<?php echo esc_attr( isset( $this->options['delay_sharing'] ) ? $this->options['delay_sharing'] : 0 ); ?>" />
+							<p class="description"><?php esc_html_e( 'The time, in seconds, WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;that&rsquo;s 5 minutes&mdash;might resolve issues with image uploads.)', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+
+						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
+							<tr valign="top">
+								<th scope="row"><?php esc_html_e( 'Micropub', 'share-on-mastodon' ); ?></label></th>
+								<td><label><input type="checkbox" id="share_on_mastodon_settings[micropub_compat]" name="share_on_mastodon_settings[micropub_compat]" value="1" <?php checked( ! empty( $this->options['micropub_compat'] ) ); ?> /> <?php esc_html_e( 'Add syndication target', 'share-on-mastodon' ); ?></label>
+								<p class="description"><?php esc_html_e( '(Experimental) Add &ldquo;Mastodon&rdquo; as a Micropub syndication target.', 'share-on-mastodon' ); ?></p></td>
+							</tr>
+						<?php endif; ?>
+
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Featured Images', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[featured_images]" value="1" <?php checked( ! isset( $this->options['featured_images'] ) || $this->options['featured_images'] ); ?> /> <?php esc_html_e( 'Include featured images', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Upload syndicated posts&rsquo; featured images.', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Attached Images', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[attached_images]" value="1" <?php checked( ! isset( $this->options['attached_images'] ) || $this->options['attached_images'] ); ?> /> <?php esc_html_e( 'Include attached images', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Upload syndicated posts&rsquo; attached images.', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'In-Post Images', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[referenced_images]" value="1" <?php checked( ! empty( $this->options['referenced_images'] ) ); ?> /> <?php esc_html_e( 'Include &ldquo;in-post&rdquo; images', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php esc_html_e( '(Experimental) Upload syndicated posts&rsquo; &ldquo;in-content&rdquo; images.', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><label for="share_on_mastodon_settings[max_images]"><?php esc_html_e( 'Max. No. of Images', 'share-on-mastodon' ); ?></label></th>
+							<td><input type="number" min="0" max="4" style="width: 6em;" id="share_on_mastodon_settings[max_images]" name="share_on_mastodon_settings[max_images]" value="<?php echo esc_attr( ! empty( $this->options['max_images'] ) ? $this->options['max_images'] : '4' ); ?>" />
+							<p class="description"><?php esc_html_e( 'The maximum number of images that will be uploaded. (Mastodon supports a up to 4 images.)', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+					</table>
+					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+				</form>
 				<?php
-			}
+			endif;
+
+			if ( 'debug' === $active_tab ) :
+				?>
+				<h3><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></h3>
+				<p><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
+				<p style="margin-bottom: 2rem;">
+					<?php
+					printf(
+						'<a href="%1$s" class="button button-reset-settings" style="color: #a00; border-color: #a00;">%2$s</a>',
+						esc_url(
+							add_query_arg(
+								array(
+									'action'   => 'share_on_mastodon',
+									'reset'    => 'true',
+									'_wpnonce' => wp_create_nonce( 'share-on-mastodon-reset' ),
+								),
+								admin_url( 'admin-post.php' )
+							)
+						),
+						esc_html__( 'Reset Settings', 'share-on-mastodon' )
+					);
+					?>
+				</p>
+				<?php
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) {
+					?>
+					<p><?php esc_html_e( 'Below information is not meant to be shared with anyone but may help when troubleshooting issues.', 'share-on-mastodon' ); ?></p>
+					<p><textarea class="widefat" rows="5"><?php print_r( $this->options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions ?>
+					<?php
+				}
+			endif;
 			?>
 		</div>
 		<?php
@@ -661,5 +741,51 @@ class Options_Handler {
 		}
 
 		return sanitize_url( $url );
+	}
+
+	/**
+	 * Returns this plugin's options URL with a `tab` query parameter.
+	 *
+	 * @param  string $tab Target tab.
+	 * @return string      Options page URL.
+	 */
+	public function get_options_url( $tab = 'setup' ) {
+		return add_query_arg(
+			array(
+				'page' => 'share-on-mastodon',
+				'tab'  => $tab,
+			),
+			admin_url( 'options-general.php' )
+		);
+	}
+
+	/**
+	 * Returns the active tab.
+	 *
+	 * @return string Active tab.
+	 */
+	private function get_active_tab() {
+		if ( ! empty( $_POST['submit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$query_string = wp_parse_url( wp_get_referer(), PHP_URL_QUERY );
+
+			if ( empty( $query_string ) ) {
+				return 'setup';
+			}
+
+			parse_str( $query_string, $query_vars );
+
+			if ( isset( $query_vars['tab'] ) && in_array( $query_vars['tab'], array( 'advanced', 'debug' ), true ) ) {
+				return $query_vars['tab'];
+			}
+
+			return 'setup';
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['tab'] ) && in_array( $_GET['tab'], array( 'advanced', 'debug' ), true ) ) {
+			return $_GET['tab']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		}
+
+		return 'setup';
 	}
 }
