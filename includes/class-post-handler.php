@@ -106,6 +106,10 @@ class Post_Handler {
 
 		$is_enabled = ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ? true : false );
 
+		if ( isset( $this->options['share_always'] ) && $this->options['share_always'] ) {
+			$is_enabled = true;
+		}
+
 		if ( ! apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID ) ) {
 			// Disabled for this post.
 			return;
@@ -230,7 +234,8 @@ class Post_Handler {
 		$media = Image_Handler::get_images( $post );
 
 		if ( ! empty( $media ) ) {
-			$max   = (int) apply_filters( 'share_on_mastodon_num_images', 4, $post );
+			$max   = isset( $this->options['max_images'] ) ? $this->options['max_images'] : 4;
+			$max   = (int) apply_filters( 'share_on_mastodon_num_images', $max, $post );
 			$count = min( count( $media ), $max );
 
 			for ( $i = 0; $i < $count; $i++ ) {
@@ -354,9 +359,10 @@ class Post_Handler {
 	public function render_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' );
 
-		$check = array( '', '1' );
+		$enabled = isset( $this->options['optin'] ) && $this->options['optin'];
+		$check   = array( '', '1' );
 
-		if ( apply_filters( 'share_on_mastodon_optin', false ) ) {
+		if ( apply_filters( 'share_on_mastodon_optin', $enabled ) ) {
 			$check = array( '1' ); // Make sharing opt-in.
 		}
 		?>

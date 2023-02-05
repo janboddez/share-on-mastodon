@@ -20,12 +20,19 @@ class Image_Handler {
 	public static function get_images( $post ) {
 		$media = array();
 
-		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', true, $post ) ) {
+		$plugin  = Share_On_Mastodon::get_instance();
+		$options = $plugin->get_options_handler()->get_options();
+
+		$enable_featured_images = ! isset( $options['featured_images'] ) || $options['featured_images'];
+
+		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', $enable_featured_images, $post ) ) {
 			// Include featured image.
 			$media[] = get_post_thumbnail_id( $post->ID );
 		}
 
-		if ( apply_filters( 'share_on_mastodon_attached_images', true, $post ) ) {
+		$enable_attached_images = ! isset( $options['attached_images'] ) || $options['attached_images'];
+
+		if ( apply_filters( 'share_on_mastodon_attached_images', $enable_attached_images, $post ) ) {
 			// Include all attached images.
 			$attachments = get_attached_media( 'image', $post->ID );
 
@@ -36,7 +43,9 @@ class Image_Handler {
 			}
 		}
 
-		if ( apply_filters( 'share_on_mastodon_referenced_images', false, $post ) ) {
+		$enable_referenced_images = ! empty( $options['referenced_images'] ); // This was always opt-in.
+
+		if ( apply_filters( 'share_on_mastodon_referenced_images', $enable_referenced_images, $post ) ) {
 			// Include in-post, i.e., referenced, images.
 			$image_ids = static::get_referenced_images( $post );
 

@@ -330,7 +330,7 @@ class Options_Handler {
 					<table class="form-table">
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Opt-In', 'share-on-mastodon' ); ?></th>
-							<td><label><input type="checkbox" name="share_on_mastodon_settings[optin]" value="1" <?php checked( ! isset( $this->options['optin'] ) || $this->options['optin'] ); ?> /> <?php esc_html_e( 'Make syndication opt-in rather than opt-out', 'share-on-mastodon' ); ?></label></td>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[optin]" value="1" <?php checked( ! empty( $this->options['optin'] ) ); ?> /> <?php esc_html_e( 'Make syndication opt-in rather than opt-out', 'share-on-mastodon' ); ?></label></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Share Always', 'share-on-mastodon' ); ?></th>
@@ -404,7 +404,7 @@ class Options_Handler {
 				if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) {
 					?>
 					<p><?php esc_html_e( 'Below information is not meant to be shared with anyone but may help when troubleshooting issues.', 'share-on-mastodon' ); ?></p>
-					<p><textarea class="widefat" rows="5"><?php print_r( $this->options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions ?>
+					<p><textarea class="widefat" rows="5"><?php var_export( $this->options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export ?>
 					<?php
 				}
 			endif;
