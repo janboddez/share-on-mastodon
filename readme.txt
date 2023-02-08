@@ -29,10 +29,10 @@ More detailed instructions can be found on [this plugin's GitHub page](https://g
 
 == Changelog ==
 = 0.11.0 =
-More flexible/robust instance URL handling. New plugin options.
+More flexible/robust instance URL handling. Overhauled plugin options. Syndication Links compatibility.
 
 = 0.10.1 =
-Avoid duplicate posts CPT without explicit custom field support.
+Avoid duplicate posts for CPTs without explicit custom field support.
 
 = 0.10.0 =
 Add (experimental) support for in-post images, and alt text fallback.
