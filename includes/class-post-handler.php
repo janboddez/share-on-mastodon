@@ -39,6 +39,7 @@ class Post_Handler {
 		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
 		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ) );
 
+		add_action( 'rest_api_init', array( $this, 'register_meta' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
@@ -289,6 +290,28 @@ class Post_Handler {
 			// Provided debugging's enabled, let's store the (somehow faulty)
 			// response.
 			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+		}
+	}
+
+	/**
+	 * Register a post's Mastodon URL for use with the REST API.
+	 *
+	 * @since 0.11.0
+	 */
+	public function register_meta() {
+		$post_types = (array) $this->options['post_types'];
+
+		// Make `_share_on_mastodon_url` available in the REST API, too.
+		foreach ( $post_types as $post_type ) {
+			register_post_meta(
+				$post_type,
+				'_share_on_mastodon_url',
+				array(
+					'single'       => true,
+					'show_in_rest' => true,
+					'type'         => 'string',
+				)
+			);
 		}
 	}
 
