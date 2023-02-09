@@ -95,7 +95,7 @@ class Options_Handler {
 	 * @since 0.1.0
 	 */
 	public function add_settings() {
-		add_option( 'share_on_mastodon_settings', $this->options );
+		add_option( 'share_on_mastodon_settings', self::DEFAULT_OPTIONS );
 
 		$active_tab = $this->get_active_tab();
 
