@@ -433,7 +433,7 @@ class Options_Handler {
 
 			if ( 'debug' === $active_tab ) :
 				?>
-				<p style="margin: 1em 0 0.5em;"><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
+				<p style="margin: 1.5em 0 0.5em;"><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
 				<p>
 					<?php
 					printf(
