@@ -363,22 +363,22 @@ class Options_Handler {
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Featured Images', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[featured_images]" value="1" <?php checked( ! isset( $this->options['featured_images'] ) || $this->options['featured_images'] ); ?> /> <?php esc_html_e( 'Include featured images', 'share-on-mastodon' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Upload syndicated posts&rsquo; featured images.', 'share-on-mastodon' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Upload featured images.', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Attached Images', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[attached_images]" value="1" <?php checked( ! isset( $this->options['attached_images'] ) || $this->options['attached_images'] ); ?> /> <?php esc_html_e( 'Include attached images', 'share-on-mastodon' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Upload syndicated posts&rsquo; attached images.', 'share-on-mastodon' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Upload attached images.', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'In-Post Images', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[referenced_images]" value="1" <?php checked( ! empty( $this->options['referenced_images'] ) ); ?> /> <?php esc_html_e( 'Include &ldquo;in-post&rdquo; images', 'share-on-mastodon' ); ?></label>
-							<p class="description"><?php esc_html_e( '(Experimental) Upload syndicated posts&rsquo; &ldquo;in-content&rdquo; images.', 'share-on-mastodon' ); ?></p></td>
+							<p class="description"><?php esc_html_e( '(Experimental) Upload &ldquo;in-content&rdquo; images.', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="share_on_mastodon_settings[max_images]"><?php esc_html_e( 'Max. No. of Images', 'share-on-mastodon' ); ?></label></th>
 							<td><input type="number" min="0" max="4" style="width: 6em;" id="share_on_mastodon_settings[max_images]" name="share_on_mastodon_settings[max_images]" value="<?php echo esc_attr( ! empty( $this->options['max_images'] ) ? $this->options['max_images'] : '4' ); ?>" />
-							<p class="description"><?php esc_html_e( 'The maximum number of images that will be uploaded. (Mastodon supports a up to 4 images.)', 'share-on-mastodon' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'The maximum number of images that will be uploaded. (Mastodon supports up to 4 images.)', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 					</table>
 					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
@@ -433,7 +433,7 @@ class Options_Handler {
 
 			if ( 'debug' === $active_tab ) :
 				?>
-				<p style="margin: 1em 0 0.5em;"><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
+				<p style="margin: 1.5em 0 0.5em;"><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
 				<p>
 					<?php
 					printf(
