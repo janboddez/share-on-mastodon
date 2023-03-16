@@ -31,8 +31,7 @@ class Micropub_Compat {
 	 * @since 0.8.0
 	 */
 	public static function syndicate_to( $syndicate_to ) {
-		$plugin  = Share_On_Mastodon::get_instance();
-		$options = $plugin->get_options_handler()->get_options();
+		$options = get_options();
 
 		if ( empty( $options['mastodon_host'] ) ) {
 			return $syndicate_to;
@@ -59,8 +58,7 @@ class Micropub_Compat {
 	 * @since 0.8.0
 	 */
 	public static function syndication( $post_id, $synd_requested ) {
-		$plugin  = Share_On_Mastodon::get_instance();
-		$options = $plugin->get_options_handler()->get_options();
+		$options = get_options();
 
 		if ( empty( $options['mastodon_host'] ) ) {
 			return;
@@ -78,8 +76,9 @@ class Micropub_Compat {
 
 			if ( 'publish' === $post->post_status ) {
 				// Trigger syndication.
-				$post_handler = $plugin->get_post_handler();
-				$post_handler->toot( 'publish', 'publish', $post );
+				Share_On_Mastodon::get_instance()
+					->get_post_handler()
+					->toot( 'publish', 'publish', $post );
 			}
 		}
 	}

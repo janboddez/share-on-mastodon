@@ -32,6 +32,7 @@ class Options_Handler {
 		'delay_sharing'          => 0,
 		'micropub_compat'        => false,
 		'syn_links_compat'       => false,
+		'debug_logging'          => false,
 	);
 
 	/**
@@ -205,6 +206,23 @@ class Options_Handler {
 				: 0,
 			'micropub_compat'  => isset( $settings['micropub_compat'] ) ? true : false,
 			'syn_links_compat' => isset( $settings['syn_links_compat'] ) ? true : false,
+		);
+
+		// Updated settings.
+		return array_merge( $this->options, $options );
+	}
+
+	/**
+	 * Handles submitted "debugging" options.
+	 *
+	 * @since 0.12.0
+	 *
+	 * @param  array $settings Settings as submitted through WP Admin.
+	 * @return array Options to be stored.
+	 */
+	public function sanitize_debug_settings( $settings ) {
+		$options = array(
+			'debug_logging' => isset( $settings['debug_logging'] ) ? true : false,
 		);
 
 		// Updated settings.
@@ -433,7 +451,22 @@ class Options_Handler {
 
 			if ( 'debug' === $active_tab ) :
 				?>
-				<p style="margin: 1.5em 0 0.5em;"><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
+				<form method="post" action="options.php">
+					<?php
+					// Print nonces and such.
+					settings_fields( 'share-on-mastodon-settings-group' );
+					?>
+					<table class="form-table">
+						<tr valign="top">
+							<th scope="row"><label for="share_on_mastodon_settings[debug_logging]"><?php esc_html_e( 'Logging', 'share-on-mastodon' ); ?></label></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[debug_logging]" value="1" <?php checked( ! empty( $this->options['debug_logging'] ) ); ?> /> <?php esc_html_e( 'Enable debug logging', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php _e( 'You&rsquo;ll <em>also</em> need to set WordPress&rsquo; <a href="https://wordpress.org/documentation/article/debugging-in-wordpress/#example-wp-config-php-for-debugging" target="_blank" rel="noopener noreferrer">debug logging constants</a>.', 'share-on-mastodon' ); // phpcs:ignore WordPress.Security.EscapeOutput.UnsafePrintingFunction ?></p></td>
+						</tr>
+					</table>
+					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+				</form>
+
+				<p><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
 				<p>
 					<?php
 					printf(
@@ -514,7 +547,7 @@ class Options_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return;
 		}
 
@@ -526,7 +559,7 @@ class Options_Handler {
 			$this->options['mastodon_client_secret'] = $app->client_secret;
 			update_option( 'share_on_mastodon_settings', $this->options );
 		} else {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 	}
 
@@ -558,7 +591,7 @@ class Options_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return false;
 		}
 
@@ -576,7 +609,7 @@ class Options_Handler {
 
 			return true;
 		} else {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 
 		return false;
@@ -624,7 +657,7 @@ class Options_Handler {
 		update_option( 'share_on_mastodon_settings', $this->options );
 
 		if ( is_wp_error( $response ) ) {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return false;
 		}
 
@@ -632,7 +665,7 @@ class Options_Handler {
 			// If we were actually successful.
 			return true;
 		} else {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 
 		// Something went wrong.
@@ -706,7 +739,7 @@ class Options_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return;
 		}
 
@@ -727,7 +760,7 @@ class Options_Handler {
 				update_option( 'share_on_mastodon_settings', $this->options );
 			}
 		} else {
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 	}
 

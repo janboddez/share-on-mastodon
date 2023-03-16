@@ -18,10 +18,8 @@ class Image_Handler {
 	 * @return array         Array of attachemnt IDs.
 	 */
 	public static function get_images( $post ) {
-		$media = array();
-
-		$plugin  = Share_On_Mastodon::get_instance();
-		$options = $plugin->get_options_handler()->get_options();
+		$media   = array();
+		$options = get_options();
 
 		$enable_featured_images = ! isset( $options['featured_images'] ) || $options['featured_images'];
 
@@ -137,21 +135,23 @@ class Image_Handler {
 		$body = '--' . $boundary . $eol;
 
 		if ( false !== $alt && '' !== $alt ) {
-			error_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
-			// $alt = sanitize_text_field( $alt ); // Some instance don't like our alt texts, thought maybe avoiding newline chars would help, but alas.
+			// @codingStandardsIgnoreStart
+			// $alt = sanitize_text_field( $alt ); // Some instances don't like our alt texts, thought maybe avoiding newline chars wo
 			// $alt = esc_attr( $alt ); // Leads to double-escaped entities.
 			// $alt = wp_strip_all_tags(); // We could probably leave this in, but entities seem to be escaped okay.
 			// $alt = str_replace( array( "\r", "\n", '"' ), array( '%0D', '%0A', '%22' ), $alt ); // Also doesn't work, as these aren't unencoded by Mastodon.
+			// @codingStandardsIgnoreEnd
 
 			// Send along an image description, because accessibility.
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
 			$body .= $alt . $eol;
 			$body .= '--' . $boundary . $eol;
 
-			error_log( "[Share on Mastodon] Here's the `alt` bit of what we're about to send the Mastodon API: `$body`" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( "[Share on Mastodon] Here's the `alt` bit of what we're about to send the Mastodon API: `$body`" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		} else {
-			error_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 
 		// The actual (binary) image data.
@@ -160,8 +160,7 @@ class Image_Handler {
 		$body .= file_get_contents( $file_path ) . $eol; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$body .= '--' . $boundary . '--'; // Note the extra two hyphens at the end.
 
-		$plugin  = Share_On_Mastodon::get_instance();
-		$options = $plugin->get_options_handler()->get_options();
+		$options = get_options();
 
 		$response = wp_remote_post(
 			esc_url_raw( $options['mastodon_host'] . '/api/v1/media' ),
@@ -178,7 +177,7 @@ class Image_Handler {
 
 		if ( is_wp_error( $response ) ) {
 			// An error occurred.
-			error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log,WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			  debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return;
 		}
 
@@ -190,6 +189,6 @@ class Image_Handler {
 
 		// Provided debugging's enabled, let's store the (somehow faulty)
 		// response.
-		error_log( print_r( $response, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+		  debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 	}
 }
