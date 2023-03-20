@@ -56,7 +56,7 @@ class Image_Handler {
 
 		$media = apply_filters( 'share_on_mastodon_media', array_unique( $media ), $post );
 
-		return array_values( $media ); // Always renumber keys.
+		return array_values( $media ); // Always reindex.
 	}
 
 	/**
