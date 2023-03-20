@@ -54,7 +54,9 @@ class Image_Handler {
 			}
 		}
 
-		return array_values( array_unique( $media ) );
+		$media = array_values( array_unique( $media ) );
+
+		return apply_filters( 'share_on_mastodon_media', $media, $post );
 	}
 
 	/**
@@ -177,7 +179,7 @@ class Image_Handler {
 
 		if ( is_wp_error( $response ) ) {
 			// An error occurred.
-			  debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return;
 		}
 
@@ -189,6 +191,6 @@ class Image_Handler {
 
 		// Provided debugging's enabled, let's store the (somehow faulty)
 		// response.
-		  debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 	}
 }
