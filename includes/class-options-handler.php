@@ -419,20 +419,21 @@ class Options_Handler {
 						</tr>
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Opt-In', 'share-on-mastodon' ); ?></th>
-							<td><label><input type="checkbox" name="share_on_mastodon_settings[optin]" value="1" <?php checked( ! empty( $this->options['optin'] ) ); ?> /> <?php esc_html_e( 'Make sharing opt-in rather than opt-out', 'share-on-mastodon' ); ?></label></td>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[optin]" value="1" <?php checked( ! empty( $this->options['optin'] ) ); ?> /> <?php esc_html_e( 'Make sharing opt-in rather than opt-out', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Have the &ldquo;Share on Mastodon&rdquo; checkbox unchecked by default.', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Share Always', 'share-on-mastodon' ); ?></th>
-							<td><label><input type="checkbox" name="share_on_mastodon_settings[share_always]" value="1" <?php checked( ! empty( $this->options['share_always'] ) ); ?> /> <?php esc_html_e( 'Always syndicate to Mastodon', 'share-on-mastodon' ); ?></label>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[share_always]" value="1" <?php checked( ! empty( $this->options['share_always'] ) ); ?> /> <?php esc_html_e( 'Always share on Mastodon', 'share-on-mastodon' ); ?></label>
 							<?php /* translators: %s: link to the `share_on_mastodon_enabled` documentation */ ?>
-							<p class="description"><?php printf( esc_html__( ' &ldquo;Force&rdquo; sharing, like when posting from a mobile app. For more fine-grained control, have a look at the %s filter hook.', 'share-on-mastodon' ), '<a target="_blank" href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_enabled"><code>share_on_mastodon_enabled</code></a>' ); ?></p></td>
+							<p class="description"><?php printf( esc_html__( '&ldquo;Force&rdquo; sharing, like when posting from a mobile app. For more fine-grained control, have a look at the %s filter hook.', 'share-on-mastodon' ), '<a target="_blank" href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_enabled"><code>share_on_mastodon_enabled</code></a>' ); ?></p></td>
 						</tr>
 
 						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
 							<tr valign="top">
 								<th scope="row"><?php esc_html_e( 'Micropub', 'share-on-mastodon' ); ?></th>
 								<td><label><input type="checkbox" name="share_on_mastodon_settings[micropub_compat]" value="1" <?php checked( ! empty( $this->options['micropub_compat'] ) ); ?> /> <?php esc_html_e( 'Add syndication target', 'share-on-mastodon' ); ?></label>
-								<p class="description"><?php esc_html_e( '(Experimental) Add &ldquo;Mastodon&rdquo; as a Micropub syndication target.', 'share-on-mastodon' ); ?></p></td>
+								<p class="description"><?php esc_html_e( 'Add &ldquo;Mastodon&rdquo; as a Micropub syndication target.', 'share-on-mastodon' ); ?></p></td>
 							</tr>
 						<?php endif; ?>
 
