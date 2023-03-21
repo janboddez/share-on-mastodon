@@ -103,7 +103,10 @@ class Image_Handler {
 	 * @return string|null   Unique media ID, or nothing on failure.
 	 */
 	public static function upload_image( $image_id ) {
-		$image   = wp_get_attachment_image_src( $image_id, 'large' );
+		if ( wp_attachment_is_image( $image_id ) ) {
+			$image = wp_get_attachment_image_src( $image_id, 'large' );
+		}
+
 		$uploads = wp_upload_dir();
 
 		if ( ! empty( $image[0] ) && 0 === strpos( $image[0], $uploads['baseurl'] ) ) {
