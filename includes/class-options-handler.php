@@ -548,7 +548,7 @@ class Options_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 			return;
 		}
 
@@ -560,7 +560,7 @@ class Options_Handler {
 			$this->options['mastodon_client_secret'] = $app->client_secret;
 			update_option( 'share_on_mastodon_settings', $this->options );
 		} else {
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 		}
 	}
 
@@ -592,7 +592,7 @@ class Options_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 			return false;
 		}
 
@@ -610,7 +610,7 @@ class Options_Handler {
 
 			return true;
 		} else {
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 		}
 
 		return false;
@@ -658,7 +658,7 @@ class Options_Handler {
 		update_option( 'share_on_mastodon_settings', $this->options );
 
 		if ( is_wp_error( $response ) ) {
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 			return false;
 		}
 
@@ -666,7 +666,7 @@ class Options_Handler {
 			// If we were actually successful.
 			return true;
 		} else {
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 		}
 
 		// Something went wrong.
@@ -740,7 +740,7 @@ class Options_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 			return;
 		}
 
@@ -761,7 +761,7 @@ class Options_Handler {
 				update_option( 'share_on_mastodon_settings', $this->options );
 			}
 		} else {
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 		}
 	}
 

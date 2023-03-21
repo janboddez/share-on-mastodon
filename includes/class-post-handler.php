@@ -264,7 +264,7 @@ class Post_Handler {
 
 		if ( is_wp_error( $response ) ) {
 			// An error occurred.
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 			return;
 		}
 
@@ -289,7 +289,7 @@ class Post_Handler {
 
 			// Provided debugging's enabled, let's store the (somehow faulty)
 			// response.
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 		}
 	}
 

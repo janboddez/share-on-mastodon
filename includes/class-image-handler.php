@@ -97,13 +97,14 @@ class Image_Handler {
 	}
 
 	/**
-	 * Uploads an image and returns a (single) media ID.
+	 * Uploads an attachment and returns a (single) media ID.
 	 *
-	 * @param  int $image_id Image ID.
+	 * @param  int $image_id Attachment ID.
 	 * @return string|null   Unique media ID, or nothing on failure.
 	 */
 	public static function upload_image( $image_id ) {
 		if ( wp_attachment_is_image( $image_id ) ) {
+			// Grab the image's "large" thumbnail.
 			$image = wp_get_attachment_image_src( $image_id, 'large' );
 		}
 
@@ -114,9 +115,8 @@ class Image_Handler {
 			// e.g., a CDN).
 			$url = $image[0];
 		} else {
-			// Get the original image URL. Note that Mastodon has an upload
-			// limit of, I believe, 8 MB. Either way, this should return a
-			// _local_ image.
+			// Get the original attachment URL. Note that Mastodon has an upload
+			// limit of 8 MB. Either way, this should return a _local_ URL.
 			$url = wp_get_attachment_url( $image_id );
 		}
 
@@ -140,7 +140,7 @@ class Image_Handler {
 		$body = '--' . $boundary . $eol;
 
 		if ( false !== $alt && '' !== $alt ) {
-			debug_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" );
 
 			// @codingStandardsIgnoreStart
 			// $alt = sanitize_text_field( $alt ); // Some instances don't like our alt texts, thought maybe avoiding newline chars wo
@@ -154,9 +154,9 @@ class Image_Handler {
 			$body .= $alt . $eol;
 			$body .= '--' . $boundary . $eol;
 
-			debug_log( "[Share on Mastodon] Here's the `alt` bit of what we're about to send the Mastodon API: `$body`" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( "[Share on Mastodon] Here's the `alt` bit of what we're about to send the Mastodon API: `$body`" );
 		} else {
-			debug_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" );
 		}
 
 		// The actual (binary) image data.
@@ -182,7 +182,7 @@ class Image_Handler {
 
 		if ( is_wp_error( $response ) ) {
 			// An error occurred.
-			debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			debug_log( $response );
 			return;
 		}
 
@@ -194,6 +194,6 @@ class Image_Handler {
 
 		// Provided debugging's enabled, let's store the (somehow faulty)
 		// response.
-		debug_log( $response ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		debug_log( $response );
 	}
 }
