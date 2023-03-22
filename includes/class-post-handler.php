@@ -301,15 +301,16 @@ class Post_Handler {
 	public function register_meta() {
 		$post_types = (array) $this->options['post_types'];
 
-		// Make `_share_on_mastodon_url` available in the REST API, too.
+		// Make (only) `_share_on_mastodon_url` available in the REST API, too.
 		foreach ( $post_types as $post_type ) {
 			register_post_meta(
 				$post_type,
 				'_share_on_mastodon_url',
 				array(
-					'single'       => true,
-					'show_in_rest' => true,
-					'type'         => 'string',
+					'single'        => true,
+					'show_in_rest'  => true,
+					'type'          => 'string',
+					'auth_callback' => '__return_true',
 				)
 			);
 		}
