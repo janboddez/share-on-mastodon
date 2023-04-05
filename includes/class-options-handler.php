@@ -33,7 +33,7 @@ class Options_Handler {
 		'micropub_compat'        => false,
 		'syn_links_compat'       => false,
 		'debug_logging'          => false,
-		'on_publish_only'        => false,
+		'on_publish_only'        => true,
 	);
 
 	/**
