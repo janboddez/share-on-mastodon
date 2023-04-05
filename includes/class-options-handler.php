@@ -33,6 +33,7 @@ class Options_Handler {
 		'micropub_compat'        => false,
 		'syn_links_compat'       => false,
 		'debug_logging'          => false,
+		'on_publish_only'        => false,
 	);
 
 	/**
@@ -163,6 +164,8 @@ class Options_Handler {
 			}
 		}
 
+		$this->options['on_publish_only'] = isset( $settings['on_publish_only'] ) ? true : false;
+
 		// Updated settings.
 		return $this->options;
 	}
@@ -277,6 +280,11 @@ class Options_Handler {
 								?>
 							</ul>
 							<p class="description"><?php esc_html_e( 'Post types for which sharing to Mastodon is possible. (Sharing can still be disabled on a per-post basis.)', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'On Publish Only', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[on_publish_only]" value="1" <?php checked( ! empty( $this->options['on_publish_only'] ) ); ?> /> <?php esc_html_e( 'Share on publish only', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php _e( 'Only share <em>newly published</em> posts.', 'share-on-mastodon' ); // phpcs:ignore WordPress.Security.EscapeOutput.UnsafePrintingFunction ?></p></td>
 						</tr>
 					</table>
 					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>

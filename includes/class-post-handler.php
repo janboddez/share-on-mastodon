@@ -121,8 +121,13 @@ class Post_Handler {
 			return;
 		}
 
-		if ( 'publish' !== $post->post_status ) {
+		if ( 'publish' !== $new_status ) {
 			// Status is something other than `publish`.
+			return;
+		}
+
+		if ( ! empty( $this->options['on_publish_only'] ) && 'publish' === $old_status ) {
+			// Not a newly published post.
 			return;
 		}
 
@@ -174,6 +179,10 @@ class Post_Handler {
 
 		// Let's rerun all of these checks, as something may have changed.
 		$is_enabled = ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ? true : false );
+
+		if ( ! empty( $this->options['share_always'] ) ) {
+			$is_enabled = true;
+		}
 
 		if ( ! apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID ) ) {
 			// Disabled for this post.

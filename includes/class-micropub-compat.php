@@ -74,12 +74,12 @@ class Micropub_Compat {
 
 			$post = get_post( $post_id );
 
-			if ( 'publish' === $post->post_status ) {
-				// Trigger syndication.
-				Share_On_Mastodon::get_instance()
-					->get_post_handler()
-					->toot( 'publish', 'publish', $post );
-			}
+			// Trigger syndication.
+			Share_On_Mastodon::get_instance()
+				->get_post_handler()
+				// "Draft," to bypass the "On Publish Only" setting. We have no
+				// way of finding out the old post status, after all.
+				->toot( $post->post_status, 'draft', $post ); // Note: If `$post->post_status === 'draft'`, nothing will happen!
 		}
 	}
 }
