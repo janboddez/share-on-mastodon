@@ -105,39 +105,7 @@ class Post_Handler {
 			return;
 		}
 
-		$is_enabled = ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ? true : false );
-
-		if ( ! empty( $this->options['share_always'] ) ) {
-			$is_enabled = true;
-		}
-
-		if ( ! apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID ) ) {
-			// Disabled for this post.
-			return;
-		}
-
-		if ( '' !== get_post_meta( $post->ID, '_share_on_mastodon_url', true ) ) {
-			// Prevent duplicate toots.
-			return;
-		}
-
-		if ( 'publish' !== $new_status ) {
-			// Status is something other than `publish`.
-			return;
-		}
-
-		if ( ! empty( $this->options['on_publish_only'] ) && 'publish' === $old_status ) {
-			// Not a newly published post.
-			return;
-		}
-
-		if ( post_password_required( $post ) ) {
-			// Post is password-protected.
-			return;
-		}
-
-		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
-			// Unsupported post type.
+		if ( ! $this->is_valid( $post ) ) {
 			return;
 		}
 
@@ -177,35 +145,7 @@ class Post_Handler {
 	public function post_to_mastodon( $post_id ) {
 		$post = get_post( $post_id );
 
-		// Let's rerun all of these checks, as something may have changed.
-		$is_enabled = ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ? true : false );
-
-		if ( ! empty( $this->options['share_always'] ) ) {
-			$is_enabled = true;
-		}
-
-		if ( ! apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID ) ) {
-			// Disabled for this post.
-			return;
-		}
-
-		if ( '' !== get_post_meta( $post->ID, '_share_on_mastodon_url', true ) ) {
-			// Prevent duplicate toots.
-			return;
-		}
-
-		if ( 'publish' !== $post->post_status ) {
-			// Status is something other than `publish`.
-			return;
-		}
-
-		if ( post_password_required( $post ) ) {
-			// Post is password-protected.
-			return;
-		}
-
-		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
-			// Unsupported post type.
+		if ( ! $this->is_valid( $post ) ) {
 			return;
 		}
 
@@ -468,5 +408,58 @@ class Post_Handler {
 				'post_id' => $post->ID, // Pass current post ID to JS.
 			)
 		);
+	}
+
+	/**
+	 * Determines if a post should, in fact, be shared.
+	 *
+	 * @param  WP_Post $post Post object.
+	 * @return bool          If the post should be shared.
+	 */
+	protected function is_valid( $post ) {
+		$is_enabled = false;
+
+		if ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ) {
+			// Sharing was enabled for this post.
+			$is_enabled = true;
+		}
+
+		if ( ! empty( $this->options['share_always'] ) ) {
+			// The "Share Always" option always overrides the meta field above.
+			$is_enabled = true;
+		}
+
+		// Let developers override `$is_enabled` through a callback function.
+		if ( ! apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID ) ) {
+			return false;
+		}
+
+		if ( '' !== get_post_meta( $post->ID, '_share_on_mastodon_url', true ) ) {
+			// Was shared before (and not "unlinked").
+			return false;
+		}
+
+		if ( 'publish' !== $post->post_status ) {
+			// Status is something other than `publish`.
+			return false;
+		}
+
+		if ( apply_filters( 'share_on_mastodon_new_posts_only', true ) && ! empty( $this->options['last_activated'] ) && get_post_time( 'U', true, $post->ID ) < $this->options['last_activated'] ) {
+			// Ignore posts created before "Share on Mastodon" was last activated.
+			return false;
+		}
+
+		if ( post_password_required( $post ) ) {
+			// Post is password-protected.
+			return false;
+		}
+
+		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
+			// Unsupported post type.
+			return false;
+		}
+
+		// Passed all checks.
+		return true;
 	}
 }
