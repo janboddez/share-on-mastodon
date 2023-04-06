@@ -10,7 +10,11 @@ WP_Mock::bootstrap();
  * Now we include any plugin files that we need to be able to run the tests. This
  * should be files that define the functions and classes you're going to test.
  */
+require_once __DIR__ . '/includes/class-image-handler.php';
+require_once __DIR__ . '/includes/class-micropub-compat.php';
 require_once __DIR__ . '/includes/class-notices.php';
 require_once __DIR__ . '/includes/class-options-handler.php';
 require_once __DIR__ . '/includes/class-post-handler.php';
 require_once __DIR__ . '/includes/class-share-on-mastodon.php';
+require_once __DIR__ . '/includes/class-syn-links-compat.php';
+require_once __DIR__ . '/includes/functions.php';

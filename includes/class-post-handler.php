@@ -299,11 +299,16 @@ class Post_Handler {
 	public function render_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' );
 
-		$enabled = ! empty( $this->options['optin'] );
 		$check   = array( '', '1' );
+		$enabled = ! empty( $this->options['optin'] );
 
 		if ( apply_filters( 'share_on_mastodon_optin', $enabled ) ) {
 			$check = array( '1' ); // Make sharing opt-in.
+		}
+
+		if ( is_older( $post ) ) {
+			// Post created before "Share on Mastodon" was first activated.
+			$check = array( '1' ); // For "older" posts, always make sharing opt-in.
 		}
 		?>
 		<label>
@@ -424,8 +429,10 @@ class Post_Handler {
 			$is_enabled = true;
 		}
 
-		if ( ! empty( $this->options['share_always'] ) ) {
-			// The "Share Always" option always overrides the meta field above.
+		if ( ! empty( $this->options['share_always'] ) && ! is_older( $post ) ) {
+			// The "Share Always" option always overrides the meta field above,
+			// but _not_ for posts created before Share on Mastodon was first
+			// installed. Yes, it's complicated.
 			$is_enabled = true;
 		}
 
@@ -441,11 +448,6 @@ class Post_Handler {
 
 		if ( 'publish' !== $post->post_status ) {
 			// Status is something other than `publish`.
-			return false;
-		}
-
-		if ( apply_filters( 'share_on_mastodon_new_posts_only', true ) && ! empty( $this->options['last_activated'] ) && get_post_time( 'U', true, $post->ID ) < $this->options['last_activated'] ) {
-			// Ignore posts created before "Share on Mastodon" was last activated.
 			return false;
 		}
 

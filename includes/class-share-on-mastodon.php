@@ -74,14 +74,13 @@ class Share_On_Mastodon {
 	 * @since 0.5.0
 	 */
 	public function register() {
-		register_activation_hook( dirname( dirname( __FILE__ ) ) . '/share-on-mastodon.php', array( $this, 'activate' ) );
 		register_deactivation_hook( dirname( dirname( __FILE__ ) ) . '/share-on-mastodon.php', array( $this, 'deactivate' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		add_action( 'init', array( $this, 'register_cron' ) );
 		add_action( 'share_on_mastodon_verify_token', array( $this->options_handler, 'cron_verify_token' ) );
 
-		$options = $this->options_handler->get_options();
+		$options = get_options();
 
 		if ( ! empty( $options['micropub_compat'] ) ) {
 			Micropub_Compat::register();
@@ -92,17 +91,9 @@ class Share_On_Mastodon {
 		}
 	}
 
-	/**
-	 * Runs on activation.
-	 *
-	 * @since 0.4.0
-	 */
-	public function activate() {
-		$this->options_handler->update_last_activated();
-	}
 
 	/**
-	 * Runs on activation.
+	 * Ensures cron job is scheduled.
 	 *
 	 * @since 0.13.0
 	 */

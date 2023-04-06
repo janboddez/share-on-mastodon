@@ -33,7 +33,7 @@ class Options_Handler {
 		'micropub_compat'        => false,
 		'syn_links_compat'       => false,
 		'debug_logging'          => false,
-		'last_activated'         => 0,
+		'first_activated'        => 0,
 	);
 
 	/**
@@ -63,8 +63,9 @@ class Options_Handler {
 	public function __construct() {
 		$this->options = get_option( 'share_on_mastodon_settings', self::DEFAULT_OPTIONS );
 
-		if ( empty( $this->options['last_activated'] ) ) {
-			$this->update_last_activated();
+		if ( ! empty( $this->options['first_activated'] ) ) {
+			$this->options['first_activated'] = time();
+			update_option( 'share_on_mastodon_settings', $this->options );
 		}
 	}
 
@@ -869,13 +870,5 @@ class Options_Handler {
 		}
 
 		return 'setup';
-	}
-
-	/**
-	 * Updates the `last_activated` option.
-	 */
-	public function update_last_activated() {
-		$this->options['last_activated'] = time();
-		update_option( 'share_on_mastodon_settings', $this->options );
 	}
 }
