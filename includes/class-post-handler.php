@@ -306,8 +306,7 @@ class Post_Handler {
 			$check = array( '1' ); // Make sharing opt-in.
 		}
 
-		if ( is_older( $post ) ) {
-			// Post created before "Share on Mastodon" was first activated.
+		if ( is_older_than( 900, $post ) ) {
 			$check = array( '1' ); // For "older" posts, always make sharing opt-in.
 		}
 		?>
@@ -429,10 +428,9 @@ class Post_Handler {
 			$is_enabled = true;
 		}
 
-		if ( ! empty( $this->options['share_always'] ) && ! is_older( $post ) ) {
+		if ( ! empty( $this->options['share_always'] ) && ! is_older_than( DAY_IN_SECONDS, $post ) ) {
 			// The "Share Always" option always overrides the meta field above,
-			// but _not_ for posts created before Share on Mastodon was first
-			// installed. Yes, it's complicated.
+			// but _not_ for "old" posts. Yes, it's complicated.
 			$is_enabled = true;
 		}
 

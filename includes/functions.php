@@ -25,20 +25,14 @@ function debug_log( $item ) {
 /**
  * Determines whether a post was created before the plugin was first activated.
  *
- * @param  WP_Post $post Post object.
- * @return bool          Whether the post was created before the plugin was first activated.
+ * @param  int     $seconds Minimum age.
+ * @param  WP_Post $post    Post object.
+ * @return bool             True if the post is older than `$seconds`, false otherwise.
  */
-function is_older( $post ) {
-	$options = get_options();
-
-	if ( empty( $options['first_activated'] ) ) {
-		// Not much we can do.
-		return false;
-	}
-
+function is_older_than( $seconds, $post ) {
 	$post_time = get_post_time( 'U', true, $post );
 
-	if ( false !== $post_time && $post_time < $options['first_activated'] ) {
+	if ( false !== $post_time && $post_time < time() - $seconds ) {
 		return true;
 	}
 
