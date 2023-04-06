@@ -36,7 +36,9 @@ function is_older( $post ) {
 		return false;
 	}
 
-	if ( get_post_time( 'U', true, $post->ID ) < $options['first_activated'] ) {
+	$post_time = get_post_time( 'U', true, $post );
+
+	if ( false !== $post_time && $post_time < $options['first_activated'] ) {
 		return true;
 	}
 
