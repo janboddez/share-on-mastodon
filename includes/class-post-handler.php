@@ -125,7 +125,7 @@ class Post_Handler {
 			// Since version 0.7.0, there's an option to "schedule" sharing
 			// rather than do everything inline.
 			wp_schedule_single_event(
-				time() + $this->options['delay_sharing'],
+				time() + min( $this->options['delay_sharing'], 3600 ), // Limit to one hour.
 				'share_on_mastodon_post',
 				array( $post->ID )
 			);
