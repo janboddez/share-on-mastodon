@@ -29,7 +29,7 @@ More detailed instructions can be found on [this plugin's GitHub page](https://g
 
 == Changelog ==
 = 0.13.0 =
-Add option to share only newly published posts.
+Disable the sharing of posts created before plugin activation.
 
 = 0.12.2 =
 Custom field fix.
