@@ -429,7 +429,7 @@ class Options_Handler {
 							<th scope="row"><?php esc_html_e( 'Share Always', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[share_always]" value="1" <?php checked( ! empty( $this->options['share_always'] ) ); ?> /> <?php esc_html_e( 'Always share on Mastodon', 'share-on-mastodon' ); ?></label>
 							<?php /* translators: %s: link to the `share_on_mastodon_enabled` documentation */ ?>
-							<p class="description"><?php printf( esc_html__( '&ldquo;Force&rdquo; sharing, completely disregarding the &ldquo;Share on Mastodon&rdquo; checkbox. May come in handy when posting from a mobile app. For more fine-grained control, have a look at the %s filter hook.', 'share-on-mastodon' ), '<a target="_blank" href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_enabled"><code>share_on_mastodon_enabled</code></a>' ); ?></p></td>
+							<p class="description"><?php esc_html_e( '&ldquo;Force&rdquo; sharing (regardless of the &ldquo;Share on Mastodon&rdquo; checkbox&rsquo;s state), like when posting from a mobile app.', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 
 						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>

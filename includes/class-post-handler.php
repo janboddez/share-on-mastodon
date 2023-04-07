@@ -36,7 +36,7 @@ class Post_Handler {
 	 */
 	public function register() {
 		add_action( 'transition_post_status', array( $this, 'update_meta' ), 11, 3 );
-		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
+		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 ); // Hi prio so it runs later, except since Gutenberg there's this thing where `update_meta` won't actually run till after ...
 		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ) );
 
 		add_action( 'rest_api_init', array( $this, 'register_meta' ) );
@@ -67,7 +67,9 @@ class Post_Handler {
 		}
 
 		if ( ! isset( $_POST['share_on_mastodon_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['share_on_mastodon_nonce'] ), basename( __FILE__ ) ) ) {
-			// Nonce missing or invalid.
+			// Nonce missing or invalid. On sites that use the block editor,
+			// this will also cause the rest of this function to _not_ run the
+			// first time this hook is called.
 			return;
 		}
 
@@ -369,9 +371,11 @@ class Post_Handler {
 		}
 
 		// Have WordPress forget the Mastodon URL.
-		if ( '' !== get_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url', true ) ) {
-			delete_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url' );
-		}
+		delete_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url' );
+		// Delete the meta box value, too, to prevent accidental re-sharing
+		// through Gutenberg and its odd meta box behavior. We should eventually
+		// move to Gutenberg-specific panels and such.
+		delete_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon' );
 
 		wp_die();
 	}
@@ -421,29 +425,6 @@ class Post_Handler {
 	 * @return bool          If the post should be shared.
 	 */
 	protected function is_valid( $post ) {
-		$is_enabled = false;
-
-		if ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ) {
-			// Sharing was enabled for this post.
-			$is_enabled = true;
-		}
-
-		if ( ! empty( $this->options['share_always'] ) && ! is_older_than( DAY_IN_SECONDS, $post ) ) {
-			// The "Share Always" option always overrides the meta field above,
-			// but _not_ for "old" posts. Yes, it's complicated.
-			$is_enabled = true;
-		}
-
-		// Let developers override `$is_enabled` through a callback function.
-		if ( ! apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID ) ) {
-			return false;
-		}
-
-		if ( '' !== get_post_meta( $post->ID, '_share_on_mastodon_url', true ) ) {
-			// Was shared before (and not "unlinked").
-			return false;
-		}
-
 		if ( 'publish' !== $post->post_status ) {
 			// Status is something other than `publish`.
 			return false;
@@ -456,6 +437,50 @@ class Post_Handler {
 
 		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
 			// Unsupported post type.
+			return false;
+		}
+
+		if ( '' !== get_post_meta( $post->ID, '_share_on_mastodon_url', true ) ) {
+			// Was shared before (and not "unlinked").
+			return false;
+		}
+
+		// A post should only be shared when either the "Share on Mastodon"
+		// checkbox was checked (and its value saved), or when "Share Always" is
+		// active (and the post isn't "too old," to avoid mishaps).
+		$share_always = false;
+		$is_enabled   = false;
+
+		if ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ) {
+			// Sharing was "explicitly" enabled for this post.
+			$is_enabled = true;
+		}
+
+		if ( ! empty( $this->options['share_always'] ) ) {
+			$share_always = true;
+		}
+
+		// We would let developers override `$is_enabled` through a callback
+		// function. In practice, this is almost always used to force sharing.
+		if (
+			apply_filters_deprecated(
+				'share_on_mastodon_enabled',
+				array( $is_enabled, $post->ID ),
+				'0.13.0',
+				'', // We don't actually recommend the new hook!
+				__( 'The `share_on_mastodon_enabled` hook is deprecated. Please use the &ldquo;Share Always&rdquo; setting instead. If you absolutely must use a filter, try `share_on_mastodon_force_share`.', 'share-on-mastodon' )
+			)
+		) {
+			$share_always = true;
+		}
+
+		if ( is_older_than( DAY_IN_SECONDS, $post ) ) {
+			// Since v0.13.0, we disallow most automatic sharing of "older" posts.
+			$share_always = false;
+		}
+
+		// Yet, v0.13.0 introduced a _new_ yet undocumented hook to allow devs to (mostly) restore the old behavior.
+		if ( ! apply_filters( 'share_on_mastodon_force_share', $is_enabled || $share_always, $post->ID ) ) {
 			return false;
 		}
 
