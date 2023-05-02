@@ -2,7 +2,7 @@
 Contributors: janboddez
 Tags: mastodon, share, publicize, crosspost, fediverse, syndication
 Tested up to: 6.2
-Stable tag: 0.13.0
+Stable tag: 0.13.1
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -28,6 +28,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.13.1 =
+Improve Syndication Links compatibility.
+
 = 0.13.0 =
 Disable the sharing of posts created before plugin activation.
 

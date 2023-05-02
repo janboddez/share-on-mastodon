@@ -25,18 +25,22 @@ function debug_log( $item ) {
 /**
  * Determines whether a post was created before the plugin was first activated.
  *
- * @param  int     $seconds Minimum age.
+ * @param  int     $seconds Minimum "age," in secondss.
  * @param  WP_Post $post    Post object.
- * @return bool             True if the post is older than `$seconds`, false otherwise.
+ * @return bool             True if the post exists and is older than `$seconds`, false otherwise.
  */
 function is_older_than( $seconds, $post ) {
 	$post_time = get_post_time( 'U', true, $post );
 
-	if ( false !== $post_time && $post_time < time() - $seconds ) {
-		return true;
+	if ( false === $post_time ) {
+		return false;
 	}
 
-	return false;
+	if ( $post_time >= time() - $seconds ) {
+		return false;
+	}
+
+	return true;
 }
 
 /**

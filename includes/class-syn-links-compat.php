@@ -17,7 +17,12 @@ class Syn_Links_Compat {
 	 * @since 0.11.0
 	 */
 	public static function register() {
-		add_filter( 'syn_add_links', array( __CLASS__, 'syndication_links' ), 10, 2 );
+		$options    = get_options();
+		$post_types = (array) $options['post_types']; // Should make this more robust.
+
+		foreach ( $post_types as $post_type ) {
+			add_filter( "get_{$post_type}_syndication_links", array( __CLASS__, 'syndication_links' ), 10, 2 );
+		}
 	}
 
 	/**
