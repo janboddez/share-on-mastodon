@@ -14,7 +14,8 @@ jQuery( document ).ready( function ( $ ) {
 		};
 
 		$.post( ajaxurl, data, function( response ) {
-			// On success, remove extra paragraph.
+			// On success, untick the checkbox, and remove the link (and the `button` with it).
+			$( 'input[name="share_on_mastodon"]' ).prop( 'checked', false );
 			button.closest( '.description' ).remove();
 		} );
 	} );

@@ -78,6 +78,16 @@ class Post_Handler {
 			return;
 		}
 
+		if ( isset( $_POST['share_on_mastodon_status'] ) ) {
+			$status = sanitize_textarea_field( wp_unslash( $_POST['share_on_mastodon_status'] ) );
+		}
+
+		if ( ! empty( $status ) ) {
+			update_post_meta( $post->ID, '_share_on_mastodon_status', $status );
+		} else {
+			delete_post_meta( $post->ID, '_share_on_mastodon_status' );
+		}
+
 		if ( isset( $_POST['share_on_mastodon'] ) && ! post_password_required( $post ) ) {
 			// If sharing enabled and post not password-protected.
 			update_post_meta( $post->ID, '_share_on_mastodon', '1' );
@@ -90,10 +100,9 @@ class Post_Handler {
 	/**
 	 * Schedules sharing to Mastodon.
 	 *
-	 * On Gutenberg installs, this function will typically run twice if a save
-	 * is triggered from WP Admin. (The one above will not, because it checks
-	 * for the existence of a `$_POST` variable.) This should not be an issue,
-	 * however.
+	 * On Gutenberg installs, this function will, despite its crazy high prio
+	 * number, run **before** the one above. (Because the one above checks for
+	 * the existence of a `$_POST` variable and Gutenberg is weird like that.)
 	 *
 	 * @since 0.1.0
 	 *
@@ -132,7 +141,9 @@ class Post_Handler {
 				array( $post->ID )
 			);
 		} else {
-			// Share immediately.
+			// Share immediately. This'll cause below function to run before the
+			// metadata is saved, at least on Gutenberg. But, it will run once
+			// more after. Still, this bit is super tricky.
 			$this->post_to_mastodon( $post->ID );
 		}
 	}
@@ -163,14 +174,22 @@ class Post_Handler {
 			return;
 		}
 
+		$status = sanitize_textarea_field( get_post_meta( $post->ID, '_share_on_mastodon_status', true ) );
+
+		if ( empty( $status ) ) {
+			$status = get_the_title( $post->ID );
+		}
+
 		$status  = wp_strip_all_tags(
-			html_entity_decode( get_the_title( $post->ID ), ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ) // Avoid double-encoded HTML entities.
+			html_entity_decode( $status, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ) // Avoid double-encoded HTML entities.
 		);
 		$status .= ' ' . esc_url_raw( get_permalink( $post->ID ) );
 
+		// Allow developers to (completely) override `$status`.
 		$status = apply_filters( 'share_on_mastodon_status', $status, $post );
 		$args   = apply_filters( 'share_on_mastodon_toot_args', array( 'status' => $status ), $post );
 
+		// We should probably deprecate the filter below. Next time.
 		if ( apply_filters( 'share_on_mastodon_cutoff', false ) ) {
 			// May render hashtags or URLs, or unfiltered HTML, at the very end
 			// of a toot unusable. Also, Mastodon may not even use a multibyte
@@ -342,6 +361,16 @@ class Post_Handler {
 				<?php
 			endif;
 		endif;
+
+		if ( ! empty( $this->options['custom_status_field'] ) ) :
+			?>
+			<div style="margin-top: 1em;">
+				<label for="share_on_mastodon_status"><?php esc_html_e( '(Optional) Message', 'share-on-mastodon' ); ?></label>
+				<textarea id="share_on_mastodon_status" name="share_on_mastodon_status" rows="3" style="width: 100%; box-sizing: border-box; margin-top: 0.5em;"><?php echo esc_html( get_post_meta( $post->ID, '_share_on_mastodon_status', true ) ); ?></textarea>
+				<p class="description" style="margin-top: 0.25em;"><?php esc_html_e( 'Customize this post&rsquo;s Mastodon status. (A permalink will be appended automatically.)', 'share-on-mastodon' ); ?></p>
+			</div>
+			<?php
+		endif;
 	}
 
 	/**
@@ -372,6 +401,7 @@ class Post_Handler {
 
 		// Have WordPress forget the Mastodon URL.
 		delete_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url' );
+
 		// Delete the meta box value, too, to prevent accidental re-sharing
 		// through Gutenberg and its odd meta box behavior. We should eventually
 		// move to Gutenberg-specific panels and such.

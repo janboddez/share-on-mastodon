@@ -33,6 +33,7 @@ class Options_Handler {
 		'micropub_compat'        => false,
 		'syn_links_compat'       => false,
 		'debug_logging'          => false,
+		'custom_status_field'    => false,
 	);
 
 	/**
@@ -204,11 +205,12 @@ class Options_Handler {
 		$delay = min( $delay, HOUR_IN_SECONDS ); // Limit to one hour.
 
 		$options = array(
-			'optin'            => isset( $settings['optin'] ) ? true : false,
-			'share_always'     => isset( $settings['share_always'] ) ? true : false,
-			'delay_sharing'    => $delay,
-			'micropub_compat'  => isset( $settings['micropub_compat'] ) ? true : false,
-			'syn_links_compat' => isset( $settings['syn_links_compat'] ) ? true : false,
+			'optin'               => isset( $settings['optin'] ) ? true : false,
+			'share_always'        => isset( $settings['share_always'] ) ? true : false,
+			'delay_sharing'       => $delay,
+			'micropub_compat'     => isset( $settings['micropub_compat'] ) ? true : false,
+			'syn_links_compat'    => isset( $settings['syn_links_compat'] ) ? true : false,
+			'custom_status_field' => isset( $settings['custom_status_field'] ) ? true : false,
 		);
 
 		// Updated settings.
@@ -428,8 +430,13 @@ class Options_Handler {
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Share Always', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[share_always]" value="1" <?php checked( ! empty( $this->options['share_always'] ) ); ?> /> <?php esc_html_e( 'Always share on Mastodon', 'share-on-mastodon' ); ?></label>
-							<?php /* translators: %s: link to the `share_on_mastodon_enabled` documentation */ ?>
 							<p class="description"><?php esc_html_e( '&ldquo;Force&rdquo; sharing (regardless of the &ldquo;Share on Mastodon&rdquo; checkbox&rsquo;s state), like when posting from a mobile app.', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Customize Status', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[custom_status_field]" value="1" <?php checked( ! empty( $this->options['custom_status_field'] ) ); ?> /> <?php esc_html_e( 'Allow customizing Mastodon statuses', 'share-on-mastodon' ); ?></label>
+								<?php /* translators: %s: link to the `share_on_mastodon_status` documentation */ ?>
+							<p class="description"><?php printf( __( '(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s meta box. May cause problems in combination with the block editor and &ldquo;Share Always.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)', 'share-on-mastodon' ), '<a href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_status" target="_blank"><code>share_on_mastodon_status</code></a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p></td>
 						</tr>
 
 						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
