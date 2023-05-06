@@ -2,11 +2,22 @@
 	margin: 1em 0 1px;
 }
 
-#share-on-mastodon .url .ellipsis::after,
-.share-on-mastodon-url .ellipsis::after {
-	content: "…";
+#share-on-mastodon .url .ellipsis,
+.share-on-mastodon-url .ellipsis {
+	word-break: break-word;
 }
 
-#share-on-mastodon .unlink {
+#share-on-mastodon .url .ellipsis::after,
+.share-on-mastodon-url .ellipsis::after {
+	word-break: break-word;
+	content: "\2026";
+	margin-inline-end: 0.3em;
+}
+
+#share-on-mastodon .unlink,
+.share-on-mastodon-unlink,
+.share-on-mastodon-unlink:active,
+.share-on-mastodon-unlink:hover,
+.share-on-mastodon-unlink:focus {
 	color: #a00;
 }

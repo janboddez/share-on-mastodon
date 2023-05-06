@@ -65,6 +65,11 @@ class Post_Handler {
 			return;
 		}
 
+		if ( use_block_editor_for_post( $post ) ) {
+			// We have the block editor deal with updating post meta.
+			return;
+		}
+
 		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 			return;
 		}
@@ -317,6 +322,23 @@ class Post_Handler {
 		foreach ( $post_types as $post_type ) {
 			register_post_meta(
 				$post_type,
+				'_share_on_mastodon',
+				array(
+					'single'            => true,
+					'show_in_rest'      => true,
+					'type'              => 'string',
+					'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1',
+					'auth_callback'     => function() {
+						return current_user_can( 'edit_posts' );
+					},
+					'sanitize_callback' => function( $meta_value ) {
+						return '1' === $meta_value ? '1' : '0';
+					},
+				)
+			);
+
+			register_post_meta(
+				$post_type,
 				'_share_on_mastodon_url',
 				array(
 					'single'            => true,
@@ -363,6 +385,11 @@ class Post_Handler {
 	public function add_meta_box() {
 		if ( empty( $this->options['post_types'] ) ) {
 			// Sharing disabled for all post types.
+			return;
+		}
+
+		$current_screen = get_current_screen();
+		if ( isset( $current_screen->post_type ) && use_block_editor_for_post_type( $current_screen->post_type ) ) {
 			return;
 		}
 

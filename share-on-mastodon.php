@@ -22,6 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require __DIR__ . '/includes/class-blocks.php';
 require __DIR__ . '/includes/class-image-handler.php';
 require __DIR__ . '/includes/class-micropub-compat.php';
 require __DIR__ . '/includes/class-notices.php';
@@ -31,4 +32,5 @@ require __DIR__ . '/includes/class-share-on-mastodon.php';
 require __DIR__ . '/includes/class-syn-links-compat.php';
 require __DIR__ . '/includes/functions.php';
 
-Share_On_Mastodon::get_instance()->register();
+Share_On_Mastodon::get_instance()
+	->register();
