@@ -66,6 +66,8 @@ class Share_On_Mastodon {
 
 		$this->post_handler = new Post_Handler();
 		$this->post_handler->register();
+
+		Blocks::register();
 	}
 
 	/**

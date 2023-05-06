@@ -40,6 +40,7 @@ class Post_Handler {
 		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ) );
 
 		add_action( 'rest_api_init', array( $this, 'register_meta' ) );
+
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
@@ -59,6 +60,10 @@ class Post_Handler {
 	public function update_meta( $new_status, $old_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
 			// Prevent double posting.
+			return;
+		}
+
+		if ( use_block_editor_for_post( $post ) ) {
 			return;
 		}
 
@@ -194,7 +199,7 @@ class Post_Handler {
 			// May render hashtags or URLs, or unfiltered HTML, at the very end
 			// of a toot unusable. Also, Mastodon may not even use a multibyte
 			// check. To do: test better?
-			$args['status'] = mb_substr( $args['status'], 0, 499, get_bloginfo( 'charset' ) ) . '…';
+			$args['status'] = mb_substr( $args['status'], 0, 499, get_bloginfo( 'charset' ) ) . '&#1074;&#1026;�';
 		}
 
 		// Encode, build query string.
@@ -271,16 +276,40 @@ class Post_Handler {
 	public function register_meta() {
 		$post_types = (array) $this->options['post_types'];
 
-		// Make (only) `_share_on_mastodon_url` available in the REST API, too.
+		// Make Share on Mastodon's custom fields available in the REST API.
 		foreach ( $post_types as $post_type ) {
+			register_post_meta(
+				$post_type,
+				'_share_on_mastodon',
+				array(
+					'single'            => true,
+					'show_in_rest'      => true,
+					'type'              => 'string',
+					'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1',
+					'auth_callback'     => function() {
+						return current_user_can( 'edit_posts' );
+					},
+					'sanitize_callback' => function( $meta_value ) {
+						return '1' === $meta_value ? '1' : '0';
+					},
+				)
+			);
+
 			register_post_meta(
 				$post_type,
 				'_share_on_mastodon_url',
 				array(
-					'single'        => true,
-					'show_in_rest'  => true,
-					'type'          => 'string',
-					'auth_callback' => '__return_true',
+					'single'            => true,
+					'show_in_rest'      => true,
+					'type'              => 'string',
+					'auth_callback'     => function() {
+						return current_user_can( 'edit_posts' );
+					},
+					'sanitize_callback' => function( $meta_value ) {
+						return wp_http_validate_url( $meta_value )
+							? esc_url_raw( wp_http_validate_url( $meta_value ) )
+							: null;
+					},
 				)
 			);
 		}
@@ -298,6 +327,17 @@ class Post_Handler {
 		}
 
 		$post_types = (array) $this->options['post_types'];
+
+		foreach ( $post_types as $key => $post_type ) {
+			if ( use_block_editor_for_post_type( $post_type ) ) {
+				unset( $post_types[ $key ] );
+			}
+		}
+
+		if ( empty( $post_types ) ) {
+			// When all enabled post types apparently use the block editor.
+			return;
+		}
 
 		// Add meta box, for those post types that are supported.
 		add_meta_box(
@@ -319,20 +359,14 @@ class Post_Handler {
 	 */
 	public function render_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' );
+		$enabled = get_post_meta( $post->ID, '_share_on_mastodon', true );
 
-		$check   = array( '', '1' );
-		$enabled = ! empty( $this->options['optin'] );
-
-		if ( apply_filters( 'share_on_mastodon_optin', $enabled ) ) {
-			$check = array( '1' ); // Make sharing opt-in.
-		}
-
-		if ( is_older_than( 900, $post ) ) {
-			$check = array( '1' ); // For "older" posts, always make sharing opt-in.
+		if ( '' === $enabled ) {
+			$enabled = apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1';
 		}
 		?>
 		<label>
-			<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( in_array( get_post_meta( $post->ID, '_share_on_mastodon', true ), $check, true ) ); ?>>
+			<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( '1' === $enabled ); ?>>
 			<?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?>
 		</label>
 		<?php
