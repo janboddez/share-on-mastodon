@@ -436,7 +436,7 @@ class Options_Handler {
 							<th scope="row"><?php esc_html_e( 'Customize Status', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[custom_status_field]" value="1" <?php checked( ! empty( $this->options['custom_status_field'] ) ); ?> /> <?php esc_html_e( 'Allow customizing Mastodon statuses', 'share-on-mastodon' ); ?></label>
 								<?php /* translators: %s: link to the `share_on_mastodon_status` documentation */ ?>
-							<p class="description"><?php printf( __( '(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s meta box. May cause problems in combination with the block editor and &ldquo;Share Always.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)', 'share-on-mastodon' ), '<a href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_status" target="_blank"><code>share_on_mastodon_status</code></a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p></td>
+							<p class="description"><?php printf( __( '(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s meta box. May not always work in combination with the block editor and &ldquo;Share Always.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)', 'share-on-mastodon' ), '<a href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_status" target="_blank" rel="noopener noreferrer"><code>share_on_mastodon_status</code></a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p></td>
 						</tr>
 
 						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
