@@ -7,11 +7,14 @@
 	word-break: break-word;
 }
 
+.share-on-mastodon-url {
+	margin-inline-end: 0.33em;
+}
+
 #share-on-mastodon .url .ellipsis::after,
 .share-on-mastodon-url .ellipsis::after {
 	word-break: break-word;
 	content: "\2026";
-	margin-inline-end: 0.3em;
 }
 
 #share-on-mastodon .unlink,
