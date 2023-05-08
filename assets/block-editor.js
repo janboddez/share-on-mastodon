@@ -54,8 +54,8 @@
 
 	registerPlugin( 'share-on-mastodon-panel', {
 		render: function( props ) {
-			var postId   = useSelect( ( select ) => select('core/editor').getCurrentPostId(), [] );
-			var postType = useSelect( ( select ) => select('core/editor').getCurrentPostType(), [] );
+			var postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId(), [] );
+			var postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
 
 			var [ meta, setMeta ]       = useEntityProp( 'postType', postType, 'meta' );
 			var [ visible, setVisible ] = useState( !! meta._share_on_mastodon_url ); // Using `useState()` to trigger a re-render on change.
@@ -79,6 +79,9 @@
 						setMeta( { ...meta, _share_on_mastodon_status: ( newValue ? newValue : null ) } );
 					},
 				} ),
+				el ('p', { className: 'description' },
+					__( 'Customize this post’s Mastodon status.', 'share-on-mastodon' ),
+				),
 				visible
 					? el( 'div', {},
 						// @todo: "Shorten" the URL.
