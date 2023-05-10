@@ -40,6 +40,7 @@ class Post_Handler {
 		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ) );
 
 		add_action( 'rest_api_init', array( $this, 'register_meta' ) );
+
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
@@ -59,6 +60,10 @@ class Post_Handler {
 	public function update_meta( $new_status, $old_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
 			// Prevent double posting.
+			return;
+		}
+
+		if ( use_block_editor_for_post( $post ) ) {
 			return;
 		}
 
@@ -174,16 +179,29 @@ class Post_Handler {
 			return;
 		}
 
-		$status = sanitize_textarea_field( get_post_meta( $post->ID, '_share_on_mastodon_status', true ) );
+		$status = get_post_meta( $post->ID, '_share_on_mastodon_status', true );
+		$status = $this->parse_status( $status, $post->ID );
 
 		if ( empty( $status ) ) {
+			// Fall back to default format.
 			$status = get_the_title( $post->ID );
 		}
 
-		$status  = wp_strip_all_tags(
+		$status = wp_strip_all_tags(
 			html_entity_decode( $status, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ) // Avoid double-encoded HTML entities.
 		);
-		$status .= ' ' . esc_url_raw( get_permalink( $post->ID ) );
+
+		// Append permalink, but only if it's not already mentioned.
+		$permalink = esc_url_raw( get_permalink( $post->ID ) );
+
+		if ( false === strpos( $status, $permalink ) ) {
+			// Post doesn't mention permalink, yet. Append it.
+			if ( false === strpos( $status, "\n" ) ) {
+				$status .= ' ' . $permalink; // Keep it single-line.
+			} else {
+				$status .= "\n\n" . $permalink;
+			}
+		}
 
 		// Allow developers to (completely) override `$status`.
 		$status = apply_filters( 'share_on_mastodon_status', $status, $post );
@@ -271,16 +289,23 @@ class Post_Handler {
 	public function register_meta() {
 		$post_types = (array) $this->options['post_types'];
 
-		// Make (only) `_share_on_mastodon_url` available in the REST API, too.
+		// Make Share on Mastodon's custom fields available in the REST API.
 		foreach ( $post_types as $post_type ) {
 			register_post_meta(
 				$post_type,
 				'_share_on_mastodon_url',
 				array(
-					'single'        => true,
-					'show_in_rest'  => true,
-					'type'          => 'string',
-					'auth_callback' => '__return_true',
+					'single'            => true,
+					'show_in_rest'      => true,
+					'type'              => 'string',
+					'auth_callback'     => function() {
+						return current_user_can( 'edit_posts' );
+					},
+					'sanitize_callback' => function( $meta_value ) {
+						return wp_http_validate_url( $meta_value )
+							? esc_url_raw( $meta_value )
+							: null;
+					},
 				)
 			);
 		}
@@ -319,20 +344,14 @@ class Post_Handler {
 	 */
 	public function render_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' );
+		$enabled = get_post_meta( $post->ID, '_share_on_mastodon', true );
 
-		$check   = array( '', '1' );
-		$enabled = ! empty( $this->options['optin'] );
-
-		if ( apply_filters( 'share_on_mastodon_optin', $enabled ) ) {
-			$check = array( '1' ); // Make sharing opt-in.
-		}
-
-		if ( is_older_than( 900, $post ) ) {
-			$check = array( '1' ); // For "older" posts, always make sharing opt-in.
+		if ( '' === $enabled ) {
+			$enabled = apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1';
 		}
 		?>
 		<label>
-			<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( in_array( get_post_meta( $post->ID, '_share_on_mastodon', true ), $check, true ) ); ?>>
+			<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( '1' === $enabled ); ?>>
 			<?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?>
 		</label>
 		<?php
@@ -363,11 +382,18 @@ class Post_Handler {
 		endif;
 
 		if ( ! empty( $this->options['custom_status_field'] ) ) :
+			// Custom message saved earlier, if any.
+			$custom_status = get_post_meta( $post->ID, '_share_on_mastodon_status', true );
+
+			if ( '' === $custom_status && ! empty( $this->options['status_template'] ) ) {
+				// Default to the template as set on the options page.
+				$custom_status = $this->options['status_template'];
+			}
 			?>
 			<div style="margin-top: 1em;">
 				<label for="share_on_mastodon_status"><?php esc_html_e( '(Optional) Message', 'share-on-mastodon' ); ?></label>
-				<textarea id="share_on_mastodon_status" name="share_on_mastodon_status" rows="3" style="width: 100%; box-sizing: border-box; margin-top: 0.5em;"><?php echo esc_html( get_post_meta( $post->ID, '_share_on_mastodon_status', true ) ); ?></textarea>
-				<p class="description" style="margin-top: 0.25em;"><?php esc_html_e( 'Customize this post&rsquo;s Mastodon status. (A permalink will be appended automatically.)', 'share-on-mastodon' ); ?></p>
+				<textarea id="share_on_mastodon_status" name="share_on_mastodon_status" rows="3" style="width: 100%; box-sizing: border-box; margin-top: 0.5em;"><?php echo esc_html( trim( $custom_status ) ); ?></textarea>
+				<p class="description" style="margin-top: 0.25em;"><?php esc_html_e( 'Customize this post&rsquo;s Mastodon status.', 'share-on-mastodon' ); ?></p>
 			</div>
 			<?php
 		endif;
@@ -516,5 +542,67 @@ class Post_Handler {
 
 		// Passed all checks.
 		return true;
+	}
+
+	/**
+	 * Parses `%title%`, etc. template tags.
+	 *
+	 * @param  string $status  Mastodon status text.
+	 * @param  int    $post_id Post ID.
+	 * @return string          Parsed status.
+	 */
+	protected function parse_status( $status, $post_id ) {
+		$status = str_replace( '%title%', get_the_title( $post_id ), $status );
+		$status = str_replace( '%excerpt%', $this->get_excerpt( $post_id ), $status );
+		$status = str_replace( '%tags%', $this->get_tags( $post_id ), $status );
+		$status = str_replace( '%permalink%', esc_url_raw( get_permalink( $post_id ) ), $status );
+		$status = preg_replace( '~\n\n+~', "\n\n", $status );
+
+		return sanitize_textarea_field( $status ); // Strips HTML and whatnot.
+	}
+
+	/**
+	 * Returns a post's excerpt, but limited to approx. 125 characters.
+	 *
+	 * @param  int $post_id Post ID.
+	 * @return string       (Possibly shortened) excerpt.
+	 */
+	protected function get_excerpt( $post_id ) {
+		$excerpt = get_the_excerpt( $post_id );
+		$excerpt = mb_substr( $excerpt, 0, 125 );
+
+		if ( ! ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
+			$excerpt .= '…';
+		}
+
+		return trim( $excerpt );
+	}
+
+	/**
+	 * Returns a post's tags as a string of space-separated hashtags.
+	 *
+	 * @param  int $post_id Post ID.
+	 * @return string       Hashtag string.
+	 */
+	protected function get_tags( $post_id ) {
+		$hashtags = '';
+		$tags     = get_the_tags( $post_id );
+
+		if ( $tags && ! is_wp_error( $tags ) ) {
+			foreach ( $tags as $tag ) {
+				$tag_name = $tag->name;
+
+				if ( preg_match( '/\s+/', $tag_name ) ) {
+					// Try to "CamelCase" multi-word tags.
+					$tag_name = preg_replace( '/\s+/', ' ', $tag_name );
+					$tag_name = explode( ' ', $tag_name );
+					$tag_name = implode( '', array_map( 'ucfirst', $tag_name ) );
+				}
+
+				$hashtags .= '#' . $tag_name . ' ';
+			}
+		}
+
+		return trim( $hashtags );
 	}
 }
