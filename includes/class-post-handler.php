@@ -377,6 +377,23 @@ class Post_Handler {
 			<?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?>
 		</label>
 		<?php
+		if ( ! empty( $this->options['custom_status_field'] ) ) :
+			// Custom message saved earlier, if any.
+			$custom_status = get_post_meta( $post->ID, '_share_on_mastodon_status', true );
+
+			if ( '' === $custom_status && ! empty( $this->options['status_template'] ) ) {
+				// Default to the template as set on the options page.
+				$custom_status = $this->options['status_template'];
+			}
+			?>
+			<div style="margin-top: 1em;">
+				<label for="share_on_mastodon_status"><?php esc_html_e( '(Optional) Message', 'share-on-mastodon' ); ?></label>
+				<textarea id="share_on_mastodon_status" name="share_on_mastodon_status" rows="3" style="width: 100%; box-sizing: border-box; margin-top: 0.5em;"><?php echo esc_html( trim( $custom_status ) ); ?></textarea>
+				<p class="description" style="margin-top: 0.25em;"><?php esc_html_e( 'Customize this post&rsquo;s Mastodon status.', 'share-on-mastodon' ); ?></p>
+			</div>
+			<?php
+		endif;
+
 		$url = get_post_meta( $post->ID, '_share_on_mastodon_url', true );
 
 		if ( '' !== $url && wp_http_validate_url( $url ) ) :
@@ -401,23 +418,6 @@ class Post_Handler {
 				<p class="description"><i><?php echo esc_html( $error_message ); ?></i></p>
 				<?php
 			endif;
-		endif;
-
-		if ( ! empty( $this->options['custom_status_field'] ) ) :
-			// Custom message saved earlier, if any.
-			$custom_status = get_post_meta( $post->ID, '_share_on_mastodon_status', true );
-
-			if ( '' === $custom_status && ! empty( $this->options['status_template'] ) ) {
-				// Default to the template as set on the options page.
-				$custom_status = $this->options['status_template'];
-			}
-			?>
-			<div style="margin-top: 1em;">
-				<label for="share_on_mastodon_status"><?php esc_html_e( '(Optional) Message', 'share-on-mastodon' ); ?></label>
-				<textarea id="share_on_mastodon_status" name="share_on_mastodon_status" rows="3" style="width: 100%; box-sizing: border-box; margin-top: 0.5em;"><?php echo esc_html( trim( $custom_status ) ); ?></textarea>
-				<p class="description" style="margin-top: 0.25em;"><?php esc_html_e( 'Customize this post&rsquo;s Mastodon status.', 'share-on-mastodon' ); ?></p>
-			</div>
-			<?php
 		endif;
 	}
 
