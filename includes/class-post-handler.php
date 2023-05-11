@@ -63,10 +63,6 @@ class Post_Handler {
 			return;
 		}
 
-		if ( use_block_editor_for_post( $post ) ) {
-			return;
-		}
-
 		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 			return;
 		}
@@ -105,10 +101,6 @@ class Post_Handler {
 	/**
 	 * Schedules sharing to Mastodon.
 	 *
-	 * On Gutenberg installs, this function will, despite its crazy high prio
-	 * number, run **before** the one above. (Because the one above checks for
-	 * the existence of a `$_POST` variable and Gutenberg is weird like that.)
-	 *
 	 * @since 0.1.0
 	 *
 	 * @param string  $new_status New post status.
@@ -118,6 +110,19 @@ class Post_Handler {
 	public function toot( $new_status, $old_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
 			// Prevent accidental double posting.
+			return;
+		}
+
+		if (
+			defined( 'REST_REQUEST' ) && REST_REQUEST &&
+			empty( $_REQUEST['meta-box-loader'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			0 === strpos( wp_get_referer(), admin_url() ) &&
+			! empty( $this->options['custom_status_field'] )
+		) {
+			// Looks like this call to `transition_post_status` was initiated by
+			// the block editor. In that case, this function will be called a
+			// second time after custom meta, including `custom_status_field`,
+			// is processed.
 			return;
 		}
 
@@ -291,6 +296,25 @@ class Post_Handler {
 
 		// Make Share on Mastodon's custom fields available in the REST API.
 		foreach ( $post_types as $post_type ) {
+			// @codingStandardsIgnoreStart
+			// register_post_meta(
+			// 	$post_type,
+			// 	'_share_on_mastodon',
+			// 	array(
+			// 		'single'            => true,
+			// 		'show_in_rest'      => true,
+			// 		'type'              => 'string',
+			// 		'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1',
+			// 		'auth_callback'     => function() {
+			// 			return current_user_can( 'edit_posts' );
+			// 		},
+			// 		'sanitize_callback' => function( $meta_value ) {
+			// 			return '1' === $meta_value ? '1' : '0';
+			// 		},
+			// 	)
+			// );
+			// @codingStandardsIgnoreEnd
+
 			register_post_meta(
 				$post_type,
 				'_share_on_mastodon_url',
@@ -303,7 +327,7 @@ class Post_Handler {
 					},
 					'sanitize_callback' => function( $meta_value ) {
 						return wp_http_validate_url( $meta_value )
-							? esc_url_raw( $meta_value )
+							? esc_url_raw( wp_http_validate_url( $meta_value ) )
 							: null;
 					},
 				)
@@ -322,14 +346,12 @@ class Post_Handler {
 			return;
 		}
 
-		$post_types = (array) $this->options['post_types'];
-
 		// Add meta box, for those post types that are supported.
 		add_meta_box(
 			'share-on-mastodon',
 			__( 'Share on Mastodon', 'share-on-mastodon' ),
 			array( $this, 'render_meta_box' ),
-			$post_types,
+			(array) $this->options['post_types'],
 			'side',
 			'default'
 		);
