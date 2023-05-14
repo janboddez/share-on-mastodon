@@ -36,7 +36,7 @@ class Post_Handler {
 	 */
 	public function register() {
 		add_action( 'transition_post_status', array( $this, 'update_meta' ), 11, 3 );
-		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 ); // Hi prio so it runs later, except since Gutenberg there's this thing where `update_meta` won't actually run till after ...
+		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
 		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ) );
 
 		add_action( 'rest_api_init', array( $this, 'register_meta' ) );
@@ -151,9 +151,7 @@ class Post_Handler {
 				array( $post->ID )
 			);
 		} else {
-			// Share immediately. This'll cause below function to run before the
-			// metadata is saved, at least on Gutenberg. But, it will run once
-			// more after. Still, this bit is super tricky.
+			// Share immediately.
 			$this->post_to_mastodon( $post->ID );
 		}
 	}
@@ -168,6 +166,7 @@ class Post_Handler {
 	public function post_to_mastodon( $post_id ) {
 		$post = get_post( $post_id );
 
+		// Things may have changed ...
 		if ( ! $this->is_valid( $post ) ) {
 			return;
 		}
@@ -184,11 +183,18 @@ class Post_Handler {
 			return;
 		}
 
+		// Fetch custom status message, if any.
 		$status = get_post_meta( $post->ID, '_share_on_mastodon_status', true );
+		// Parse template tags, and sanitize.
 		$status = $this->parse_status( $status, $post->ID );
 
+		if ( empty( $status ) && ! empty( $this->options['status_template'] ) ) {
+			// Use template stored in settings.
+			$this->parse_status( $this->options['status_template'], $post->ID );
+		}
+
 		if ( empty( $status ) ) {
-			// Fall back to default format.
+			// Fall back to post title.
 			$status = get_the_title( $post->ID );
 		}
 
@@ -196,7 +202,7 @@ class Post_Handler {
 			html_entity_decode( $status, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ) // Avoid double-encoded HTML entities.
 		);
 
-		// Append permalink, but only if it's not already mentioned.
+		// Append permalink, but only if it's not already there.
 		$permalink = esc_url_raw( get_permalink( $post->ID ) );
 
 		if ( false === strpos( $status, $permalink ) ) {
@@ -294,27 +300,8 @@ class Post_Handler {
 	public function register_meta() {
 		$post_types = (array) $this->options['post_types'];
 
-		// Make Share on Mastodon's custom fields available in the REST API.
+		// Make Share on Mastodon's URL available in the REST API.
 		foreach ( $post_types as $post_type ) {
-			// @codingStandardsIgnoreStart
-			// register_post_meta(
-			// 	$post_type,
-			// 	'_share_on_mastodon',
-			// 	array(
-			// 		'single'            => true,
-			// 		'show_in_rest'      => true,
-			// 		'type'              => 'string',
-			// 		'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1',
-			// 		'auth_callback'     => function() {
-			// 			return current_user_can( 'edit_posts' );
-			// 		},
-			// 		'sanitize_callback' => function( $meta_value ) {
-			// 			return '1' === $meta_value ? '1' : '0';
-			// 		},
-			// 	)
-			// );
-			// @codingStandardsIgnoreEnd
-
 			register_post_meta(
 				$post_type,
 				'_share_on_mastodon_url',
@@ -332,6 +319,26 @@ class Post_Handler {
 					},
 				)
 			);
+
+			// @codingStandardsIgnoreStart
+			// Allow the block editor to set `_share_on_mastodon`.
+			// register_post_meta(
+			// 	$post_type,
+			// 	'_share_on_mastodon',
+			// 	array(
+			// 		'single'            => true,
+			// 		'show_in_rest'      => true,
+			// 		'type'              => 'string',
+			// 		'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1',
+			// 		'auth_callback'     => function() {
+			// 			return current_user_can( 'edit_posts' );
+			// 		},
+			// 		'sanitize_callback' => function( $meta_value ) {
+			// 			return '1' === $meta_value ? '1' : '0';
+			// 		},
+			// 	)
+			// );
+			// @codingStandardsIgnoreEnd
 		}
 	}
 
@@ -369,7 +376,7 @@ class Post_Handler {
 		$enabled = get_post_meta( $post->ID, '_share_on_mastodon', true );
 
 		if ( '' === $enabled ) {
-			$enabled = apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1';
+			$enabled = apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) || is_older_than( 900, $post ) ? '0' : '1';
 		}
 		?>
 		<label>
@@ -447,13 +454,16 @@ class Post_Handler {
 			wp_die();
 		}
 
-		// Have WordPress forget the Mastodon URL.
-		delete_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon_url' );
+		$post_id = (int) $_POST['post_id'];
 
-		// Delete the meta box value, too, to prevent accidental re-sharing
-		// through Gutenberg and its odd meta box behavior. We should eventually
-		// move to Gutenberg-specific panels and such.
-		delete_post_meta( intval( $_POST['post_id'] ), '_share_on_mastodon' );
+		// Have WordPress forget the Mastodon URL.
+		delete_post_meta( $post_id, '_share_on_mastodon_url' );
+
+		if ( use_block_editor_for_post( $post_id ) ) {
+			// Delete the checkbox value, too, to prevent Gutenberg's' odd meta
+			// box behavior from triggering an immediate re-share.
+			delete_post_meta( $post_id, '_share_on_mastodon' );
+		}
 
 		wp_die();
 	}
@@ -538,27 +548,23 @@ class Post_Handler {
 			$share_always = true;
 		}
 
-		// We would let developers override `$is_enabled` through a callback
+		// We have let developers override `$is_enabled` through a callback
 		// function. In practice, this is almost always used to force sharing.
-		if (
-			apply_filters_deprecated(
-				'share_on_mastodon_enabled',
-				array( $is_enabled, $post->ID ),
-				'0.13.0',
-				'', // We don't actually recommend the new hook!
-				__( 'The `share_on_mastodon_enabled` hook is deprecated. Please use the &ldquo;Share Always&rdquo; setting instead. If you absolutely must use a filter, try `share_on_mastodon_force_share`.', 'share-on-mastodon' )
-			)
-		) {
+		if ( apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID ) ) {
 			$share_always = true;
 		}
 
-		if ( is_older_than( DAY_IN_SECONDS, $post ) ) {
-			// Since v0.13.0, we disallow most automatic sharing of "older" posts.
+		if ( is_older_than( DAY_IN_SECONDS / 2, $post ) ) {
+			// Since v0.13.0, we disallow automatic sharing of "older" posts.
+			// This sort of changes the behavior of the hook above, which would
+			// always come last.
 			$share_always = false;
 		}
 
 		// Yet, v0.13.0 introduced a _new_ yet undocumented hook to allow devs to (mostly) restore the old behavior.
 		if ( ! apply_filters( 'share_on_mastodon_force_share', $is_enabled || $share_always, $post->ID ) ) {
+			// You should probably never use this. `share_on_mastodon_enabled`
+			// is so much safer.
 			return false;
 		}
 

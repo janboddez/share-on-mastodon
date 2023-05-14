@@ -23,7 +23,7 @@ function debug_log( $item ) {
 }
 
 /**
- * Determines whether a post was created before the plugin was first activated.
+ * Determines whether a post is older than a certain number of seconds.
  *
  * @param  int     $seconds Minimum "age," in secondss.
  * @param  WP_Post $post    Post object.

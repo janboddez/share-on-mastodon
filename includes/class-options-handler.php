@@ -213,7 +213,7 @@ class Options_Handler {
 			'syn_links_compat'    => isset( $settings['syn_links_compat'] ) ? true : false,
 			'custom_status_field' => isset( $settings['custom_status_field'] ) ? true : false,
 			'status_template'     => isset( $settings['status_template'] ) && is_string( $settings['status_template'] )
-				? sanitize_textarea_field( $settings['status_template'] )
+				? sanitize_textarea_field( preg_replace( '~\R~u', "\r\n", $settings['status_template'] ) ) // Normalize EOL chars, then sanitize.
 				: '',
 		);
 
@@ -437,16 +437,16 @@ class Options_Handler {
 							<p class="description"><?php esc_html_e( '&ldquo;Force&rdquo; sharing (regardless of the &ldquo;Share on Mastodon&rdquo; checkbox&rsquo;s state), like when posting from a mobile app.', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Customize Status', 'share-on-mastodon' ); ?></th>
-							<td><label><input type="checkbox" name="share_on_mastodon_settings[custom_status_field]" value="1" <?php checked( ! empty( $this->options['custom_status_field'] ) ); ?> /> <?php esc_html_e( 'Allow customizing Mastodon statuses', 'share-on-mastodon' ); ?></label>
-								<?php /* translators: %s: link to the `share_on_mastodon_status` documentation */ ?>
-							<p class="description"><?php printf( __( '(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s meta box. May not always work in combination with the block editor and &ldquo;Share Always.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)', 'share-on-mastodon' ), '<a href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_status" target="_blank" rel="noopener noreferrer"><code>share_on_mastodon_status</code></a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p></td>
-						</tr>
-						<tr valign="top">
 							<th scope="row"><label for="share_on_mastodon_status_template"><?php esc_html_e( 'Status Template', 'share-on-mastodon' ); ?></label></th>
 							<td><textarea name="share_on_mastodon_settings[status_template]" id="share_on_mastodon_status_template" rows="5" style="min-width: 33%;"><?php echo ! empty( $this->options['status_template'] ) ? esc_html( $this->options['status_template'] ) : ''; ?></textarea>
 							<?php /* translators: %s: supported template tags */ ?>
 							<p class="description"><?php printf( __( '(Experimental) Customize the default status template. Supported &ldquo;template tags&rdquo;: %s.', 'share-on-mastodon' ), '<code>%title%</code>, <code>%excerpt%</code>, <code>%tags%</code>, <code>%permalink%</code>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Customize Status', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[custom_status_field]" value="1" <?php checked( ! empty( $this->options['custom_status_field'] ) ); ?> /> <?php esc_html_e( 'Allow customizing Mastodon statuses', 'share-on-mastodon' ); ?></label>
+								<?php /* translators: %s: link to the `share_on_mastodon_status` documentation */ ?>
+							<p class="description"><?php printf( __( '(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)', 'share-on-mastodon' ), '<a href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_status" target="_blank" rel="noopener noreferrer"><code>share_on_mastodon_status</code></a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p></td>
 						</tr>
 
 						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
