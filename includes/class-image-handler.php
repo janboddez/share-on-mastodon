@@ -147,7 +147,7 @@ class Image_Handler {
 			return;
 		}
 
-		if ( null === $alt ) {
+		if ( empty( $alt ) ) {
 			// Fetch alt text.
 			$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 
