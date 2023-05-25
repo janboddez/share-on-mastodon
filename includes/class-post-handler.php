@@ -25,8 +25,8 @@ class Post_Handler {
 	 *
 	 * @since 0.1.0
 	 */
-	public function __construct() {
-		$this->options = get_option( 'share_on_mastodon_settings' );
+	public function __construct( $options = array() ) {
+		$this->options = $options;
 	}
 
 	/**
@@ -232,6 +232,7 @@ class Post_Handler {
 		// And now, images. Note that this'll have to be rewritten for the new
 		// media API.
 		$media = Image_Handler::get_images( $post );
+		$media = convert_media_array( $media ); // To cover the highly unlikely case that someone's been filtering the (old-format) media array.
 
 		if ( ! empty( $media ) ) {
 			$max   = isset( $this->options['max_images'] ) ? $this->options['max_images'] : 4;
@@ -239,7 +240,7 @@ class Post_Handler {
 			$count = min( count( $media ), $max );
 
 			for ( $i = 0; $i < $count; $i++ ) {
-				$media_id = Image_Handler::upload_image( $media[ $i ] );
+				$media_id = Image_Handler::upload_image( $media[ $i ]['id'], $media[ $i ]['alt'] );
 
 				if ( ! empty( $media_id ) ) {
 					// The image got uploaded OK.
