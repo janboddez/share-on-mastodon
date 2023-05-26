@@ -53,4 +53,49 @@ class Test_Image_Handler extends \WP_Mock\Tools\TestCase {
 
 		$this->assertEquals( $expected, \Share_On_Mastodon\Image_Handler::get_images( $post ) );
 	}
+
+	public function test_convert_media_array() {
+		$input = array(
+			0     => 1,
+			'key' => array(
+				'id'  => 7,
+				'alt' => 'some alt text',
+			),
+			2     => '3',
+			3     => 2,
+			4     => '',
+			99    => array(
+				'id'  => 1,
+				'alt' => 'different alt text',
+			),
+			10    => array(
+				'id'  => 7,
+				'alt' => 'still different alt text',
+			),
+		);
+
+		$expected = array(
+			array(
+				'id'  => 1,
+				'alt' => '',
+			),
+			array(
+				'id'  => 7,
+				'alt' => 'some alt text',
+			),
+			array(
+				'id'  => 2,
+				'alt' => '',
+			),
+		);
+
+		$class           = new \ReflectionClass( '\\Share_On_Mastodon\\Image_Handler' );
+		$protectedMethod = $class->getMethod( 'convert_media_array' );
+		$protectedMethod->setAccessible( true );
+
+		$image_handler = new \Share_On_Mastodon\Image_Handler();
+		$actual        = $protectedMethod->invokeArgs( $image_handler, array( $input ) );
+
+		$this->assertEquals( $expected, $actual );
+	}
 }

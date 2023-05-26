@@ -24,6 +24,8 @@ class Post_Handler {
 	 * Constructor.
 	 *
 	 * @since 0.1.0
+	 *
+	 * @param array $options Plugin options.
 	 */
 	public function __construct( $options = array() ) {
 		$this->options = $options;
@@ -232,7 +234,6 @@ class Post_Handler {
 		// And now, images. Note that this'll have to be rewritten for the new
 		// media API.
 		$media = Image_Handler::get_images( $post );
-		$media = convert_media_array( $media ); // To cover the highly unlikely case that someone's been filtering the (old-format) media array.
 
 		if ( ! empty( $media ) ) {
 			$max   = isset( $this->options['max_images'] ) ? $this->options['max_images'] : 4;

@@ -44,32 +44,6 @@ function is_older_than( $seconds, $post ) {
 }
 
 /**
- * Converts an array of media IDs to the newer multidimensional format.
- *
- * @param  array $media Original media array.
- * @return array        Processed array.
- */
-function convert_media_array( $media ) {
-	$array = array();
-
-	foreach ( $media as $item ) {
-		if ( is_array( $item ) ) {
-			$array[] = $item; // Keep as is.
-		} elseif ( is_int( $item ) ) {
-			$array[] = array(
-				'id'  => $item,
-				'alt' => '',
-			);
-		}
-	}
-
-	$tmp   = array_unique( array_column( $array, 'id' ) ); // `array_column()` preserves keys, and so does `array_unique()`.
-	$array = array_intersect_key( $array, $tmp );          // And that is what allows us to do this.
-
-	return array_values( $array );
-}
-
-/**
  * Returns this plugin's options.
  *
  * Roughly equal to `get_option( 'share_on_mastodon_settings' )`.

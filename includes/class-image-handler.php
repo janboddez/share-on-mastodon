@@ -18,55 +18,68 @@ class Image_Handler {
 	 * @return array         Attachment array.
 	 */
 	public static function get_images( $post ) {
-		$media   = array();
 		$options = get_options();
 
-		// Process "in-post" images first, so as to give _their_ `alt`
-		// attributes priority over what's saved, if anything, in the database.
 		$enable_referenced_images = ! empty( $options['referenced_images'] ); // This was always opt-in.
+		$enable_referenced_images = apply_filters( 'share_on_mastodon_referenced_images', $enable_referenced_images, $post );
 
-		if ( apply_filters( 'share_on_mastodon_referenced_images', $enable_referenced_images, $post ) ) {
-			// Include in-post, i.e., referenced, images.
-			$images = static::get_referenced_images( $post );
+		$enable_featured_images = ! isset( $options['featured_images'] ) || $options['featured_images'];
+		$enable_featured_images = has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', $enable_featured_images, $post );
 
-			if ( ! empty( $images ) && is_array( $images ) ) {
-				foreach ( $images as $image ) {
-					$media[] = $image;
-				}
+		$enable_attached_images = ! isset( $options['attached_images'] ) || $options['attached_images'];
+		$enable_attached_images = apply_filters( 'share_on_mastodon_attached_images', $enable_attached_images, $post );
+
+		if ( ! ( $enable_referenced_images || $enable_featured_images || $enable_attached_images ) ) {
+			// Nothing to do.
+			return array();
+		}
+
+		// Always parse post content for images and alt text. Doing this (first)
+		// allows us to override (possibly empty) `wp_postmeta` alt values.
+		$referenced_images = static::get_referenced_images( $post ); // Returns image IDs _and_ alt text (if any).
+
+		// Alright, let's get started.
+		$media = array();
+
+		if ( $enable_referenced_images && ! empty( $referenced_images ) ) {
+			// Add in-post images.
+			foreach ( $referenced_images as $referenced_image ) {
+				$media[] = $referenced_image;
 			}
 		}
 
-		$enable_featured_images = ! isset( $options['featured_images'] ) || $options['featured_images'];
-
-		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', $enable_featured_images, $post ) ) {
+		if ( $enable_featured_images ) {
 			// Include featured image.
-			$media[] = array(
-				'id'  => get_post_thumbnail_id( $post->ID ),
-				'alt' => '',
+			$image_id = get_post_thumbnail_id( $post->ID );
+			$media[]  = array(
+				'id'  => $image_id,
+				'alt' => static::get_alt_text( $image_id, $referenced_images ),
 			);
 		}
 
-		$enable_attached_images = ! isset( $options['attached_images'] ) || $options['attached_images'];
-
-		if ( apply_filters( 'share_on_mastodon_attached_images', $enable_attached_images, $post ) ) {
+		if ( $enable_attached_images ) {
 			// Include all attached images.
 			$attachments = get_attached_media( 'image', $post->ID );
 
-			if ( ! empty( $attachments ) && is_array( $attachments ) ) {
+			if ( ! empty( $attachments ) ) {
 				foreach ( $attachments as $attachment ) {
 					$media[] = array(
 						'id'  => $attachment->ID,
-						'alt' => '',
+						'alt' => static::get_alt_text( $image_id, $referenced_images ),
 					);
 				}
 			}
 		}
 
+		// Remove duplicates.
 		$tmp   = array_unique( array_column( $media, 'id' ) ); // `array_column()` preserves keys, and so does `array_unique()`.
 		$media = array_intersect_key( $media, $tmp );          // And that is what allows us to do this.
+		$media = array_values( $media ); // Always reindex.
+
+		// Allow developers to filter the resulting array.
 		$media = apply_filters( 'share_on_mastodon_media', $media, $post );
 
-		return array_values( $media ); // Always reindex.
+		return static::convert_media_array( $media ); // To cover the highly unlikely case that someone's been filtering the (old-format) media array.
 	}
 
 	/**
@@ -147,21 +160,12 @@ class Image_Handler {
 			return;
 		}
 
-		if ( empty( $alt ) ) {
-			// Fetch alt text.
-			$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-
-			if ( '' === $alt ) {
-				$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption.
-			}
-		}
-
 		$boundary = md5( time() );
 		$eol      = "\r\n";
 
 		$body = '--' . $boundary . $eol;
 
-		if ( false !== $alt && '' !== $alt ) {
+		if ( '' !== $alt ) {
 			debug_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" );
 
 			// @codingStandardsIgnoreStart
@@ -175,8 +179,6 @@ class Image_Handler {
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
 			$body .= $alt . $eol;
 			$body .= '--' . $boundary . $eol;
-
-			debug_log( "[Share on Mastodon] Here's the `alt` bit of what we're about to send the Mastodon API: `$body`" );
 		} else {
 			debug_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" );
 		}
@@ -217,5 +219,66 @@ class Image_Handler {
 		// Provided debugging's enabled, let's store the (somehow faulty)
 		// response.
 		debug_log( $response );
+	}
+
+	/**
+	 * Uploads an attachment and returns a (single) media ID.
+	 *
+	 * @param  int   $image_id Attachment ID.
+	 * @param  array $images   An array of (in-post) images to look through first.
+	 * @return string          Alt text, or an empty string.
+	 */
+	protected static function get_alt_text( $image_id, $images ) {
+		$alt = '';
+
+		foreach ( $images as $image ) {
+			if ( isset( $image['id'] ) && $image_id === $image['id'] ) {
+				$alt = isset( $image['alt'] ) ? $image['alt'] : '';
+
+				break;
+			}
+		}
+
+		if ( '' !== $alt ) {
+			return $alt;
+		}
+
+		// Fetch alt text from the `wp_postmeta` table.
+		$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
+
+		if ( '' === $alt ) {
+			$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption.
+		}
+
+		return is_string( $alt ) ? $alt : '';
+	}
+
+	/**
+	 * Converts an array of media IDs to the newer multidimensional format.
+	 *
+	 * @param  array $media Original media array.
+	 * @return array        Processed array.
+	 */
+	protected static function convert_media_array( $media ) {
+		$array = array();
+
+		foreach ( $media as $item ) {
+			if ( is_array( $item ) ) {
+				$array[] = $item; // Keep as is.
+			} elseif ( is_int( $item ) ) {
+				// Convert to "new" format.
+				$array[] = array(
+					'id'  => $item,
+					'alt' => '',
+				);
+			}
+		}
+
+		// We've normally done this before, but because we've allowed filtering
+		// the resulting array, we have no choice but to do it again.
+		$tmp   = array_unique( array_column( $array, 'id' ) ); // `array_column()` preserves keys, and so does `array_unique()`.
+		$array = array_intersect_key( $array, $tmp );          // And that is what allows us to do this.
+
+		return array_values( $array );
 	}
 }
