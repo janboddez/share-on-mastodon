@@ -380,14 +380,16 @@ class Post_Handler {
 	 */
 	public function render_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' );
-		$enabled = get_post_meta( $post->ID, '_share_on_mastodon', true );
+		$checked = get_post_meta( $post->ID, '_share_on_mastodon', true );
 
-		if ( '' === $enabled ) {
-			$enabled = apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) || $this->is_older_than( 900, $post ) ? '0' : '1';
+		if ( '' === $checked ) {
+			// If sharing is "opt-in" or the post in question is older than 15
+			// minutes, do _not_ check the checkbox by default.
+			$checked = apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) || $this->is_older_than( 900, $post ) ? '0' : '1';
 		}
 		?>
 		<label>
-			<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( '1' === $enabled ); ?>>
+			<input type="checkbox" name="share_on_mastodon" value="1" <?php checked( '1' === $checked ); ?>>
 			<?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?>
 		</label>
 		<?php
