@@ -213,7 +213,7 @@ class Options_Handler {
 			'syn_links_compat'    => isset( $settings['syn_links_compat'] ) ? true : false,
 			'custom_status_field' => isset( $settings['custom_status_field'] ) ? true : false,
 			'status_template'     => isset( $settings['status_template'] ) && is_string( $settings['status_template'] )
-				? sanitize_textarea_field( preg_replace( '~\R~u', "\r\n", $settings['status_template'] ) ) // Normalize EOL chars, then sanitize.
+				? preg_replace( '~\R~u', "\r\n", sanitize_textarea_field( $settings['status_template'] ) )
 				: '',
 		);
 

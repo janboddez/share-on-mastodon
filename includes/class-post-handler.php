@@ -83,9 +83,10 @@ class Post_Handler {
 
 		if ( isset( $_POST['share_on_mastodon_status'] ) ) {
 			$status = sanitize_textarea_field( wp_unslash( $_POST['share_on_mastodon_status'] ) );
+			$status = preg_replace( '~\R~u', "\r\n", $status );
 		}
 
-		if ( ! empty( $status ) ) {
+		if ( ! empty( $status ) || '' === preg_replace( '~\s~', '', $status ) ) {
 			update_post_meta( $post->ID, '_share_on_mastodon_status', $status );
 		} else {
 			delete_post_meta( $post->ID, '_share_on_mastodon_status' );
@@ -590,7 +591,7 @@ class Post_Handler {
 		$status = str_replace( '%excerpt%', $this->get_excerpt( $post_id ), $status );
 		$status = str_replace( '%tags%', $this->get_tags( $post_id ), $status );
 		$status = str_replace( '%permalink%', esc_url_raw( get_permalink( $post_id ) ), $status );
-		$status = preg_replace( '~\n\n+~', "\n\n", $status );
+		$status = preg_replace( '~(\r\n){2,}~', "\r\n\r\n", $status ); // We should have normalized line endings.
 
 		return sanitize_textarea_field( $status ); // Strips HTML and whatnot.
 	}
