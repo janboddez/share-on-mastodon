@@ -23,27 +23,6 @@ function debug_log( $item ) {
 }
 
 /**
- * Determines whether a post is older than a certain number of seconds.
- *
- * @param  int     $seconds Minimum "age," in secondss.
- * @param  WP_Post $post    Post object.
- * @return bool             True if the post exists and is older than `$seconds`, false otherwise.
- */
-function is_older_than( $seconds, $post ) {
-	$post_time = get_post_time( 'U', true, $post );
-
-	if ( false === $post_time ) {
-		return false;
-	}
-
-	if ( $post_time >= time() - $seconds ) {
-		return false;
-	}
-
-	return true;
-}
-
-/**
  * Returns this plugin's options.
  *
  * Roughly equal to `get_option( 'share_on_mastodon_settings' )`.

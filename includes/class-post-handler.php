@@ -383,7 +383,7 @@ class Post_Handler {
 		$enabled = get_post_meta( $post->ID, '_share_on_mastodon', true );
 
 		if ( '' === $enabled ) {
-			$enabled = apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) || is_older_than( 900, $post ) ? '0' : '1';
+			$enabled = apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) || $this->is_older_than( 900, $post ) ? '0' : '1';
 		}
 		?>
 		<label>
@@ -561,21 +561,39 @@ class Post_Handler {
 			$share_always = true;
 		}
 
-		if ( is_older_than( DAY_IN_SECONDS / 2, $post ) ) {
+		if ( $this->is_older_than( DAY_IN_SECONDS / 2, $post ) ) {
 			// Since v0.13.0, we disallow automatic sharing of "older" posts.
 			// This sort of changes the behavior of the hook above, which would
 			// always come last.
 			$share_always = false;
 		}
 
-		// Yet, v0.13.0 introduced a _new_ yet undocumented hook to allow devs to (mostly) restore the old behavior.
-		if ( ! apply_filters( 'share_on_mastodon_force_share', $is_enabled || $share_always, $post->ID ) ) {
-			// You should probably never use this. `share_on_mastodon_enabled`
-			// is so much safer.
-			return false;
+		if ( $is_enabled || $share_always ) {
+			return true;
 		}
 
 		// Passed all checks.
+		return false;
+	}
+
+	/**
+	 * Determines whether a post is older than a certain number of seconds.
+	 *
+	 * @param  int     $seconds Minimum "age," in secondss.
+	 * @param  WP_Post $post    Post object.
+	 * @return bool             True if the post exists and is older than `$seconds`, false otherwise.
+	 */
+	protected function is_older_than( $seconds, $post ) {
+		$post_time = get_post_time( 'U', true, $post );
+
+		if ( false === $post_time ) {
+			return false;
+		}
+
+		if ( $post_time >= time() - $seconds ) {
+			return false;
+		}
+
 		return true;
 	}
 

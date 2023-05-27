@@ -24,4 +24,51 @@ class Test_Post_Handler extends \WP_Mock\Tools\TestCase {
 
 		$this->assertHooksAdded();
 	}
+
+	public function test_post_handler_is_older_than() {
+		$class           = new \ReflectionClass( '\\Share_On_Mastodon\\Post_Handler' );
+		$protectedMethod = $class->getMethod( 'is_older_than' );
+		$protectedMethod->setAccessible( true );
+
+		$post            = new stdClass();
+		$post->ID        = 1;
+		$post->post_date = '2022-01-01 08:30:05';
+
+		\WP_Mock::userFunction( 'get_post_time', array(
+			'times'  => 1,
+			'args'   => array( 'U', true, $post ),
+			'return' => strtotime( $post->post_date ),
+		) );
+
+		$post_handler = new \Share_On_Mastodon\Post_Handler();
+
+		$this->assertEquals( $protectedMethod->invokeArgs( $post_handler, array( 3600, $post ) ), true );
+
+		$post            = new stdClass();
+		$post->post_date = '2023-01-01 08:30:05';
+
+		\WP_Mock::userFunction( 'get_post_time', array(
+			'times'  => 1,
+			'args'   => array( 'U', true, $post ),
+			'return' => strtotime( $post->post_date ),
+		) );
+
+		$class           = new \ReflectionClass( '\\Share_On_Mastodon\\Post_Handler' );
+		$protectedMethod = $class->getMethod( 'is_older_than' );
+		$protectedMethod->setAccessible( true );
+
+		$post_handler = new \Share_On_Mastodon\Post_Handler();
+
+		$this->assertEquals( $protectedMethod->invokeArgs( $post_handler, array( 315360000, $post ) ), false );
+
+		$post = new stdClass();
+
+		\WP_Mock::userFunction( 'get_post_time', array(
+			'times'  => 1,
+			'args'   => array( 'U', true, $post ),
+			'return' => false,
+		) );
+
+		$this->assertEquals( $protectedMethod->invokeArgs( $post_handler, array( 3600, $post ) ), false );
+	}
 }
