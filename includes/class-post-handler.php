@@ -279,7 +279,7 @@ class Post_Handler {
 
 		if ( ! empty( $status->url ) ) {
 			delete_post_meta( $post->ID, '_share_on_mastodon_error' );
-			update_post_meta( $post->ID, '_share_on_mastodon_url', $status->url );
+			update_post_meta( $post->ID, '_share_on_mastodon_url', esc_url_raw( $status->url ) );
 
 			if ( 'share_on_mastodon_post' !== current_filter() ) {
 				// Show a notice only when this function was called directly.
