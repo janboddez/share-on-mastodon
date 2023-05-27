@@ -168,16 +168,9 @@ class Image_Handler {
 		if ( '' !== $alt ) {
 			debug_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" );
 
-			// @codingStandardsIgnoreStart
-			// $alt = sanitize_text_field( $alt ); // Some instances don't like our alt texts, thought maybe avoiding newline chars wo
-			// $alt = esc_attr( $alt ); // Leads to double-escaped entities.
-			// $alt = wp_strip_all_tags(); // We could probably leave this in, but entities seem to be escaped okay.
-			// $alt = str_replace( array( "\r", "\n", '"' ), array( '%0D', '%0A', '%22' ), $alt ); // Also doesn't work, as these aren't unencoded by Mastodon.
-			// @codingStandardsIgnoreEnd
-
 			// Send along an image description, because accessibility.
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
-			$body .= $alt . $eol;
+			$body .= wp_strip_all_tags( $alt ) . $eol;
 			$body .= '--' . $boundary . $eol;
 		} else {
 			debug_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" );
@@ -265,10 +258,10 @@ class Image_Handler {
 		foreach ( $media as $item ) {
 			if ( is_array( $item ) ) {
 				$array[] = $item; // Keep as is.
-			} elseif ( is_int( $item ) ) {
+			} elseif ( is_int( $item ) || ( is_string( $item ) && ctype_digit( $item ) ) ) {
 				// Convert to "new" format.
 				$array[] = array(
-					'id'  => $item,
+					'id'  => (int) $item,
 					'alt' => '',
 				);
 			}

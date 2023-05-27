@@ -84,6 +84,10 @@ class Test_Image_Handler extends \WP_Mock\Tools\TestCase {
 				'alt' => 'some alt text',
 			),
 			array(
+				'id'  => 3,
+				'alt' => '',
+			),
+			array(
 				'id'  => 2,
 				'alt' => '',
 			),
