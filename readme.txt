@@ -2,7 +2,7 @@
 Contributors: janboddez
 Tags: mastodon, share, publicize, crosspost, fediverse, syndication
 Tested up to: 6.2
-Stable tag: 0.14.0
+Stable tag: 0.15.0
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -28,6 +28,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
 
 == Changelog ==
+= 0.15.0 =
+Better custom status messages: template tags, default template. Address odd Gutenberg behavior.
+
 = 0.14.0 =
 A very first implementation of optional custom status messages.
 

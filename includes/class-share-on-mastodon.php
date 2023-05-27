@@ -11,7 +11,7 @@ namespace Share_On_Mastodon;
  * Main plugin class.
  */
 class Share_On_Mastodon {
-	const PLUGIN_VERSION = '0.14.0';
+	const PLUGIN_VERSION = '0.15.0';
 
 	/**
 	 * This plugin's single instance.

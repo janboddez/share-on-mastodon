@@ -9,105 +9,18 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-05-04T11:43:03+00:00\n"
+"POT-Creation-Date: 2023-05-27T18:18:59+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: share-on-mastodon\n"
 
 #. Plugin Name of the plugin
-#: includes/class-options-handler.php:85
 #: includes/class-options-handler.php:86
-#: includes/class-options-handler.php:246
-#: includes/class-options-handler.php:545
-#: includes/class-post-handler.php:305
-#: includes/class-post-handler.php:336
-#: svn/tags/0.1/includes/class-options-handler.php:66
-#: svn/tags/0.1/includes/class-options-handler.php:67
-#: svn/tags/0.1/includes/class-options-handler.php:147
-#: svn/tags/0.1/includes/class-post-handler.php:51
-#: svn/tags/0.1/includes/class-post-handler.php:70
-#: svn/tags/0.2/includes/class-options-handler.php:66
-#: svn/tags/0.2/includes/class-options-handler.php:67
-#: svn/tags/0.2/includes/class-options-handler.php:147
-#: svn/tags/0.2/includes/class-post-handler.php:51
-#: svn/tags/0.2/includes/class-post-handler.php:70
-#: svn/tags/0.4.1/includes/class-options-handler.php:95
-#: svn/tags/0.4.1/includes/class-options-handler.php:96
-#: svn/tags/0.4.1/includes/class-options-handler.php:174
-#: svn/tags/0.4.1/includes/class-post-handler.php:75
-#: svn/tags/0.4.1/includes/class-post-handler.php:95
-#: svn/tags/0.4/includes/class-options-handler.php:95
-#: svn/tags/0.4/includes/class-options-handler.php:96
-#: svn/tags/0.4/includes/class-options-handler.php:174
-#: svn/tags/0.4/includes/class-post-handler.php:86
-#: svn/tags/0.4/includes/class-post-handler.php:106
-#: svn/tags/0.5.1/includes/class-options-handler.php:78
-#: svn/tags/0.5.1/includes/class-options-handler.php:79
-#: svn/tags/0.5.1/includes/class-options-handler.php:157
-#: svn/tags/0.5.1/includes/class-post-handler.php:61
-#: svn/tags/0.5.1/includes/class-post-handler.php:81
-#: svn/tags/0.6.1/includes/class-options-handler.php:78
-#: svn/tags/0.6.1/includes/class-options-handler.php:79
-#: svn/tags/0.6.1/includes/class-options-handler.php:157
-#: svn/tags/0.6.1/includes/class-post-handler.php:64
-#: svn/tags/0.6.1/includes/class-post-handler.php:84
-#: svn/tags/0.6.3/includes/class-options-handler.php:78
-#: svn/tags/0.6.3/includes/class-options-handler.php:79
-#: svn/tags/0.6.3/includes/class-options-handler.php:179
-#: svn/tags/0.6.3/includes/class-post-handler.php:65
-#: svn/tags/0.6.3/includes/class-post-handler.php:85
-#: svn/tags/0.6.4/includes/class-options-handler.php:78
-#: svn/tags/0.6.4/includes/class-options-handler.php:79
-#: svn/tags/0.6.4/includes/class-options-handler.php:179
-#: svn/tags/0.6.4/includes/class-post-handler.php:65
-#: svn/tags/0.6.4/includes/class-post-handler.php:91
-#: svn/tags/0.9.0/includes/class-options-handler.php:72
-#: svn/tags/0.9.0/includes/class-options-handler.php:73
-#: svn/tags/0.9.0/includes/class-options-handler.php:178
-#: svn/tags/0.9.0/includes/class-post-handler.php:68
-#: svn/tags/0.9.0/includes/class-post-handler.php:117
-#: svn/tags/0.10.0/includes/class-options-handler.php:69
-#: svn/tags/0.10.0/includes/class-options-handler.php:70
-#: svn/tags/0.10.0/includes/class-options-handler.php:175
-#: svn/tags/0.10.0/includes/class-options-handler.php:374
-#: svn/tags/0.10.0/includes/class-post-handler.php:306
-#: svn/tags/0.10.0/includes/class-post-handler.php:365
-#: svn/tags/0.10.1/includes/class-options-handler.php:69
-#: svn/tags/0.10.1/includes/class-options-handler.php:70
-#: svn/tags/0.10.1/includes/class-options-handler.php:175
-#: svn/tags/0.10.1/includes/class-options-handler.php:374
-#: svn/tags/0.10.1/includes/class-post-handler.php:306
-#: svn/tags/0.10.1/includes/class-post-handler.php:365
-#: svn/tags/0.12.0/includes/class-options-handler.php:84
-#: svn/tags/0.12.0/includes/class-options-handler.php:85
-#: svn/tags/0.12.0/includes/class-options-handler.php:241
-#: svn/tags/0.12.0/includes/class-options-handler.php:534
-#: svn/tags/0.12.0/includes/class-post-handler.php:334
-#: svn/tags/0.12.0/includes/class-post-handler.php:394
-#: svn/tags/0.12.1/includes/class-options-handler.php:84
-#: svn/tags/0.12.1/includes/class-options-handler.php:85
-#: svn/tags/0.12.1/includes/class-options-handler.php:241
-#: svn/tags/0.12.1/includes/class-options-handler.php:535
-#: svn/tags/0.12.1/includes/class-post-handler.php:334
-#: svn/tags/0.12.1/includes/class-post-handler.php:394
-#: svn/tags/0.12.2/includes/class-options-handler.php:84
-#: svn/tags/0.12.2/includes/class-options-handler.php:85
-#: svn/tags/0.12.2/includes/class-options-handler.php:241
-#: svn/tags/0.12.2/includes/class-options-handler.php:535
-#: svn/tags/0.12.2/includes/class-post-handler.php:335
-#: svn/tags/0.12.2/includes/class-post-handler.php:362
-#: svn/tags/0.14.0/includes/class-options-handler.php:85
-#: svn/tags/0.14.0/includes/class-options-handler.php:86
-#: svn/tags/0.14.0/includes/class-options-handler.php:246
-#: svn/tags/0.14.0/includes/class-options-handler.php:545
-#: svn/tags/0.14.0/includes/class-post-handler.php:305
-#: svn/tags/0.14.0/includes/class-post-handler.php:336
-#: svn/trunk/includes/class-options-handler.php:85
-#: svn/trunk/includes/class-options-handler.php:86
-#: svn/trunk/includes/class-options-handler.php:246
-#: svn/trunk/includes/class-options-handler.php:545
-#: svn/trunk/includes/class-post-handler.php:305
-#: svn/trunk/includes/class-post-handler.php:336
+#: includes/class-options-handler.php:87
+#: includes/class-options-handler.php:250
+#: includes/class-options-handler.php:555
+#: includes/class-post-handler.php:366
+#: includes/class-post-handler.php:393
 msgid "Share on Mastodon"
 msgstr ""
 
@@ -129,839 +42,260 @@ msgstr ""
 
 #. translators: %s: error message
 #: includes/class-notices.php:56
-#: svn/tags/0.10.0/includes/class-notices.php:56
-#: svn/tags/0.10.1/includes/class-notices.php:56
-#: svn/tags/0.12.0/includes/class-notices.php:56
-#: svn/tags/0.12.1/includes/class-notices.php:56
-#: svn/tags/0.12.2/includes/class-notices.php:56
-#: svn/tags/0.14.0/includes/class-notices.php:56
-#: svn/trunk/includes/class-notices.php:56
 msgid "Share on Mastodon ran into the following error: %s"
 msgstr ""
 
 #. translators: %s: link to Mastodon status
 #: includes/class-notices.php:77
-#: svn/tags/0.10.0/includes/class-notices.php:77
-#: svn/tags/0.10.1/includes/class-notices.php:77
-#: svn/tags/0.12.0/includes/class-notices.php:77
-#: svn/tags/0.12.1/includes/class-notices.php:77
-#: svn/tags/0.12.2/includes/class-notices.php:77
-#: svn/tags/0.14.0/includes/class-notices.php:77
-#: svn/trunk/includes/class-notices.php:77
 msgid "Shared on Mastodon at %s."
 msgstr ""
 
-#: includes/class-options-handler.php:162
-#: svn/tags/0.6.3/includes/class-options-handler.php:161
-#: svn/tags/0.6.4/includes/class-options-handler.php:161
-#: svn/tags/0.9.0/includes/class-options-handler.php:152
-#: svn/tags/0.10.0/includes/class-options-handler.php:149
-#: svn/tags/0.10.1/includes/class-options-handler.php:149
-#: svn/tags/0.12.0/includes/class-options-handler.php:161
-#: svn/tags/0.12.1/includes/class-options-handler.php:161
-#: svn/tags/0.12.2/includes/class-options-handler.php:161
-#: svn/tags/0.14.0/includes/class-options-handler.php:162
-#: svn/trunk/includes/class-options-handler.php:162
+#: includes/class-options-handler.php:163
 msgid "Please provide a valid URL."
 msgstr ""
 
-#: includes/class-options-handler.php:249
-#: svn/tags/0.12.0/includes/class-options-handler.php:244
-#: svn/tags/0.12.1/includes/class-options-handler.php:244
-#: svn/tags/0.12.2/includes/class-options-handler.php:244
-#: svn/tags/0.14.0/includes/class-options-handler.php:249
-#: svn/trunk/includes/class-options-handler.php:249
+#: includes/class-options-handler.php:253
 msgid "Setup"
 msgstr ""
 
-#: includes/class-options-handler.php:250
-#: svn/tags/0.12.0/includes/class-options-handler.php:245
-#: svn/tags/0.12.1/includes/class-options-handler.php:245
-#: svn/tags/0.12.2/includes/class-options-handler.php:245
-#: svn/tags/0.14.0/includes/class-options-handler.php:250
-#: svn/trunk/includes/class-options-handler.php:250
+#: includes/class-options-handler.php:254
 msgid "Images"
 msgstr ""
 
-#: includes/class-options-handler.php:251
-#: svn/tags/0.12.0/includes/class-options-handler.php:246
-#: svn/tags/0.12.1/includes/class-options-handler.php:246
-#: svn/tags/0.12.2/includes/class-options-handler.php:246
-#: svn/tags/0.14.0/includes/class-options-handler.php:251
-#: svn/trunk/includes/class-options-handler.php:251
+#: includes/class-options-handler.php:255
 msgid "Advanced"
 msgstr ""
 
-#: includes/class-options-handler.php:252
-#: svn/tags/0.1/includes/class-options-handler.php:271
-#: svn/tags/0.2/includes/class-options-handler.php:271
-#: svn/tags/0.4.1/includes/class-options-handler.php:298
-#: svn/tags/0.4/includes/class-options-handler.php:298
-#: svn/tags/0.5.1/includes/class-options-handler.php:281
-#: svn/tags/0.6.1/includes/class-options-handler.php:281
-#: svn/tags/0.6.3/includes/class-options-handler.php:303
-#: svn/tags/0.6.4/includes/class-options-handler.php:303
-#: svn/tags/0.9.0/includes/class-options-handler.php:312
-#: svn/tags/0.10.0/includes/class-options-handler.php:309
-#: svn/tags/0.10.1/includes/class-options-handler.php:309
-#: svn/tags/0.12.0/includes/class-options-handler.php:247
-#: svn/tags/0.12.1/includes/class-options-handler.php:247
-#: svn/tags/0.12.2/includes/class-options-handler.php:247
-#: svn/tags/0.14.0/includes/class-options-handler.php:252
-#: svn/trunk/includes/class-options-handler.php:252
+#: includes/class-options-handler.php:256
 msgid "Debugging"
 msgstr ""
 
-#: includes/class-options-handler.php:263
-#: svn/tags/0.1/includes/class-options-handler.php:163
-#: svn/tags/0.2/includes/class-options-handler.php:163
-#: svn/tags/0.4.1/includes/class-options-handler.php:190
-#: svn/tags/0.4/includes/class-options-handler.php:190
-#: svn/tags/0.5.1/includes/class-options-handler.php:173
-#: svn/tags/0.6.1/includes/class-options-handler.php:173
-#: svn/tags/0.6.3/includes/class-options-handler.php:195
-#: svn/tags/0.6.4/includes/class-options-handler.php:195
-#: svn/tags/0.9.0/includes/class-options-handler.php:192
-#: svn/tags/0.10.0/includes/class-options-handler.php:189
-#: svn/tags/0.10.1/includes/class-options-handler.php:189
-#: svn/tags/0.12.0/includes/class-options-handler.php:258
-#: svn/tags/0.12.1/includes/class-options-handler.php:258
-#: svn/tags/0.12.2/includes/class-options-handler.php:258
-#: svn/tags/0.14.0/includes/class-options-handler.php:263
-#: svn/trunk/includes/class-options-handler.php:263
+#: includes/class-options-handler.php:267
 msgid "Instance"
 msgstr ""
 
 #. translators: %s: example URL.
-#: includes/class-options-handler.php:266
-#: svn/tags/0.12.0/includes/class-options-handler.php:261
-#: svn/tags/0.12.1/includes/class-options-handler.php:261
-#: svn/tags/0.12.2/includes/class-options-handler.php:261
-#: svn/tags/0.14.0/includes/class-options-handler.php:266
-#: svn/trunk/includes/class-options-handler.php:266
+#: includes/class-options-handler.php:270
 msgid "Your Mastodon instance&rsquo;s URL. E.g., %s."
 msgstr ""
 
-#: includes/class-options-handler.php:269
-#: svn/tags/0.1/includes/class-options-handler.php:168
-#: svn/tags/0.2/includes/class-options-handler.php:168
-#: svn/tags/0.4.1/includes/class-options-handler.php:195
-#: svn/tags/0.4/includes/class-options-handler.php:195
-#: svn/tags/0.5.1/includes/class-options-handler.php:178
-#: svn/tags/0.6.1/includes/class-options-handler.php:178
-#: svn/tags/0.6.3/includes/class-options-handler.php:200
-#: svn/tags/0.6.4/includes/class-options-handler.php:200
-#: svn/tags/0.9.0/includes/class-options-handler.php:197
-#: svn/tags/0.10.0/includes/class-options-handler.php:194
-#: svn/tags/0.10.1/includes/class-options-handler.php:194
-#: svn/tags/0.12.0/includes/class-options-handler.php:264
-#: svn/tags/0.12.1/includes/class-options-handler.php:264
-#: svn/tags/0.12.2/includes/class-options-handler.php:264
-#: svn/tags/0.14.0/includes/class-options-handler.php:269
-#: svn/trunk/includes/class-options-handler.php:269
+#: includes/class-options-handler.php:273
 msgid "Supported Post Types"
 msgstr ""
 
-#: includes/class-options-handler.php:284
-#: svn/tags/0.1/includes/class-options-handler.php:179
-#: svn/tags/0.2/includes/class-options-handler.php:179
-#: svn/tags/0.4.1/includes/class-options-handler.php:206
-#: svn/tags/0.4/includes/class-options-handler.php:206
-#: svn/tags/0.5.1/includes/class-options-handler.php:189
-#: svn/tags/0.6.1/includes/class-options-handler.php:189
-#: svn/tags/0.6.3/includes/class-options-handler.php:211
-#: svn/tags/0.6.4/includes/class-options-handler.php:211
-#: svn/tags/0.9.0/includes/class-options-handler.php:208
-#: svn/tags/0.10.0/includes/class-options-handler.php:205
-#: svn/tags/0.10.1/includes/class-options-handler.php:205
-#: svn/tags/0.12.0/includes/class-options-handler.php:279
-#: svn/tags/0.12.1/includes/class-options-handler.php:279
-#: svn/tags/0.12.2/includes/class-options-handler.php:279
-#: svn/tags/0.14.0/includes/class-options-handler.php:284
-#: svn/trunk/includes/class-options-handler.php:284
+#: includes/class-options-handler.php:288
 msgid "Post types for which sharing to Mastodon is possible. (Sharing can still be disabled on a per-post basis.)"
 msgstr ""
 
-#: includes/class-options-handler.php:290
-#: includes/class-options-handler.php:338
-#: svn/tags/0.1/includes/class-options-handler.php:185
-#: svn/tags/0.1/includes/class-options-handler.php:230
-#: svn/tags/0.2/includes/class-options-handler.php:185
-#: svn/tags/0.2/includes/class-options-handler.php:230
-#: svn/tags/0.4.1/includes/class-options-handler.php:212
-#: svn/tags/0.4.1/includes/class-options-handler.php:258
-#: svn/tags/0.4/includes/class-options-handler.php:212
-#: svn/tags/0.4/includes/class-options-handler.php:258
-#: svn/tags/0.5.1/includes/class-options-handler.php:195
-#: svn/tags/0.5.1/includes/class-options-handler.php:241
-#: svn/tags/0.6.1/includes/class-options-handler.php:195
-#: svn/tags/0.6.1/includes/class-options-handler.php:241
-#: svn/tags/0.6.3/includes/class-options-handler.php:217
-#: svn/tags/0.6.3/includes/class-options-handler.php:263
-#: svn/tags/0.6.4/includes/class-options-handler.php:217
-#: svn/tags/0.6.4/includes/class-options-handler.php:263
-#: svn/tags/0.9.0/includes/class-options-handler.php:226
-#: svn/tags/0.9.0/includes/class-options-handler.php:272
-#: svn/tags/0.10.0/includes/class-options-handler.php:223
-#: svn/tags/0.10.0/includes/class-options-handler.php:269
-#: svn/tags/0.10.1/includes/class-options-handler.php:223
-#: svn/tags/0.10.1/includes/class-options-handler.php:269
-#: svn/tags/0.12.0/includes/class-options-handler.php:285
-#: svn/tags/0.12.0/includes/class-options-handler.php:333
-#: svn/tags/0.12.1/includes/class-options-handler.php:285
-#: svn/tags/0.12.1/includes/class-options-handler.php:333
-#: svn/tags/0.12.2/includes/class-options-handler.php:285
-#: svn/tags/0.12.2/includes/class-options-handler.php:333
-#: svn/tags/0.14.0/includes/class-options-handler.php:290
-#: svn/tags/0.14.0/includes/class-options-handler.php:338
-#: svn/trunk/includes/class-options-handler.php:290
-#: svn/trunk/includes/class-options-handler.php:338
+#: includes/class-options-handler.php:294
+#: includes/class-options-handler.php:342
 msgid "Authorize Access"
 msgstr ""
 
-#: includes/class-options-handler.php:306
-#: svn/tags/0.1/includes/class-options-handler.php:201
-#: svn/tags/0.2/includes/class-options-handler.php:201
-#: svn/tags/0.4.1/includes/class-options-handler.php:228
-#: svn/tags/0.4/includes/class-options-handler.php:228
-#: svn/tags/0.5.1/includes/class-options-handler.php:211
-#: svn/tags/0.6.1/includes/class-options-handler.php:211
-#: svn/tags/0.6.3/includes/class-options-handler.php:233
-#: svn/tags/0.6.4/includes/class-options-handler.php:233
-#: svn/tags/0.9.0/includes/class-options-handler.php:242
-#: svn/tags/0.10.0/includes/class-options-handler.php:239
-#: svn/tags/0.10.1/includes/class-options-handler.php:239
-#: svn/tags/0.12.0/includes/class-options-handler.php:301
-#: svn/tags/0.12.1/includes/class-options-handler.php:301
-#: svn/tags/0.12.2/includes/class-options-handler.php:301
-#: svn/tags/0.14.0/includes/class-options-handler.php:306
-#: svn/trunk/includes/class-options-handler.php:306
+#: includes/class-options-handler.php:310
 msgid "Access granted!"
 msgstr ""
 
-#: includes/class-options-handler.php:337
-#: svn/tags/0.12.0/includes/class-options-handler.php:332
-#: svn/tags/0.12.1/includes/class-options-handler.php:332
-#: svn/tags/0.12.2/includes/class-options-handler.php:332
-#: svn/tags/0.14.0/includes/class-options-handler.php:337
-#: svn/trunk/includes/class-options-handler.php:337
+#: includes/class-options-handler.php:341
 msgid "Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication."
 msgstr ""
 
-#: includes/class-options-handler.php:343
-#: svn/tags/0.1/includes/class-options-handler.php:235
-#: svn/tags/0.2/includes/class-options-handler.php:235
-#: svn/tags/0.4.1/includes/class-options-handler.php:263
-#: svn/tags/0.4/includes/class-options-handler.php:263
-#: svn/tags/0.5.1/includes/class-options-handler.php:246
-#: svn/tags/0.6.1/includes/class-options-handler.php:246
-#: svn/tags/0.6.3/includes/class-options-handler.php:268
-#: svn/tags/0.6.4/includes/class-options-handler.php:268
-#: svn/tags/0.9.0/includes/class-options-handler.php:277
-#: svn/tags/0.10.0/includes/class-options-handler.php:274
-#: svn/tags/0.10.1/includes/class-options-handler.php:274
-#: svn/tags/0.12.0/includes/class-options-handler.php:338
-#: svn/tags/0.12.1/includes/class-options-handler.php:338
-#: svn/tags/0.12.2/includes/class-options-handler.php:338
-#: svn/tags/0.14.0/includes/class-options-handler.php:343
-#: svn/trunk/includes/class-options-handler.php:343
+#: includes/class-options-handler.php:347
 msgid "You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline."
 msgstr ""
 
-#: includes/class-options-handler.php:358
-#: svn/tags/0.1/includes/class-options-handler.php:250
-#: svn/tags/0.2/includes/class-options-handler.php:250
-#: svn/tags/0.4.1/includes/class-options-handler.php:278
-#: svn/tags/0.4/includes/class-options-handler.php:278
-#: svn/tags/0.5.1/includes/class-options-handler.php:261
-#: svn/tags/0.6.1/includes/class-options-handler.php:261
-#: svn/tags/0.6.3/includes/class-options-handler.php:283
-#: svn/tags/0.6.4/includes/class-options-handler.php:283
-#: svn/tags/0.9.0/includes/class-options-handler.php:292
-#: svn/tags/0.10.0/includes/class-options-handler.php:289
-#: svn/tags/0.10.1/includes/class-options-handler.php:289
-#: svn/tags/0.12.0/includes/class-options-handler.php:353
-#: svn/tags/0.12.1/includes/class-options-handler.php:353
-#: svn/tags/0.12.2/includes/class-options-handler.php:353
-#: svn/tags/0.14.0/includes/class-options-handler.php:358
-#: svn/trunk/includes/class-options-handler.php:358
+#: includes/class-options-handler.php:362
 msgid "Revoke Access"
 msgstr ""
 
-#: includes/class-options-handler.php:367
-#: svn/tags/0.1/includes/class-options-handler.php:259
-#: svn/tags/0.2/includes/class-options-handler.php:259
-#: svn/tags/0.4.1/includes/class-options-handler.php:287
-#: svn/tags/0.4/includes/class-options-handler.php:287
-#: svn/tags/0.5.1/includes/class-options-handler.php:270
-#: svn/tags/0.6.1/includes/class-options-handler.php:270
-#: svn/tags/0.6.3/includes/class-options-handler.php:292
-#: svn/tags/0.6.4/includes/class-options-handler.php:292
-#: svn/tags/0.9.0/includes/class-options-handler.php:301
-#: svn/tags/0.10.0/includes/class-options-handler.php:298
-#: svn/tags/0.10.1/includes/class-options-handler.php:298
-#: svn/tags/0.12.0/includes/class-options-handler.php:362
-#: svn/tags/0.12.1/includes/class-options-handler.php:362
-#: svn/tags/0.12.2/includes/class-options-handler.php:362
-#: svn/tags/0.14.0/includes/class-options-handler.php:367
-#: svn/trunk/includes/class-options-handler.php:367
+#: includes/class-options-handler.php:371
 msgid "Something went wrong contacting your Mastodon instance. Please reload this page to try again."
 msgstr ""
 
-#: includes/class-options-handler.php:373
-#: svn/tags/0.1/includes/class-options-handler.php:265
-#: svn/tags/0.2/includes/class-options-handler.php:265
-#: svn/tags/0.4.1/includes/class-options-handler.php:293
-#: svn/tags/0.4/includes/class-options-handler.php:293
-#: svn/tags/0.5.1/includes/class-options-handler.php:276
-#: svn/tags/0.6.1/includes/class-options-handler.php:276
-#: svn/tags/0.6.3/includes/class-options-handler.php:298
-#: svn/tags/0.6.4/includes/class-options-handler.php:298
-#: svn/tags/0.9.0/includes/class-options-handler.php:307
-#: svn/tags/0.10.0/includes/class-options-handler.php:304
-#: svn/tags/0.10.1/includes/class-options-handler.php:304
-#: svn/tags/0.12.0/includes/class-options-handler.php:368
-#: svn/tags/0.12.1/includes/class-options-handler.php:368
-#: svn/tags/0.12.2/includes/class-options-handler.php:368
-#: svn/tags/0.14.0/includes/class-options-handler.php:373
-#: svn/trunk/includes/class-options-handler.php:373
+#: includes/class-options-handler.php:377
 msgid "Please fill out and save your Mastodon instance&rsquo;s URL first."
 msgstr ""
 
-#: includes/class-options-handler.php:387
-#: svn/tags/0.12.0/includes/class-options-handler.php:382
-#: svn/tags/0.12.1/includes/class-options-handler.php:382
-#: svn/tags/0.12.2/includes/class-options-handler.php:382
-#: svn/tags/0.14.0/includes/class-options-handler.php:387
-#: svn/trunk/includes/class-options-handler.php:387
+#: includes/class-options-handler.php:391
 msgid "Featured Images"
 msgstr ""
 
-#: includes/class-options-handler.php:388
-#: svn/tags/0.12.0/includes/class-options-handler.php:383
-#: svn/tags/0.12.1/includes/class-options-handler.php:383
-#: svn/tags/0.12.2/includes/class-options-handler.php:383
-#: svn/tags/0.14.0/includes/class-options-handler.php:388
-#: svn/trunk/includes/class-options-handler.php:388
+#: includes/class-options-handler.php:392
 msgid "Include featured images"
 msgstr ""
 
-#: includes/class-options-handler.php:389
-#: svn/tags/0.12.0/includes/class-options-handler.php:384
-#: svn/tags/0.12.1/includes/class-options-handler.php:384
-#: svn/tags/0.12.2/includes/class-options-handler.php:384
-#: svn/tags/0.14.0/includes/class-options-handler.php:389
-#: svn/trunk/includes/class-options-handler.php:389
+#: includes/class-options-handler.php:393
 msgid "Upload featured images."
 msgstr ""
 
-#: includes/class-options-handler.php:392
-#: svn/tags/0.12.0/includes/class-options-handler.php:387
-#: svn/tags/0.12.1/includes/class-options-handler.php:387
-#: svn/tags/0.12.2/includes/class-options-handler.php:387
-#: svn/tags/0.14.0/includes/class-options-handler.php:392
-#: svn/trunk/includes/class-options-handler.php:392
+#: includes/class-options-handler.php:396
 msgid "Attached Images"
 msgstr ""
 
-#: includes/class-options-handler.php:393
-#: svn/tags/0.12.0/includes/class-options-handler.php:388
-#: svn/tags/0.12.1/includes/class-options-handler.php:388
-#: svn/tags/0.12.2/includes/class-options-handler.php:388
-#: svn/tags/0.14.0/includes/class-options-handler.php:393
-#: svn/trunk/includes/class-options-handler.php:393
+#: includes/class-options-handler.php:397
 msgid "Include attached images"
 msgstr ""
 
-#: includes/class-options-handler.php:394
-#: svn/tags/0.12.0/includes/class-options-handler.php:389
-#: svn/tags/0.12.1/includes/class-options-handler.php:389
-#: svn/tags/0.12.2/includes/class-options-handler.php:389
-#: svn/tags/0.14.0/includes/class-options-handler.php:394
-#: svn/trunk/includes/class-options-handler.php:394
+#: includes/class-options-handler.php:398
 msgid "Upload attached images."
 msgstr ""
 
-#: includes/class-options-handler.php:397
-#: svn/tags/0.12.0/includes/class-options-handler.php:392
-#: svn/tags/0.12.1/includes/class-options-handler.php:392
-#: svn/tags/0.12.2/includes/class-options-handler.php:392
-#: svn/tags/0.14.0/includes/class-options-handler.php:397
-#: svn/trunk/includes/class-options-handler.php:397
+#: includes/class-options-handler.php:401
 msgid "In-Post Images"
 msgstr ""
 
-#: includes/class-options-handler.php:398
-#: svn/tags/0.12.0/includes/class-options-handler.php:393
-#: svn/tags/0.12.1/includes/class-options-handler.php:393
-#: svn/tags/0.12.2/includes/class-options-handler.php:393
-#: svn/tags/0.14.0/includes/class-options-handler.php:398
-#: svn/trunk/includes/class-options-handler.php:398
+#: includes/class-options-handler.php:402
 msgid "Include &ldquo;in-post&rdquo; images"
 msgstr ""
 
-#: includes/class-options-handler.php:399
-#: svn/tags/0.12.0/includes/class-options-handler.php:394
-#: svn/tags/0.12.1/includes/class-options-handler.php:394
-#: svn/tags/0.12.2/includes/class-options-handler.php:394
-#: svn/tags/0.14.0/includes/class-options-handler.php:399
-#: svn/trunk/includes/class-options-handler.php:399
+#: includes/class-options-handler.php:403
 msgid "(Experimental) Upload &ldquo;in-content&rdquo; images."
 msgstr ""
 
-#: includes/class-options-handler.php:402
-#: svn/tags/0.12.0/includes/class-options-handler.php:397
-#: svn/tags/0.12.1/includes/class-options-handler.php:397
-#: svn/tags/0.12.2/includes/class-options-handler.php:397
-#: svn/tags/0.14.0/includes/class-options-handler.php:402
-#: svn/trunk/includes/class-options-handler.php:402
+#: includes/class-options-handler.php:406
 msgid "Max. No. of Images"
 msgstr ""
 
-#: includes/class-options-handler.php:404
-#: svn/tags/0.12.0/includes/class-options-handler.php:399
-#: svn/tags/0.12.1/includes/class-options-handler.php:399
-#: svn/tags/0.12.2/includes/class-options-handler.php:399
-#: svn/tags/0.14.0/includes/class-options-handler.php:404
-#: svn/trunk/includes/class-options-handler.php:404
+#: includes/class-options-handler.php:408
 msgid "The maximum number of images that will be uploaded. (Mastodon supports up to 4 images.)"
 msgstr ""
 
-#: includes/class-options-handler.php:421
-#: svn/tags/0.9.0/includes/class-options-handler.php:211
-#: svn/tags/0.10.0/includes/class-options-handler.php:208
-#: svn/tags/0.10.1/includes/class-options-handler.php:208
-#: svn/tags/0.12.0/includes/class-options-handler.php:416
-#: svn/tags/0.12.1/includes/class-options-handler.php:416
-#: svn/tags/0.12.2/includes/class-options-handler.php:416
-#: svn/tags/0.14.0/includes/class-options-handler.php:421
-#: svn/trunk/includes/class-options-handler.php:421
+#: includes/class-options-handler.php:425
 msgid "Delayed Sharing"
 msgstr ""
 
-#: includes/class-options-handler.php:423
-#: svn/tags/0.14.0/includes/class-options-handler.php:423
-#: svn/trunk/includes/class-options-handler.php:423
+#: includes/class-options-handler.php:427
 msgid "The number of seconds (0&ndash;3600) WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;that&rsquo;s 5 minutes&mdash;may resolve issues with image uploads.)"
 msgstr ""
 
-#: includes/class-options-handler.php:426
-#: svn/tags/0.12.0/includes/class-options-handler.php:421
-#: svn/tags/0.12.1/includes/class-options-handler.php:421
-#: svn/tags/0.12.2/includes/class-options-handler.php:421
-#: svn/tags/0.14.0/includes/class-options-handler.php:426
-#: svn/trunk/includes/class-options-handler.php:426
+#: includes/class-options-handler.php:430
 msgid "Opt-In"
 msgstr ""
 
-#: includes/class-options-handler.php:427
-#: svn/tags/0.12.1/includes/class-options-handler.php:422
-#: svn/tags/0.12.2/includes/class-options-handler.php:422
-#: svn/tags/0.14.0/includes/class-options-handler.php:427
-#: svn/trunk/includes/class-options-handler.php:427
+#: includes/class-options-handler.php:431
 msgid "Make sharing opt-in rather than opt-out"
 msgstr ""
 
-#: includes/class-options-handler.php:428
-#: svn/tags/0.12.1/includes/class-options-handler.php:423
-#: svn/tags/0.12.2/includes/class-options-handler.php:423
-#: svn/tags/0.14.0/includes/class-options-handler.php:428
-#: svn/trunk/includes/class-options-handler.php:428
+#: includes/class-options-handler.php:432
 msgid "Have the &ldquo;Share on Mastodon&rdquo; checkbox unchecked by default."
 msgstr ""
 
-#: includes/class-options-handler.php:431
-#: svn/tags/0.12.0/includes/class-options-handler.php:425
-#: svn/tags/0.12.1/includes/class-options-handler.php:426
-#: svn/tags/0.12.2/includes/class-options-handler.php:426
-#: svn/tags/0.14.0/includes/class-options-handler.php:431
-#: svn/trunk/includes/class-options-handler.php:431
+#: includes/class-options-handler.php:435
 msgid "Share Always"
 msgstr ""
 
-#: includes/class-options-handler.php:432
-#: svn/tags/0.12.1/includes/class-options-handler.php:427
-#: svn/tags/0.12.2/includes/class-options-handler.php:427
-#: svn/tags/0.14.0/includes/class-options-handler.php:432
-#: svn/trunk/includes/class-options-handler.php:432
+#: includes/class-options-handler.php:436
 msgid "Always share on Mastodon"
 msgstr ""
 
-#: includes/class-options-handler.php:433
-#: svn/tags/0.14.0/includes/class-options-handler.php:433
-#: svn/trunk/includes/class-options-handler.php:433
+#: includes/class-options-handler.php:437
 msgid "&ldquo;Force&rdquo; sharing (regardless of the &ldquo;Share on Mastodon&rdquo; checkbox&rsquo;s state), like when posting from a mobile app."
 msgstr ""
 
-#: includes/class-options-handler.php:436
-#: svn/tags/0.14.0/includes/class-options-handler.php:436
-#: svn/trunk/includes/class-options-handler.php:436
+#: includes/class-options-handler.php:440
+msgid "Status Template"
+msgstr ""
+
+#. translators: %s: supported template tags
+#: includes/class-options-handler.php:443
+msgid "(Experimental) Customize the default status template. Supported &ldquo;template tags&rdquo;: %s."
+msgstr ""
+
+#: includes/class-options-handler.php:446
 msgid "Customize Status"
 msgstr ""
 
-#: includes/class-options-handler.php:437
-#: svn/tags/0.14.0/includes/class-options-handler.php:437
-#: svn/trunk/includes/class-options-handler.php:437
+#: includes/class-options-handler.php:447
 msgid "Allow customizing Mastodon statuses"
 msgstr ""
 
 #. translators: %s: link to the `share_on_mastodon_status` documentation
-#: includes/class-options-handler.php:439
-msgid "(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s meta box. May not always work in combination with the block editor and &ldquo;Share Always.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)"
-msgstr ""
-
-#: includes/class-options-handler.php:444
-#: svn/tags/0.9.0/includes/class-options-handler.php:217
-#: svn/tags/0.10.0/includes/class-options-handler.php:214
-#: svn/tags/0.10.1/includes/class-options-handler.php:214
-#: svn/tags/0.12.0/includes/class-options-handler.php:433
-#: svn/tags/0.12.1/includes/class-options-handler.php:434
-#: svn/tags/0.12.2/includes/class-options-handler.php:434
-#: svn/tags/0.14.0/includes/class-options-handler.php:444
-#: svn/trunk/includes/class-options-handler.php:444
-msgid "Micropub"
-msgstr ""
-
-#: includes/class-options-handler.php:445
-#: svn/tags/0.9.0/includes/class-options-handler.php:218
-#: svn/tags/0.10.0/includes/class-options-handler.php:215
-#: svn/tags/0.10.1/includes/class-options-handler.php:215
-#: svn/tags/0.12.0/includes/class-options-handler.php:434
-#: svn/tags/0.12.1/includes/class-options-handler.php:435
-#: svn/tags/0.12.2/includes/class-options-handler.php:435
-#: svn/tags/0.14.0/includes/class-options-handler.php:445
-#: svn/trunk/includes/class-options-handler.php:445
-msgid "Add syndication target"
-msgstr ""
-
-#: includes/class-options-handler.php:446
-#: svn/tags/0.12.1/includes/class-options-handler.php:436
-#: svn/tags/0.12.2/includes/class-options-handler.php:436
-#: svn/tags/0.14.0/includes/class-options-handler.php:446
-#: svn/trunk/includes/class-options-handler.php:446
-msgid "Add &ldquo;Mastodon&rdquo; as a Micropub syndication target."
-msgstr ""
-
-#: includes/class-options-handler.php:452
-#: svn/tags/0.12.0/includes/class-options-handler.php:441
-#: svn/tags/0.12.1/includes/class-options-handler.php:442
-#: svn/tags/0.12.2/includes/class-options-handler.php:442
-#: svn/tags/0.14.0/includes/class-options-handler.php:452
-#: svn/trunk/includes/class-options-handler.php:452
-msgid "Syndication Links"
-msgstr ""
-
-#: includes/class-options-handler.php:453
-#: svn/tags/0.12.0/includes/class-options-handler.php:442
-#: svn/tags/0.12.1/includes/class-options-handler.php:443
-#: svn/tags/0.12.2/includes/class-options-handler.php:443
-#: svn/tags/0.14.0/includes/class-options-handler.php:453
-#: svn/trunk/includes/class-options-handler.php:453
-msgid "Add Mastodon URLs to syndication links"
+#: includes/class-options-handler.php:449
+msgid "(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)"
 msgstr ""
 
 #: includes/class-options-handler.php:454
-#: svn/tags/0.12.0/includes/class-options-handler.php:443
-#: svn/tags/0.12.1/includes/class-options-handler.php:444
-#: svn/tags/0.12.2/includes/class-options-handler.php:444
-#: svn/tags/0.14.0/includes/class-options-handler.php:454
-#: svn/trunk/includes/class-options-handler.php:454
+msgid "Micropub"
+msgstr ""
+
+#: includes/class-options-handler.php:455
+msgid "Add syndication target"
+msgstr ""
+
+#: includes/class-options-handler.php:456
+msgid "Add &ldquo;Mastodon&rdquo; as a Micropub syndication target."
+msgstr ""
+
+#: includes/class-options-handler.php:462
+msgid "Syndication Links"
+msgstr ""
+
+#: includes/class-options-handler.php:463
+msgid "Add Mastodon URLs to syndication links"
+msgstr ""
+
+#: includes/class-options-handler.php:464
 msgid "(Experimental) Add Mastodon URLs to Syndication Links&rsquo; list of syndication links."
 msgstr ""
 
-#: includes/class-options-handler.php:472
-#: svn/tags/0.12.0/includes/class-options-handler.php:461
-#: svn/tags/0.12.1/includes/class-options-handler.php:462
-#: svn/tags/0.12.2/includes/class-options-handler.php:462
-#: svn/tags/0.14.0/includes/class-options-handler.php:472
-#: svn/trunk/includes/class-options-handler.php:472
+#: includes/class-options-handler.php:482
 msgid "Logging"
 msgstr ""
 
-#: includes/class-options-handler.php:473
-#: svn/tags/0.12.0/includes/class-options-handler.php:462
-#: svn/tags/0.12.1/includes/class-options-handler.php:463
-#: svn/tags/0.12.2/includes/class-options-handler.php:463
-#: svn/tags/0.14.0/includes/class-options-handler.php:473
-#: svn/trunk/includes/class-options-handler.php:473
+#: includes/class-options-handler.php:483
 msgid "Enable debug logging"
 msgstr ""
 
-#: includes/class-options-handler.php:474
-#: svn/tags/0.12.0/includes/class-options-handler.php:463
-#: svn/tags/0.12.1/includes/class-options-handler.php:464
-#: svn/tags/0.12.2/includes/class-options-handler.php:464
-#: svn/tags/0.14.0/includes/class-options-handler.php:474
-#: svn/trunk/includes/class-options-handler.php:474
+#: includes/class-options-handler.php:484
 msgid "You&rsquo;ll <em>also</em> need to set WordPress&rsquo; <a href=\"https://wordpress.org/documentation/article/debugging-in-wordpress/#example-wp-config-php-for-debugging\" target=\"_blank\" rel=\"noopener noreferrer\">debug logging constants</a>."
 msgstr ""
 
-#: includes/class-options-handler.php:480
-#: svn/tags/0.4.1/includes/class-options-handler.php:299
-#: svn/tags/0.4/includes/class-options-handler.php:299
-#: svn/tags/0.5.1/includes/class-options-handler.php:282
-#: svn/tags/0.6.1/includes/class-options-handler.php:282
-#: svn/tags/0.6.3/includes/class-options-handler.php:304
-#: svn/tags/0.6.4/includes/class-options-handler.php:304
-#: svn/tags/0.9.0/includes/class-options-handler.php:313
-#: svn/tags/0.10.0/includes/class-options-handler.php:310
-#: svn/tags/0.10.1/includes/class-options-handler.php:310
-#: svn/tags/0.12.0/includes/class-options-handler.php:469
-#: svn/tags/0.12.1/includes/class-options-handler.php:470
-#: svn/tags/0.12.2/includes/class-options-handler.php:470
-#: svn/tags/0.14.0/includes/class-options-handler.php:480
-#: svn/trunk/includes/class-options-handler.php:480
+#: includes/class-options-handler.php:490
 msgid "Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)"
 msgstr ""
 
-#: includes/class-options-handler.php:495
-#: svn/tags/0.4.1/includes/class-options-handler.php:314
-#: svn/tags/0.4/includes/class-options-handler.php:314
-#: svn/tags/0.5.1/includes/class-options-handler.php:297
-#: svn/tags/0.6.1/includes/class-options-handler.php:297
-#: svn/tags/0.6.3/includes/class-options-handler.php:319
-#: svn/tags/0.6.4/includes/class-options-handler.php:319
-#: svn/tags/0.9.0/includes/class-options-handler.php:328
-#: svn/tags/0.10.0/includes/class-options-handler.php:325
-#: svn/tags/0.10.1/includes/class-options-handler.php:325
-#: svn/tags/0.12.0/includes/class-options-handler.php:484
-#: svn/tags/0.12.1/includes/class-options-handler.php:485
-#: svn/tags/0.12.2/includes/class-options-handler.php:485
-#: svn/tags/0.14.0/includes/class-options-handler.php:495
-#: svn/trunk/includes/class-options-handler.php:495
+#: includes/class-options-handler.php:505
 msgid "Reset Settings"
 msgstr ""
 
-#: includes/class-options-handler.php:502
-#: svn/tags/0.1/includes/class-options-handler.php:272
-#: svn/tags/0.2/includes/class-options-handler.php:272
-#: svn/tags/0.4.1/includes/class-options-handler.php:321
-#: svn/tags/0.4/includes/class-options-handler.php:321
-#: svn/tags/0.5.1/includes/class-options-handler.php:304
-#: svn/tags/0.6.1/includes/class-options-handler.php:304
-#: svn/tags/0.6.3/includes/class-options-handler.php:326
-#: svn/tags/0.6.4/includes/class-options-handler.php:326
-#: svn/tags/0.9.0/includes/class-options-handler.php:335
-#: svn/tags/0.10.0/includes/class-options-handler.php:332
-#: svn/tags/0.10.1/includes/class-options-handler.php:332
-#: svn/tags/0.12.0/includes/class-options-handler.php:491
-#: svn/tags/0.12.1/includes/class-options-handler.php:492
-#: svn/tags/0.12.2/includes/class-options-handler.php:492
-#: svn/tags/0.14.0/includes/class-options-handler.php:502
-#: svn/trunk/includes/class-options-handler.php:502
+#: includes/class-options-handler.php:512
 msgid "Below information is not meant to be shared with anyone but may help when troubleshooting issues."
 msgstr ""
 
-#: includes/class-options-handler.php:530
-#: svn/tags/0.4.1/includes/class-options-handler.php:347
-#: svn/tags/0.4/includes/class-options-handler.php:347
-#: svn/tags/0.5.1/includes/class-options-handler.php:330
-#: svn/tags/0.6.1/includes/class-options-handler.php:331
-#: svn/tags/0.6.3/includes/class-options-handler.php:353
-#: svn/tags/0.6.4/includes/class-options-handler.php:353
-#: svn/tags/0.9.0/includes/class-options-handler.php:362
-#: svn/tags/0.10.0/includes/class-options-handler.php:359
-#: svn/tags/0.10.1/includes/class-options-handler.php:359
-#: svn/tags/0.12.0/includes/class-options-handler.php:519
-#: svn/tags/0.12.1/includes/class-options-handler.php:520
-#: svn/tags/0.12.2/includes/class-options-handler.php:520
-#: svn/tags/0.14.0/includes/class-options-handler.php:530
-#: svn/trunk/includes/class-options-handler.php:530
+#: includes/class-options-handler.php:540
 msgid "Are you sure you want to reset all settings?"
 msgstr ""
 
+#: includes/class-post-handler.php:406
+msgid "(Optional) Message"
+msgstr ""
+
+#: includes/class-post-handler.php:408
+msgid "Customize this post&rsquo;s Mastodon status."
+msgstr ""
+
 #. translators: toot URL
-#: includes/class-post-handler.php:350
-#: svn/tags/0.6.1/includes/class-post-handler.php:98
-#: svn/tags/0.6.3/includes/class-post-handler.php:99
-#: svn/tags/0.6.4/includes/class-post-handler.php:105
-#: svn/tags/0.9.0/includes/class-post-handler.php:131
-#: svn/tags/0.10.0/includes/class-post-handler.php:379
-#: svn/tags/0.10.1/includes/class-post-handler.php:379
-#: svn/tags/0.12.0/includes/class-post-handler.php:408
-#: svn/tags/0.12.1/includes/class-post-handler.php:408
-#: svn/tags/0.12.2/includes/class-post-handler.php:376
-#: svn/tags/0.14.0/includes/class-post-handler.php:350
-#: svn/trunk/includes/class-post-handler.php:350
+#: includes/class-post-handler.php:424
 msgid "Shared at %s"
 msgstr ""
 
 #. translators: "unlink" link text
-#: includes/class-post-handler.php:352
-#: svn/tags/0.6.1/includes/class-post-handler.php:100
-#: svn/tags/0.6.3/includes/class-post-handler.php:101
-#: svn/tags/0.6.4/includes/class-post-handler.php:107
-#: svn/tags/0.9.0/includes/class-post-handler.php:133
-#: svn/tags/0.10.0/includes/class-post-handler.php:381
-#: svn/tags/0.10.1/includes/class-post-handler.php:381
-#: svn/tags/0.12.0/includes/class-post-handler.php:410
-#: svn/tags/0.12.1/includes/class-post-handler.php:410
-#: svn/tags/0.12.2/includes/class-post-handler.php:378
-#: svn/tags/0.14.0/includes/class-post-handler.php:352
-#: svn/trunk/includes/class-post-handler.php:352
+#: includes/class-post-handler.php:426
 msgid "Unlink"
 msgstr ""
 
-#: includes/class-post-handler.php:368
-#: svn/tags/0.14.0/includes/class-post-handler.php:368
-#: svn/trunk/includes/class-post-handler.php:368
-msgid "(Optional) Message"
-msgstr ""
-
-#: includes/class-post-handler.php:370
-#: svn/tags/0.14.0/includes/class-post-handler.php:370
-#: svn/trunk/includes/class-post-handler.php:370
-msgid "Customize this post&rsquo;s Mastodon status. (A permalink will be appended automatically.)"
-msgstr ""
-
-#: includes/class-post-handler.php:386
-#: svn/tags/0.6.1/includes/class-post-handler.php:116
-#: svn/tags/0.6.3/includes/class-post-handler.php:117
-#: svn/tags/0.6.4/includes/class-post-handler.php:123
-#: svn/tags/0.9.0/includes/class-post-handler.php:149
-#: svn/tags/0.10.0/includes/class-post-handler.php:405
-#: svn/tags/0.10.1/includes/class-post-handler.php:405
-#: svn/tags/0.12.0/includes/class-post-handler.php:434
-#: svn/tags/0.12.1/includes/class-post-handler.php:434
-#: svn/tags/0.12.2/includes/class-post-handler.php:402
-#: svn/tags/0.14.0/includes/class-post-handler.php:386
-#: svn/trunk/includes/class-post-handler.php:386
+#: includes/class-post-handler.php:450
 msgid "Missing or invalid nonce."
 msgstr ""
 
-#: includes/class-post-handler.php:392
-#: svn/tags/0.6.1/includes/class-post-handler.php:122
-#: svn/tags/0.6.3/includes/class-post-handler.php:123
-#: svn/tags/0.6.4/includes/class-post-handler.php:129
-#: svn/tags/0.9.0/includes/class-post-handler.php:155
-#: svn/tags/0.10.0/includes/class-post-handler.php:411
-#: svn/tags/0.10.1/includes/class-post-handler.php:411
-#: svn/tags/0.12.0/includes/class-post-handler.php:440
-#: svn/tags/0.12.1/includes/class-post-handler.php:440
-#: svn/tags/0.12.2/includes/class-post-handler.php:408
-#: svn/tags/0.14.0/includes/class-post-handler.php:392
-#: svn/trunk/includes/class-post-handler.php:392
+#: includes/class-post-handler.php:456
 msgid "Missing or incorrect post ID."
 msgstr ""
 
-#: includes/class-post-handler.php:398
-#: svn/tags/0.6.1/includes/class-post-handler.php:128
-#: svn/tags/0.6.3/includes/class-post-handler.php:129
-#: svn/tags/0.6.4/includes/class-post-handler.php:135
-#: svn/tags/0.9.0/includes/class-post-handler.php:161
-#: svn/tags/0.10.0/includes/class-post-handler.php:417
-#: svn/tags/0.10.1/includes/class-post-handler.php:417
-#: svn/tags/0.12.0/includes/class-post-handler.php:446
-#: svn/tags/0.12.1/includes/class-post-handler.php:446
-#: svn/tags/0.12.2/includes/class-post-handler.php:414
-#: svn/tags/0.14.0/includes/class-post-handler.php:398
-#: svn/trunk/includes/class-post-handler.php:398
+#: includes/class-post-handler.php:462
 msgid "Insufficient rights."
 msgstr ""
 
-#: includes/class-post-handler.php:445
-#: svn/tags/0.6.1/includes/class-post-handler.php:172
-#: svn/tags/0.6.3/includes/class-post-handler.php:173
-#: svn/tags/0.6.4/includes/class-post-handler.php:179
-#: svn/tags/0.9.0/includes/class-post-handler.php:205
-#: svn/tags/0.10.0/includes/class-post-handler.php:461
-#: svn/tags/0.10.1/includes/class-post-handler.php:461
-#: svn/tags/0.12.0/includes/class-post-handler.php:490
-#: svn/tags/0.12.1/includes/class-post-handler.php:490
-#: svn/tags/0.12.2/includes/class-post-handler.php:458
-#: svn/tags/0.14.0/includes/class-post-handler.php:445
-#: svn/trunk/includes/class-post-handler.php:445
+#: includes/class-post-handler.php:512
 msgid "Forget this URL?"
-msgstr ""
-
-#: includes/class-post-handler.php:501
-#: svn/tags/0.14.0/includes/class-post-handler.php:501
-#: svn/trunk/includes/class-post-handler.php:501
-msgid "The `share_on_mastodon_enabled` hook is deprecated. Please use the &ldquo;Share Always&rdquo; setting instead. If you absolutely must use a filter, try `share_on_mastodon_force_share`."
-msgstr ""
-
-#: svn/tags/0.1/includes/class-options-handler.php:149
-#: svn/tags/0.2/includes/class-options-handler.php:149
-#: svn/tags/0.4.1/includes/class-options-handler.php:176
-#: svn/tags/0.4/includes/class-options-handler.php:176
-#: svn/tags/0.5.1/includes/class-options-handler.php:159
-#: svn/tags/0.6.1/includes/class-options-handler.php:159
-#: svn/tags/0.6.3/includes/class-options-handler.php:181
-#: svn/tags/0.6.4/includes/class-options-handler.php:181
-#: svn/tags/0.9.0/includes/class-options-handler.php:180
-#: svn/tags/0.10.0/includes/class-options-handler.php:177
-#: svn/tags/0.10.1/includes/class-options-handler.php:177
-msgid "Settings"
-msgstr ""
-
-#: svn/tags/0.1/includes/class-options-handler.php:165
-#: svn/tags/0.2/includes/class-options-handler.php:165
-#: svn/tags/0.4.1/includes/class-options-handler.php:192
-#: svn/tags/0.4/includes/class-options-handler.php:192
-#: svn/tags/0.5.1/includes/class-options-handler.php:175
-#: svn/tags/0.6.1/includes/class-options-handler.php:175
-#: svn/tags/0.6.3/includes/class-options-handler.php:197
-#: svn/tags/0.6.4/includes/class-options-handler.php:197
-#: svn/tags/0.9.0/includes/class-options-handler.php:194
-#: svn/tags/0.10.0/includes/class-options-handler.php:191
-#: svn/tags/0.10.1/includes/class-options-handler.php:191
-msgid "Your Mastodon instance&rsquo;s URL."
-msgstr ""
-
-#: svn/tags/0.1/includes/class-options-handler.php:229
-#: svn/tags/0.2/includes/class-options-handler.php:229
-#: svn/tags/0.4.1/includes/class-options-handler.php:257
-#: svn/tags/0.4/includes/class-options-handler.php:257
-#: svn/tags/0.5.1/includes/class-options-handler.php:240
-#: svn/tags/0.6.1/includes/class-options-handler.php:240
-#: svn/tags/0.6.3/includes/class-options-handler.php:262
-#: svn/tags/0.6.4/includes/class-options-handler.php:262
-#: svn/tags/0.9.0/includes/class-options-handler.php:271
-#: svn/tags/0.10.0/includes/class-options-handler.php:268
-#: svn/tags/0.10.1/includes/class-options-handler.php:268
-msgid "Authorize WordPress to read and write to your Mastodon timeline in order to enable crossposting."
-msgstr ""
-
-#: svn/tags/0.9.0/includes/class-options-handler.php:213
-#: svn/tags/0.10.0/includes/class-options-handler.php:210
-#: svn/tags/0.10.1/includes/class-options-handler.php:210
-msgid "The time, in seconds, WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;that&rsquo;s 5 minutes&mdash;might resolve issues with image uploads.)"
-msgstr ""
-
-#: svn/tags/0.9.0/includes/class-options-handler.php:219
-#: svn/tags/0.10.0/includes/class-options-handler.php:216
-#: svn/tags/0.10.1/includes/class-options-handler.php:216
-#: svn/tags/0.12.0/includes/class-options-handler.php:435
-msgid "(Experimental) Add &ldquo;Mastodon&rdquo; as a Micropub syndication target."
-msgstr ""
-
-#: svn/tags/0.12.0/includes/class-options-handler.php:418
-#: svn/tags/0.12.1/includes/class-options-handler.php:418
-#: svn/tags/0.12.2/includes/class-options-handler.php:418
-msgid "The time, in seconds, WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;that&rsquo;s 5 minutes&mdash;may resolve issues with image uploads.)"
-msgstr ""
-
-#: svn/tags/0.12.0/includes/class-options-handler.php:422
-msgid "Make syndication opt-in rather than opt-out"
-msgstr ""
-
-#: svn/tags/0.12.0/includes/class-options-handler.php:426
-msgid "Always syndicate to Mastodon"
-msgstr ""
-
-#. translators: %s: link to the `share_on_mastodon_enabled` documentation
-#: svn/tags/0.12.0/includes/class-options-handler.php:428
-msgid " &ldquo;Force&rdquo; syndication, like when posting from a mobile app. For more fine-grained control, have a look at the %s filter hook."
-msgstr ""
-
-#. translators: %s: link to the `share_on_mastodon_enabled` documentation
-#: svn/tags/0.12.1/includes/class-options-handler.php:429
-#: svn/tags/0.12.2/includes/class-options-handler.php:429
-msgid "&ldquo;Force&rdquo; sharing, like when posting from a mobile app. For more fine-grained control, have a look at the %s filter hook."
-msgstr ""
-
-#. translators: %s: link to the `share_on_mastodon_status` documentation
-#: svn/tags/0.14.0/includes/class-options-handler.php:439
-#: svn/trunk/includes/class-options-handler.php:439
-msgid "(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s meta box. May cause problems in combination with the block editor and &ldquo;Share Always.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)"
 msgstr ""
