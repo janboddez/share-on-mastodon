@@ -23,13 +23,13 @@ class Image_Handler {
 		$enable_referenced_images = ! empty( $options['referenced_images'] ); // This was always opt-in.
 		$enable_referenced_images = apply_filters( 'share_on_mastodon_referenced_images', $enable_referenced_images, $post );
 
-		$enable_featured_images = ! isset( $options['featured_images'] ) || $options['featured_images'];
-		$enable_featured_images = has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', $enable_featured_images, $post );
+		$enable_featured_image = ! isset( $options['featured_images'] ) || $options['featured_images'];
+		$enable_featured_image = has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', $enable_featured_image, $post );
 
 		$enable_attached_images = ! isset( $options['attached_images'] ) || $options['attached_images'];
 		$enable_attached_images = apply_filters( 'share_on_mastodon_attached_images', $enable_attached_images, $post );
 
-		if ( ! ( $enable_referenced_images || $enable_featured_images || $enable_attached_images ) ) {
+		if ( ! ( $enable_referenced_images || $enable_featured_image || $enable_attached_images ) ) {
 			// Nothing to do.
 			return array();
 		}
@@ -42,13 +42,12 @@ class Image_Handler {
 		$media = array();
 
 		if ( $enable_referenced_images && ! empty( $referenced_images ) ) {
-			// Add in-post images.
-			foreach ( $referenced_images as $referenced_image ) {
-				$media[] = $referenced_image;
-			}
+			// Add in-post images. No need to loop over them, as they're already
+			// in the right format (and `$media` is still empty at this point).
+			$media = $referenced_images;
 		}
 
-		if ( $enable_featured_images ) {
+		if ( $enable_featured_image ) {
 			// Include featured image.
 			$image_id = get_post_thumbnail_id( $post->ID );
 			$media[]  = array(
@@ -215,7 +214,10 @@ class Image_Handler {
 	}
 
 	/**
-	 * Uploads an attachment and returns a (single) media ID.
+	 * Returns alt text for a certain image.
+	 *
+	 * Looks through `$images` first, and falls back on what's stored in the
+	 * `wp_postmeta` table.
 	 *
 	 * @param  int   $image_id Attachment ID.
 	 * @param  array $images   An array of (in-post) images to look through first.

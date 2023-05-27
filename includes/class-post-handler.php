@@ -125,6 +125,10 @@ class Post_Handler {
 			// the block editor. In that case, this function will be called a
 			// second time after custom meta, including `custom_status_field`,
 			// is processed.
+			// Unless, of course, all meta boxes, including Share on Mastodon's
+			// were hidden (e.g., when a site owners relies on the "Share
+			// Always" setting). In that (extremely rare?) case, they _should_
+			// disable the "Custom Status Field" option.
 			return;
 		}
 
@@ -190,12 +194,12 @@ class Post_Handler {
 		// Parse template tags, and sanitize.
 		$status = $this->parse_status( $status, $post->ID );
 
-		if ( empty( $status ) && ! empty( $this->options['status_template'] ) ) {
+		if ( ( empty( $status ) || '' === preg_replace( '~\s~', '', $status ) ) && ! empty( $this->options['status_template'] ) ) {
 			// Use template stored in settings.
-			$this->parse_status( $this->options['status_template'], $post->ID );
+			$status = $this->parse_status( $this->options['status_template'], $post->ID );
 		}
 
-		if ( empty( $status ) ) {
+		if ( empty( $status ) || '' === preg_replace( '~\s~', '', $status ) ) {
 			// Fall back to post title.
 			$status = get_the_title( $post->ID );
 		}
