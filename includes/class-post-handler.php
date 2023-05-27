@@ -24,9 +24,11 @@ class Post_Handler {
 	 * Constructor.
 	 *
 	 * @since 0.1.0
+	 *
+	 * @param array $options Plugin options.
 	 */
-	public function __construct() {
-		$this->options = get_option( 'share_on_mastodon_settings' );
+	public function __construct( $options = array() ) {
+		$this->options = $options;
 	}
 
 	/**
@@ -239,7 +241,7 @@ class Post_Handler {
 			$count = min( count( $media ), $max );
 
 			for ( $i = 0; $i < $count; $i++ ) {
-				$media_id = Image_Handler::upload_image( $media[ $i ] );
+				$media_id = Image_Handler::upload_image( $media[ $i ]['id'], $media[ $i ]['alt'] );
 
 				if ( ! empty( $media_id ) ) {
 					// The image got uploaded OK.

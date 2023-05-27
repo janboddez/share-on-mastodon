@@ -46,7 +46,7 @@ function is_older_than( $seconds, $post ) {
 /**
  * Returns this plugin's options.
  *
- * Roughly equal to `get_option( 'share_on_mastodon' )`.
+ * Roughly equal to `get_option( 'share_on_mastodon_settings' )`.
  *
  * @return array Current plugin settings.
  */

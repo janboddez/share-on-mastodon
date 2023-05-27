@@ -15,72 +15,101 @@ class Image_Handler {
 	 * Returns a post's associated images.
 	 *
 	 * @param  WP_Post $post Post object.
-	 * @return array         Array of attachemnt IDs.
+	 * @return array         Attachment array.
 	 */
 	public static function get_images( $post ) {
-		$media   = array();
 		$options = get_options();
 
-		$enable_featured_images = ! isset( $options['featured_images'] ) || $options['featured_images'];
+		$enable_referenced_images = ! empty( $options['referenced_images'] ); // This was always opt-in.
+		$enable_referenced_images = apply_filters( 'share_on_mastodon_referenced_images', $enable_referenced_images, $post );
 
-		if ( has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', $enable_featured_images, $post ) ) {
-			// Include featured image.
-			$media[] = get_post_thumbnail_id( $post->ID );
-		}
+		$enable_featured_images = ! isset( $options['featured_images'] ) || $options['featured_images'];
+		$enable_featured_images = has_post_thumbnail( $post->ID ) && apply_filters( 'share_on_mastodon_featured_image', $enable_featured_images, $post );
 
 		$enable_attached_images = ! isset( $options['attached_images'] ) || $options['attached_images'];
+		$enable_attached_images = apply_filters( 'share_on_mastodon_attached_images', $enable_attached_images, $post );
 
-		if ( apply_filters( 'share_on_mastodon_attached_images', $enable_attached_images, $post ) ) {
+		if ( ! ( $enable_referenced_images || $enable_featured_images || $enable_attached_images ) ) {
+			// Nothing to do.
+			return array();
+		}
+
+		// Always parse post content for images and alt text. Doing this (first)
+		// allows us to override (possibly empty) `wp_postmeta` alt values.
+		$referenced_images = static::get_referenced_images( $post ); // Returns image IDs _and_ alt text (if any).
+
+		// Alright, let's get started.
+		$media = array();
+
+		if ( $enable_referenced_images && ! empty( $referenced_images ) ) {
+			// Add in-post images.
+			foreach ( $referenced_images as $referenced_image ) {
+				$media[] = $referenced_image;
+			}
+		}
+
+		if ( $enable_featured_images ) {
+			// Include featured image.
+			$image_id = get_post_thumbnail_id( $post->ID );
+			$media[]  = array(
+				'id'  => $image_id,
+				'alt' => static::get_alt_text( $image_id, $referenced_images ),
+			);
+		}
+
+		if ( $enable_attached_images ) {
 			// Include all attached images.
 			$attachments = get_attached_media( 'image', $post->ID );
 
-			if ( ! empty( $attachments ) && is_array( $attachments ) ) {
+			if ( ! empty( $attachments ) ) {
 				foreach ( $attachments as $attachment ) {
-					$media[] = $attachment->ID;
+					$media[] = array(
+						'id'  => $attachment->ID,
+						'alt' => static::get_alt_text( $image_id, $referenced_images ),
+					);
 				}
 			}
 		}
 
-		$enable_referenced_images = ! empty( $options['referenced_images'] ); // This was always opt-in.
+		// Remove duplicates.
+		$tmp   = array_unique( array_column( $media, 'id' ) ); // `array_column()` preserves keys, and so does `array_unique()`.
+		$media = array_intersect_key( $media, $tmp );          // And that is what allows us to do this.
+		$media = array_values( $media ); // Always reindex.
 
-		if ( apply_filters( 'share_on_mastodon_referenced_images', $enable_referenced_images, $post ) ) {
-			// Include in-post, i.e., referenced, images.
-			$image_ids = static::get_referenced_images( $post );
+		// Allow developers to filter the resulting array.
+		$media = apply_filters( 'share_on_mastodon_media', $media, $post );
 
-			if ( ! empty( $image_ids ) && is_array( $image_ids ) ) {
-				foreach ( $image_ids as $image_id ) {
-					$media[] = $image_id;
-				}
-			}
-		}
-
-		$media = apply_filters( 'share_on_mastodon_media', array_unique( $media ), $post );
-
-		return array_values( $media ); // Always reindex.
+		return static::convert_media_array( $media ); // To cover the highly unlikely case that someone's been filtering the (old-format) media array.
 	}
 
 	/**
 	 * Attempts to find and return in-post images.
 	 *
 	 * @param  WP_Post $post Post object.
-	 * @return array         Array of image IDs.
+	 * @return array         Image array.
 	 */
 	protected static function get_referenced_images( $post ) {
-		// Assumes `src` value is wrapped in quotes. This will almost always be
-		// the case.
-		preg_match_all( '~<img(?:.+?)src=[\'"]([^\'"]+)[\'"](?:.*?)>~i', $post->post_content, $matches );
-
-		if ( empty( $matches[1] ) ) {
-			return array();
-		}
-
 		$images = array();
 
-		foreach ( $matches[1] as $match ) {
-			$filename = pathinfo( $match, PATHINFO_FILENAME );
+		// Wrap post content in a dummy `div`, as there must (!) be a root-level
+		// element at all times.
+		$html = '<div>' . mb_convert_encoding( $post->post_content, 'HTML-ENTITIES', get_bloginfo( 'charset' ) ) . '</div>';
+
+		libxml_use_internal_errors( true );
+		$doc = new \DOMDocument();
+		$doc->loadHTML( $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+		$xpath = new \DOMXPath( $doc );
+
+		foreach ( $xpath->query( '//img' ) as $node ) {
+			if ( ! $node->hasAttribute( 'src' ) || empty( $node->getAttribute( 'src' ) ) ) {
+				continue;
+			}
+
+			$src      = $node->getAttribute( 'src' );
+			$filename = pathinfo( $src, PATHINFO_FILENAME );
 			$original = preg_replace( '~-(?:\d+x\d+|scaled|rotated)$~', '', $filename ); // Strip dimensions, etc., off resized images.
 
-			$url = str_replace( $filename, $original, $match );
+			$url = str_replace( $filename, $original, $src );
 
 			// Convert URL back to attachment ID.
 			$image_id = (int) attachment_url_to_postid( $url );
@@ -90,7 +119,10 @@ class Image_Handler {
 				continue;
 			}
 
-			$images[] = $image_id;
+			$images[] = array(
+				'id'  => $image_id,
+				'alt' => $node->hasAttribute( 'alt' ) ? $node->getAttribute( 'alt' ) : '',
+			);
 		}
 
 		return $images;
@@ -99,10 +131,11 @@ class Image_Handler {
 	/**
 	 * Uploads an attachment and returns a (single) media ID.
 	 *
-	 * @param  int $image_id Attachment ID.
-	 * @return string|null   Unique media ID, or nothing on failure.
+	 * @param  int    $image_id Attachment ID.
+	 * @param  string $alt      (Optional) alt text.
+	 * @return string|null      Unique media ID, or nothing on failure.
 	 */
-	public static function upload_image( $image_id ) {
+	public static function upload_image( $image_id, $alt = '' ) {
 		if ( wp_attachment_is_image( $image_id ) ) {
 			// Grab the image's "large" thumbnail.
 			$image = wp_get_attachment_image_src( $image_id, 'large' );
@@ -127,34 +160,18 @@ class Image_Handler {
 			return;
 		}
 
-		// Fetch alt text.
-		$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-
-		if ( '' === $alt ) {
-			$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption.
-		}
-
 		$boundary = md5( time() );
 		$eol      = "\r\n";
 
 		$body = '--' . $boundary . $eol;
 
-		if ( false !== $alt && '' !== $alt ) {
+		if ( '' !== $alt ) {
 			debug_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" );
-
-			// @codingStandardsIgnoreStart
-			// $alt = sanitize_text_field( $alt ); // Some instances don't like our alt texts, thought maybe avoiding newline chars wo
-			// $alt = esc_attr( $alt ); // Leads to double-escaped entities.
-			// $alt = wp_strip_all_tags(); // We could probably leave this in, but entities seem to be escaped okay.
-			// $alt = str_replace( array( "\r", "\n", '"' ), array( '%0D', '%0A', '%22' ), $alt ); // Also doesn't work, as these aren't unencoded by Mastodon.
-			// @codingStandardsIgnoreEnd
 
 			// Send along an image description, because accessibility.
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
-			$body .= $alt . $eol;
+			$body .= wp_strip_all_tags( $alt ) . $eol;
 			$body .= '--' . $boundary . $eol;
-
-			debug_log( "[Share on Mastodon] Here's the `alt` bit of what we're about to send the Mastodon API: `$body`" );
 		} else {
 			debug_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" );
 		}
@@ -195,5 +212,66 @@ class Image_Handler {
 		// Provided debugging's enabled, let's store the (somehow faulty)
 		// response.
 		debug_log( $response );
+	}
+
+	/**
+	 * Uploads an attachment and returns a (single) media ID.
+	 *
+	 * @param  int   $image_id Attachment ID.
+	 * @param  array $images   An array of (in-post) images to look through first.
+	 * @return string          Alt text, or an empty string.
+	 */
+	protected static function get_alt_text( $image_id, $images ) {
+		$alt = '';
+
+		foreach ( $images as $image ) {
+			if ( isset( $image['id'] ) && $image_id === $image['id'] ) {
+				$alt = isset( $image['alt'] ) ? $image['alt'] : '';
+
+				break;
+			}
+		}
+
+		if ( '' !== $alt ) {
+			return $alt;
+		}
+
+		// Fetch alt text from the `wp_postmeta` table.
+		$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
+
+		if ( '' === $alt ) {
+			$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption.
+		}
+
+		return is_string( $alt ) ? $alt : '';
+	}
+
+	/**
+	 * Converts an array of media IDs to the newer multidimensional format.
+	 *
+	 * @param  array $media Original media array.
+	 * @return array        Processed array.
+	 */
+	protected static function convert_media_array( $media ) {
+		$array = array();
+
+		foreach ( $media as $item ) {
+			if ( is_array( $item ) ) {
+				$array[] = $item; // Keep as is.
+			} elseif ( is_int( $item ) || ( is_string( $item ) && ctype_digit( $item ) ) ) {
+				// Convert to "new" format.
+				$array[] = array(
+					'id'  => (int) $item,
+					'alt' => '',
+				);
+			}
+		}
+
+		// We've normally done this before, but because we've allowed filtering
+		// the resulting array, we have no choice but to do it again.
+		$tmp   = array_unique( array_column( $array, 'id' ) ); // `array_column()` preserves keys, and so does `array_unique()`.
+		$array = array_intersect_key( $array, $tmp );          // And that is what allows us to do this.
+
+		return array_values( $array );
 	}
 }
