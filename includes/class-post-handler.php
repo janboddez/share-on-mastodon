@@ -132,10 +132,16 @@ class Post_Handler {
 			// the block editor. In that case, this function will be called a
 			// second time after custom meta, including `custom_status_field`,
 			// is processed.
-			// Unless, of course, all meta boxes, including Share on Mastodon's
-			// were hidden (e.g., when a site owners relies on the "Share
+			// Unless, of course, all meta boxes, including Share on Mastodon's,
+			// were hidden (e.g., when a site owner relies on the "Share
 			// Always" setting). In that (extremely rare?) case, they _should_
-			// disable the "Custom Status Field" option.
+			// disable the "Custom Status Field" option (which they wouldn't
+			// really be using anyway.
+
+			// This behavior will change once we switch to a Gutenberg sidebar
+			// panel and hide "Share on Mastodon's" meta box (for the block
+			// editor only, obiously); then, these variables will have been
+			// saved the first time around.
 			return;
 		}
 
