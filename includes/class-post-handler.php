@@ -86,9 +86,15 @@ class Post_Handler {
 			$status = preg_replace( '~\R~u', "\r\n", $status );
 		}
 
-		if ( ! empty( $status ) || '' === preg_replace( '~\s~', '', $status ) ) {
+		if (
+			! empty( $status ) &&
+			'' !== preg_replace( '~\s~', '', $status ) &&
+			( empty( $this->options['status_template'] ) || $status !== $this->options['status_template'] )
+		) {
+			// Save only if `$status` is non-empty and, if a template exists, different from said template.
 			update_post_meta( $post->ID, '_share_on_mastodon_status', $status );
 		} else {
+			// Ignore, or delete a previously stored value.
 			delete_post_meta( $post->ID, '_share_on_mastodon_status' );
 		}
 
@@ -602,7 +608,7 @@ class Post_Handler {
 	/**
 	 * Parses `%title%`, etc. template tags.
 	 *
-	 * @param  string $status  Mastodon status text.
+	 * @param  string $status  Mastodon status, or template.
 	 * @param  int    $post_id Post ID.
 	 * @return string          Parsed status.
 	 */
