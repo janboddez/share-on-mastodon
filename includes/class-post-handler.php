@@ -617,7 +617,7 @@ class Post_Handler {
 		$status = str_replace( '%excerpt%', $this->get_excerpt( $post_id ), $status );
 		$status = str_replace( '%tags%', $this->get_tags( $post_id ), $status );
 		$status = str_replace( '%permalink%', esc_url_raw( get_permalink( $post_id ) ), $status );
-		$status = preg_replace( '~(\r\n){2,}~', "\r\n\r\n", $status ); // We should have normalized line endings.
+		$status = preg_replace( '~(\r\n){2,}~', "\r\n\r\n", $status ); // We should have normalized line endings by now.
 
 		return sanitize_textarea_field( $status ); // Strips HTML and whatnot.
 	}
