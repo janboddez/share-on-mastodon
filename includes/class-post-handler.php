@@ -229,7 +229,7 @@ class Post_Handler {
 			if ( false === strpos( $status, "\n" ) ) {
 				$status .= ' ' . $permalink; // Keep it single-line.
 			} else {
-				$status .= "\n\n" . $permalink;
+				$status .= "\r\n\r\n" . $permalink;
 			}
 		}
 
