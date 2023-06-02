@@ -34,26 +34,20 @@ class Image_Handler {
 			return array();
 		}
 
-		// Always parse post content for images and alt text. Doing this (first)
-		// allows us to override (possibly empty) `wp_postmeta` alt values.
-		$referenced_images = static::get_referenced_images( $post ); // Returns image IDs _and_ alt text (if any).
+		// Always parse post content for images and alt text.
+		$referenced_images = static::get_referenced_images( $post );
 
 		// Alright, let's get started.
-		$media = array();
+		$media_ids = array();
 
 		if ( $enable_referenced_images && ! empty( $referenced_images ) ) {
-			// Add in-post images. No need to loop over them, as they're already
-			// in the right format (and `$media` is still empty at this point).
-			$media = $referenced_images;
+			// Add in-post images.
+			$media_ids = array_keys( $referenced_images );
 		}
 
 		if ( $enable_featured_image ) {
 			// Include featured image.
-			$image_id = get_post_thumbnail_id( $post->ID );
-			$media[]  = array(
-				'id'  => $image_id,
-				'alt' => static::get_alt_text( $image_id, $referenced_images ),
-			);
+			$media_ids[] = get_post_thumbnail_id( $post->ID );
 		}
 
 		if ( $enable_attached_images ) {
@@ -62,23 +56,16 @@ class Image_Handler {
 
 			if ( ! empty( $attachments ) ) {
 				foreach ( $attachments as $attachment ) {
-					$media[] = array(
-						'id'  => $attachment->ID,
-						'alt' => static::get_alt_text( $image_id, $referenced_images ),
-					);
+					$media_ids[] = $attachment->ID;
 				}
 			}
 		}
 
-		// Remove duplicates.
-		$tmp   = array_unique( array_column( $media, 'id' ) ); // `array_column()` preserves keys, and so does `array_unique()`.
-		$media = array_intersect_key( $media, $tmp );          // And that is what allows us to do this.
-		$media = array_values( $media ); // Always reindex.
+		// Remove duplicates, and reindex.
+		$media_ids = array_values( array_unique( $media_ids ) );
+		$media_ids = (array) apply_filters( 'share_on_mastodon_media', $media_ids, $post );
 
-		// Allow developers to filter the resulting array.
-		$media = apply_filters( 'share_on_mastodon_media', $media, $post );
-
-		return static::convert_media_array( $media ); // To cover the highly unlikely case that someone's been filtering the (old-format) media array.
+		return static::add_alt_text( $media_ids, $referenced_images );
 	}
 
 	/**
@@ -118,10 +105,11 @@ class Image_Handler {
 				continue;
 			}
 
-			$images[] = array(
-				'id'  => $image_id,
-				'alt' => $node->hasAttribute( 'alt' ) ? $node->getAttribute( 'alt' ) : '',
-			);
+			if ( ! isset( $images[ $image_id ] ) || '' === $images[ $image_id ] ) {
+				// When an image is already present, overwrite it only if its
+				// "known" alt text is empty.
+				$images[ $image_id ] = $node->hasAttribute( 'alt' ) ? $node->getAttribute( 'alt' ) : '';
+			}
 		}
 
 		return $images;
@@ -169,7 +157,7 @@ class Image_Handler {
 
 			// Send along an image description, because accessibility.
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
-			$body .= wp_strip_all_tags( $alt ) . $eol;
+			$body .= html_entity_decode( wp_strip_all_tags( $alt ), ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ) . $eol;
 			$body .= '--' . $boundary . $eol;
 		} else {
 			debug_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" );
@@ -219,33 +207,31 @@ class Image_Handler {
 	 * Looks through `$images` first, and falls back on what's stored in the
 	 * `wp_postmeta` table.
 	 *
-	 * @param  int   $image_id Attachment ID.
-	 * @param  array $images   An array of (in-post) images to look through first.
-	 * @return string          Alt text, or an empty string.
+	 * @param  array $image_ids         Attachment IDs.
+	 * @param  array $referenced_images An array of (in-post) images and their alt text to look through first.
+	 * @return array                    An array with image IDs as its keys and their corresponding alt text as its values.
 	 */
-	protected static function get_alt_text( $image_id, $images ) {
-		$alt = '';
+	protected static function add_alt_text( $image_ids, $referenced_images ) {
+		$image_ids = array_values( $image_ids );
+		$images    = array();
 
-		foreach ( $images as $image ) {
-			if ( isset( $image['id'] ) && $image_id === $image['id'] ) {
-				$alt = isset( $image['alt'] ) ? $image['alt'] : '';
+		foreach ( $image_ids as $image_id ) {
+			if ( isset( $referenced_images[ $image_id ] ) && '' !== $referenced_images[ $image_id ] ) {
+				// This image was found inside the post, with alt text.
+				$images[ $image_id ] = $referenced_images[ $image_id ];
+			} else {
+				// Fetch alt text from the `wp_postmeta` table.
+				$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 
-				break;
+				if ( '' === $alt ) {
+					$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption.
+				}
+
+				$images[ $image_id ] = is_string( $alt ) ? $alt : '';
 			}
 		}
 
-		if ( '' !== $alt ) {
-			return $alt;
-		}
-
-		// Fetch alt text from the `wp_postmeta` table.
-		$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-
-		if ( '' === $alt ) {
-			$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption.
-		}
-
-		return is_string( $alt ) ? $alt : '';
+		return $images;
 	}
 
 	/**

@@ -44,12 +44,7 @@ class Test_Image_Handler extends \WP_Mock\Tools\TestCase {
 		$post->ID            = 1;
 		$post->post_content  = 'Some text. <a href="https://example.org/images/an-image.png"><img src="https://example.org/images/an-image.png" alt="The image\'s alt text." class="aligncenter" width="1920" height="1080"></a>';
 
-		$expected = array(
-			array(
-				'id'  => 12,
-				'alt' => 'The image\'s alt text.',
-			),
-		);
+		$expected = array( 12 => 'The image\'s alt text.' );
 
 		$this->assertEquals( $expected, \Share_On_Mastodon\Image_Handler::get_images( $post ) );
 	}
