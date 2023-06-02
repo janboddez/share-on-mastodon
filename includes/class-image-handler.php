@@ -65,7 +65,14 @@ class Image_Handler {
 		$media_ids = array_values( array_unique( $media_ids ) );
 		$media_ids = (array) apply_filters( 'share_on_mastodon_media', $media_ids, $post );
 
-		return static::add_alt_text( $media_ids, $referenced_images );
+		$media = static::add_alt_text( $media_ids, $referenced_images );
+
+		debug_log( '[Share on Mastodon] The images selected for crossposting (but not yet limited to 4):' );
+		debug_log( $media );
+		debug_log( '[Share on Mastodon] The images as found in the post:' );
+		debug_log( $referenced_images );
+
+		return $media;
 	}
 
 	/**
@@ -157,7 +164,7 @@ class Image_Handler {
 
 			// Send along an image description, because accessibility.
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
-			$body .= html_entity_decode( wp_strip_all_tags( $alt ), ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ) . $eol;
+			$body .= $alt . $eol;
 			$body .= '--' . $boundary . $eol;
 		} else {
 			debug_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" );
@@ -207,13 +214,12 @@ class Image_Handler {
 	 * Looks through `$images` first, and falls back on what's stored in the
 	 * `wp_postmeta` table.
 	 *
-	 * @param  array $image_ids         Attachment IDs.
-	 * @param  array $referenced_images An array of (in-post) images and their alt text to look through first.
-	 * @return array                    An array with image IDs as its keys and their corresponding alt text as its values.
+	 * @param  array $image_ids         IDs of images we want to upload.
+	 * @param  array $referenced_images In-post images and their alt attributes, to look through first.
+	 * @return array                    An array with image IDs as its keys and these images' alt attributes as its values.
 	 */
 	protected static function add_alt_text( $image_ids, $referenced_images ) {
-		$image_ids = array_values( $image_ids );
-		$images    = array();
+		$images = array();
 
 		foreach ( $image_ids as $image_id ) {
 			if ( isset( $referenced_images[ $image_id ] ) && '' !== $referenced_images[ $image_id ] ) {
@@ -231,35 +237,13 @@ class Image_Handler {
 			}
 		}
 
+		$images = array_map(
+			function( $value ) {
+				return html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
+			},
+			$images
+		);
+
 		return $images;
-	}
-
-	/**
-	 * Converts an array of media IDs to the newer multidimensional format.
-	 *
-	 * @param  array $media Original media array.
-	 * @return array        Processed array.
-	 */
-	protected static function convert_media_array( $media ) {
-		$array = array();
-
-		foreach ( $media as $item ) {
-			if ( is_array( $item ) ) {
-				$array[] = $item; // Keep as is.
-			} elseif ( is_int( $item ) || ( is_string( $item ) && ctype_digit( $item ) ) ) {
-				// Convert to "new" format.
-				$array[] = array(
-					'id'  => (int) $item,
-					'alt' => '',
-				);
-			}
-		}
-
-		// We've normally done this before, but because we've allowed filtering
-		// the resulting array, we have no choice but to do it again.
-		$tmp   = array_unique( array_column( $array, 'id' ) ); // `array_column()` preserves keys, and so does `array_unique()`.
-		$array = array_intersect_key( $array, $tmp );          // And that is what allows us to do this.
-
-		return array_values( $array );
 	}
 }

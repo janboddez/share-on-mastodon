@@ -248,8 +248,7 @@ class Post_Handler {
 		// Encode, build query string.
 		$query_string = http_build_query( $args );
 
-		// And now, images. Note that this'll have to be rewritten for the new
-		// media API.
+		// And now, images.
 		$media = Image_Handler::get_images( $post );
 
 		if ( ! empty( $media ) ) {
