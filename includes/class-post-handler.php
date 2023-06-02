@@ -257,8 +257,11 @@ class Post_Handler {
 			$max   = (int) apply_filters( 'share_on_mastodon_num_images', $max, $post );
 			$count = min( count( $media ), $max );
 
-			for ( $i = 0; $i < $count; $i++ ) {
-				$media_id = Image_Handler::upload_image( $media[ $i ]['id'], $media[ $i ]['alt'] );
+			// Limit the no. of images (or other media) to `$count`.
+			$media = array_slice( $media, 0, $count, true );
+
+			foreach ( $media as $id => $alt ) {
+				$media_id = Image_Handler::upload_image( $id, $alt );
 
 				if ( ! empty( $media_id ) ) {
 					// The image got uploaded OK.
