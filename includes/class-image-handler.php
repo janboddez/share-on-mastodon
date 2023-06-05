@@ -224,17 +224,19 @@ class Image_Handler {
 		foreach ( $image_ids as $image_id ) {
 			if ( isset( $referenced_images[ $image_id ] ) && '' !== $referenced_images[ $image_id ] ) {
 				// This image was found inside the post, with alt text.
-				$images[ $image_id ] = $referenced_images[ $image_id ];
+				$alt = $referenced_images[ $image_id ];
 			} else {
 				// Fetch alt text from the `wp_postmeta` table.
 				$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 
 				if ( '' === $alt ) {
-					$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption.
+					$alt = wp_get_attachment_caption( $image_id ); // Fallback to caption. Might return `false`.
 				}
-
-				$images[ $image_id ] = is_string( $alt ) ? $alt : '';
 			}
+
+			$images[ $image_id ] = is_string( $alt )
+				? html_entity_decode( $alt, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ) // Avoid double-encoded entities.
+				: '';
 		}
 
 		$images = array_map(
