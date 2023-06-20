@@ -22,6 +22,12 @@ class Test_Image_Handler extends \WP_Mock\Tools\TestCase {
 			'return' => 12,
 		) );
 
+		\WP_Mock::userFunction( 'attachment_url_to_postid', array(
+			'times'  => 1,
+			'args'   => 'https://example.org/images/another-image.png',
+			'return' => 17,
+		) );
+
 		\WP_Mock::userFunction( 'has_post_thumbnail', array(
 			'times'  => 1,
 			'args'   => 1,
@@ -42,13 +48,11 @@ class Test_Image_Handler extends \WP_Mock\Tools\TestCase {
 
 		$post                = new stdClass();
 		$post->ID            = 1;
-		$post->post_content  = 'Some text. <a href="https://example.org/images/an-image.png"><img src="https://example.org/images/an-image.png" alt="The image\'s alt text." class="aligncenter" width="1920" height="1080"></a>';
+		$post->post_content  = '<p>Some text.<br><a href="https://example.org/images/an-image.png"><img src="https://example.org/images/an-image.png" alt="The image\'s alt text." class="aligncenter" width="1920" height="1080"></a></p><p><img src="https://example.org/images/another-image.png" alt="Another image\'s alt text."></p>';
 
 		$expected = array(
-			array(
-				'id'  => 12,
-				'alt' => 'The image\'s alt text.',
-			),
+			12 => 'The image\'s alt text.',
+			17 => 'Another image\'s alt text.',
 		);
 
 		$this->assertEquals( $expected, \Share_On_Mastodon\Image_Handler::get_images( $post ) );
