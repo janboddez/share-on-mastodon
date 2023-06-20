@@ -1,0 +1,17 @@
+/.wordpress-org
+/.git
+/.github
+/node_modules
+/tests
+/vendor
+
+.distignore
+.gitignore
+.phpunit.result.cache
+README.md
+bootstrap.php
+composer.json
+composer.lock
+phpcs.xml
+phpunit.xml
+*.code-workspace
