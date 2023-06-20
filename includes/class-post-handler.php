@@ -87,8 +87,7 @@ class Post_Handler {
 		}
 
 		if (
-			! empty( $status ) &&
-			'' !== preg_replace( '~\s~', '', $status ) &&
+			! empty( $status ) && '' !== preg_replace( '~\s~', '', $status ) &&
 			( empty( $this->options['status_template'] ) || $status !== $this->options['status_template'] )
 		) {
 			// Save only if `$status` is non-empty and, if a template exists, different from said template.
@@ -136,7 +135,7 @@ class Post_Handler {
 			// were hidden (e.g., when a site owner relies on the "Share
 			// Always" setting). In that (extremely rare?) case, they _should_
 			// disable the "Custom Status Field" option (which they wouldn't
-			// really be using anyway.
+			// really be using anyway).
 
 			// This behavior will change once we switch to a Gutenberg sidebar
 			// panel and hide "Share on Mastodon's" meta box (for the block
@@ -288,7 +287,6 @@ class Post_Handler {
 			return;
 		}
 
-		// Decode JSON, suppressing possible formatting errors.
 		$status = json_decode( $response['body'] );
 
 		if ( ! empty( $status->url ) ) {
@@ -588,7 +586,6 @@ class Post_Handler {
 			return true;
 		}
 
-		// Passed all checks.
 		return false;
 	}
 
@@ -637,10 +634,10 @@ class Post_Handler {
 	 * @return string       (Possibly shortened) excerpt.
 	 */
 	protected function get_excerpt( $post_id ) {
-		$excerpt = get_the_excerpt( $post_id );
-		$excerpt = mb_substr( $excerpt, 0, 125 );
+		$orig    = get_the_excerpt( $post_id );
+		$excerpt = mb_substr( $orig, 0, 125 );
 
-		if ( ! ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
+		if ( $excerpt !== $orig && ! ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
 			$excerpt .= '…';
 		}
 
