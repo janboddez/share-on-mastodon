@@ -42,7 +42,7 @@ class Image_Handler {
 
 		if ( $enable_referenced_images && ! empty( $referenced_images ) ) {
 			// Add in-post images.
-			$media_ids = array_keys( $referenced_images );
+			$media_ids = array_keys( $referenced_images ); // We're interested only in the IDs, for now.
 		}
 
 		if ( $enable_featured_image ) {
@@ -61,14 +61,17 @@ class Image_Handler {
 			}
 		}
 
-		// Remove duplicates, and reindex.
+		// Remove duplicates, and (even though it isn't _really_ needed) reindex.
 		$media_ids = array_values( array_unique( $media_ids ) );
+		// Allow developers to filter the array of media IDs.
 		$media_ids = (array) apply_filters( 'share_on_mastodon_media', $media_ids, $post );
 
+		// Convert the array of media IDs into something of the format `array( $id => 'Alt text.' )`.
 		$media = static::add_alt_text( $media_ids, $referenced_images );
 
 		debug_log( '[Share on Mastodon] The images selected for crossposting (but not yet limited to 4):' );
 		debug_log( $media );
+
 		debug_log( '[Share on Mastodon] The images as found in the post:' );
 		debug_log( $referenced_images );
 
@@ -238,13 +241,6 @@ class Image_Handler {
 				? html_entity_decode( $alt, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ) // Avoid double-encoded entities.
 				: '';
 		}
-
-		$images = array_map(
-			function( $value ) {
-				return html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
-			},
-			$images
-		);
 
 		return $images;
 	}
