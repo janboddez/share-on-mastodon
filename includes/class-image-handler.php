@@ -135,7 +135,7 @@ class Image_Handler {
 	public static function upload_image( $image_id, $alt = '' ) {
 		if ( wp_attachment_is_image( $image_id ) ) {
 			// Grab the image's "large" thumbnail.
-			$image = wp_get_attachment_image_src( $image_id, 'large' );
+			$image = wp_get_attachment_image_src( $image_id, apply_filters( 'share_on_mastodon_image_size', 'large', $image_id ) );
 		}
 
 		$uploads = wp_upload_dir();
