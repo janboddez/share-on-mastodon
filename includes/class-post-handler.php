@@ -424,7 +424,7 @@ class Post_Handler {
 
 		$url = get_post_meta( $post->ID, '_share_on_mastodon_url', true );
 
-		if ( '' !== $url && wp_http_validate_url( $url ) ) :
+		if ( '' !== $url && filter_var( $url, FILTER_VALIDATE_URL ) ) :
 			$url_parts = wp_parse_url( $url );
 
 			$display_url  = '<span class="screen-reader-text">' . $url_parts['scheme'] . '://';
