@@ -124,18 +124,14 @@ class Post_Handler {
 		if (
 			defined( 'REST_REQUEST' ) && REST_REQUEST &&
 			empty( $_REQUEST['meta-box-loader'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			0 === strpos( wp_get_referer(), admin_url() ) &&
-			! empty( $this->options['custom_status_field'] )
+			0 === strpos( wp_get_referer(), admin_url() )
 		) {
 			// Looks like this call to `transition_post_status` was initiated by
 			// the block editor. In that case, this function will be called a
 			// second time after custom meta, including `custom_status_field`,
-			// is processed.
-			// Unless, of course, all meta boxes, including Share on Mastodon's,
-			// were hidden (e.g., when a site owner relies on the "Share
-			// Always" setting). In that (extremely rare?) case, they _should_
-			// disable the "Custom Status Field" option (which they wouldn't
-			// really be using anyway).
+			// is processed. Unless, of course, all meta boxes, including Share
+			// on Mastodon's, were hidden (e.g., when a site owner relies on the
+			// "Share Always" setting).
 
 			// This behavior will change once we switch to a Gutenberg sidebar
 			// panel and hide "Share on Mastodon's" meta box (for the block
