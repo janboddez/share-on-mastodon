@@ -232,11 +232,9 @@ class Post_Handler {
 		$status = apply_filters( 'share_on_mastodon_status', $status, $post );
 		$args   = apply_filters( 'share_on_mastodon_toot_args', array( 'status' => $status ), $post );
 
-		// We should probably deprecate the filter below. Next time.
-		if ( apply_filters( 'share_on_mastodon_cutoff', false ) ) {
+		if ( apply_filters_deprecated( 'share_on_mastodon_cutoff', array( false ), '0.16.1' ) ) {
 			// May render hashtags or URLs, or unfiltered HTML, at the very end
-			// of a toot unusable. Also, Mastodon may not even use a multibyte
-			// check. To do: test better?
+			// of a toot unusable.
 			$args['status'] = mb_substr( $args['status'], 0, 499, get_bloginfo( 'charset' ) ) . '…';
 		}
 
@@ -631,7 +629,7 @@ class Post_Handler {
 	 */
 	protected function get_excerpt( $post_id ) {
 		$orig    = get_the_excerpt( $post_id );
-		$excerpt = mb_substr( $orig, 0, 125 );
+		$excerpt = mb_substr( $orig, 0, apply_filters( 'share_on_mastodon_excerpt_length', 125 ) );
 
 		if ( $excerpt !== $orig && ! ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
 			$excerpt .= '…';
