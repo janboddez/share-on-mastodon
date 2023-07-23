@@ -55,7 +55,7 @@
 		return true;
 	}
 
-	function unlinkUrl( postId ) {
+	function unlinkUrl( postId, setUrl ) {
 		if ( ! postId ) {
 			return;
 		}
@@ -75,6 +75,7 @@
 				data: { post_id: postId },
 			} ).then( function( response ) {
 				clearTimeout( timeoutId );
+				setUrl( '' ); // To force a re-render.
 			} ).catch( function( error ) {
 				// The request timed out or otherwise failed. Leave as is.
 				throw new Error( 'The "Unlink" request failed.' )
@@ -148,8 +149,7 @@
 								href: '#',
 								onClick: () => {
 									if ( confirm( __( 'Forget this URL?', 'share-on-mastodon' ) ) ) {
-										unlinkUrl( postId );
-										setUrl( '' );
+										unlinkUrl( postId, setUrl );
 									}
 								},
 							},
