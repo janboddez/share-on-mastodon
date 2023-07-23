@@ -2,7 +2,6 @@
 	var el                         = element.createElement;
 	var interpolate                = element.createInterpolateElement;
 	var useState                   = element.useState;
-	var Notice                     = components.Notice;
 	var TextareaControl            = components.TextareaControl;
 	var ToggleControl              = components.ToggleControl;
 	var __                         = i18n.__;
