@@ -23,9 +23,7 @@ class Blocks {
 	 * Enqueues block editor scripts.
 	 */
 	public static function enqueue_scripts() {
-		$options = \Share_On_Mastodon\Share_On_Mastodon::get_instance()
-			->get_options_handler()
-			->get_options();
+		$options = get_options();
 
 		global $post;
 
@@ -43,6 +41,7 @@ class Blocks {
 				'wp-data',
 				'wp-plugins',
 				'wp-edit-post',
+				'wp-url',
 			),
 			\Share_On_Mastodon\Share_On_Mastodon::PLUGIN_VERSION,
 			false
@@ -51,8 +50,6 @@ class Blocks {
 
 	/**
 	 * Registers (block-related) REST API endpoints.
-	 *
-	 * @todo: (Eventually) also add an "author" endpoint. Or have the single endpoint return both title and author information.
 	 */
 	public static function register_api_endpoints() {
 		$options    = get_options();
@@ -75,6 +72,16 @@ class Blocks {
 				)
 			);
 		}
+
+		register_rest_route(
+			'share-on-mastodon/v1',
+			'/url',
+			array(
+				'methods'             => array( 'GET' ),
+				'callback'            => array( __CLASS__, 'get_url' ),
+				'permission_callback' => array( __CLASS__, 'permission_callback' ),
+			)
+		);
 
 		register_rest_route(
 			'share-on-mastodon/v1',
@@ -103,10 +110,33 @@ class Blocks {
 		return current_user_can( 'edit_post', $post_id );
 	}
 
+
+	/**
+	 * Fetches a post's Mastodon URL.
+	 *
+	 * Should only ever be called as a REST API endpoint.
+	 *
+	 * @param  \WP_REST_Request $request   WP REST API request.
+	 * @return \WP_REST_Response|\WP_Error Response.
+	 */
+	public static function get_url( $request ) {
+		$post_id = $request->get_param( 'post_id' );
+
+		if ( empty( $post_id ) || ! ctype_digit( $post_id ) ) {
+			return new WP_Error( 'invalid_id', 'Invalid post ID.', array( 'status' => 400 ) );
+		}
+
+		$post_id = (int) $post_id;
+
+		return get_post_meta( $post_id, '_share_on_mastodon_url', true );
+	}
+
 	/**
 	 * Deletes a post's Mastodon URL.
 	 *
 	 * Should only ever be called as a REST API endpoint.
+	 *
+	 * @todo: Replace with the same AJAX call as the classic editor version.
 	 *
 	 * @since 0.15.0
 	 *
