@@ -318,7 +318,7 @@ class Post_Handler {
 	public function register_meta() {
 		$post_types = (array) $this->options['post_types'];
 
-		// Make Share on Mastodon's URL available in the REST API.
+		// Make Share on Mastodon's custom fields available in the REST API.
 		foreach ( $post_types as $post_type ) {
 			register_post_meta(
 				$post_type,
