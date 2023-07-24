@@ -500,6 +500,7 @@ class Post_Handler {
 
 		// Have WordPress forget the Mastodon URL.
 		delete_post_meta( $post_id, '_share_on_mastodon_url' );
+		delete_transient( "share_on_mastodon:$post_id:url" );
 
 		if ( use_block_editor_for_post( $post_id ) ) {
 			// Delete the checkbox value, too, to prevent Gutenberg's' odd meta

@@ -1,4 +1,4 @@
-( function ( element, components, i18n, data, coreData, plugins, editPost, url ) {
+( function ( element, components, i18n, data, coreData, plugins, editPost, apiFetch, url ) {
 	var el                         = element.createElement;
 	var interpolate                = element.createInterpolateElement;
 	var useState                   = element.useState;
@@ -11,9 +11,9 @@
 	var registerPlugin             = plugins.registerPlugin;
 	var PluginDocumentSettingPanel = editPost.PluginDocumentSettingPanel;
 
-	function displayUrl( url ) {
+	function displayUrl( mastodonUrl ) {
 		try {
-			var parser = new URL( url );
+			var parser = new URL( mastodonUrl );
 		} catch ( e ) {
 			return '';
 		}
@@ -26,7 +26,7 @@
 		);
 	}
 
-	function updateUrl( postId, setUrl ) {
+	function updateUrl( postId, setMastodonUrl ) {
 		if ( ! postId ) {
 			return;
 		}
@@ -38,24 +38,26 @@
 		}, 6000 );
 
 		try {
-			window.wp.apiFetch( {
+			apiFetch( {
 				path: url.addQueryArgs( '/share-on-mastodon/v1/url', { post_id: postId } ),
 				signal: controller.signal, // That time-out thingy.
 			} ).then( function( response ) {
 				clearTimeout( timeoutId );
-				setUrl( response );
+				setMastodonUrl( response );
 			} ).catch( function( error ) {
 				// The request timed out or otherwise failed. Leave as is.
 				throw new Error( 'The "Get URL" request failed.' )
 			} );
 		} catch ( error ) {
+			console.log( error );
 			return false;
 		}
 
+		console.log( 'All good.' );
 		return true;
 	}
 
-	function unlinkUrl( postId, setUrl ) {
+	function unlinkUrl( postId, setMastodonUrl ) {
 		if ( ! postId ) {
 			return;
 		}
@@ -68,14 +70,14 @@
 
 		// @todo: Actually use the same old AJAX call as the "classic" meta box.
 		try {
-			window.wp.apiFetch( {
+			apiFetch( {
 				path: '/share-on-mastodon/v1/unlink',
 				signal: controller.signal, // That time-out thingy.
 				method: 'POST',
 				data: { post_id: postId },
 			} ).then( function( response ) {
 				clearTimeout( timeoutId );
-				setUrl( '' ); // To force a re-render.
+				setMastodonUrl( '' ); // To force a re-render.
 			} ).catch( function( error ) {
 				// The request timed out or otherwise failed. Leave as is.
 				throw new Error( 'The "Unlink" request failed.' )
@@ -92,9 +94,8 @@
 			var postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId(), [] );
 			var postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
 
-			var [ meta, setMeta ] = useEntityProp( 'postType', postType, 'meta' );
-			var [ url, setUrl ]   = useState( '' );
-			updateUrl( postId, setUrl );
+			var [ meta, setMeta ]               = useEntityProp( 'postType', postType, 'meta' );
+			var [ mastodonUrl, setMastodonUrl ] = useState( ( 'undefined' !== typeof meta && meta.hasOwnProperty( '_share_on_mastodon_url' ) && meta._share_on_mastodon_url ? meta._share_on_mastodon_url : '' ) );
 
 			var wasSavingPost     = data.select( 'core/editor' ).isSavingPost();
 			var wasAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
@@ -102,14 +103,15 @@
 			wp.data.subscribe( () => {
 				var isSavingPost     = data.select( 'core/editor' ).isSavingPost();
 				var isAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
-				var shouldRefresh    = wasSavingPost && ! wasAutosavingPost && ! isSavingPost && ( 'publish' === data.select( 'core/editor' ).getEditedPostAttribute( 'status' ) );
+				var publishPost      = wasSavingPost && ! wasAutosavingPost && ! isSavingPost && ( 'publish' === data.select( 'core/editor' ).getEditedPostAttribute( 'status' ) );
 				wasSavingPost        = isSavingPost;
 				wasAutosavingPost    = isAutosavingPost;
 
-				if ( shouldRefresh ) {
-					// This unfortunately triggers a bunch of times.
+				if ( publishPost ) {
+					console.log( 'Starting timer.' );
+					// This unfortunately runs a bunch of times, still. Wanted to use `useEffect()`, but no dice, yet.
 					setTimeout( () => {
-						updateUrl( postId, setUrl );
+						updateUrl( postId, setMastodonUrl ); // Ideally, we'd just grab the URL from the `meta` object, but alas, the back-end changes aren't picked up, and I haven't yet figured out how to force-update `meta`.
 					}, 2000 );
 				}
 			} );
@@ -136,11 +138,11 @@
 				el ('p', { className: 'description' },
 					__( 'Customize this post’s Mastodon status.', 'share-on-mastodon' ),
 				),
-				'' !== url
+				'' !== mastodonUrl
 					? el( 'div', {},
 						// @todo: "Shorten" the URL.
-						interpolate( sprintf( __( 'Shared at %s', 'share-on-mastodon' ), displayUrl( url ) ), {
-							a: el( 'a', { className: 'share-on-mastodon-url', href: encodeURI( meta._share_on_mastodon_url ), target: '_blank', rel: 'noreferrer noopener' } ),
+						interpolate( sprintf( __( 'Shared at %s', 'share-on-mastodon' ), displayUrl( mastodonUrl ) ), {
+							a: el( 'a', { className: 'share-on-mastodon-url', href: encodeURI( mastodonUrl ), target: '_blank', rel: 'noreferrer noopener' } ),
 							b: el( 'span', { className: 'screen-reader-text' } ),
 							c: el( 'span', { className: 'ellipsis' } ),
 						} ),
@@ -149,7 +151,7 @@
 								href: '#',
 								onClick: () => {
 									if ( confirm( __( 'Forget this URL?', 'share-on-mastodon' ) ) ) {
-										unlinkUrl( postId, setUrl );
+										unlinkUrl( postId, setMastodonUrl );
 									}
 								},
 							},
@@ -160,4 +162,4 @@
 			);
 		},
 	} );
-} )( window.wp.element, window.wp.components, window.wp.i18n, window.wp.data, window.wp.coreData, window.wp.plugins, window.wp.editPost, window.wp.url );
+} )( window.wp.element, window.wp.components, window.wp.i18n, window.wp.data, window.wp.coreData, window.wp.plugins, window.wp.editPost, window.wp.apiFetch, window.wp.url );

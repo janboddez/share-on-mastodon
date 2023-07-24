@@ -41,6 +41,7 @@ class Blocks {
 				'wp-data',
 				'wp-plugins',
 				'wp-edit-post',
+				'wp-api-fetch',
 				'wp-url',
 			),
 			\Share_On_Mastodon\Share_On_Mastodon::PLUGIN_VERSION,
@@ -128,7 +129,14 @@ class Blocks {
 
 		$post_id = (int) $post_id;
 
-		return get_post_meta( $post_id, '_share_on_mastodon_url', true );
+		$url = get_transient( "share_on_mastodon:$post_id:url" );
+
+		if ( false === $url ) {
+			$url = get_post_meta( $post_id, '_share_on_mastodon_url', true );
+			set_transient( "share_on_mastodon:$post_id:url", $url, 300 );
+		}
+
+		return $url;
 	}
 
 	/**
@@ -158,7 +166,7 @@ class Blocks {
 
 		// Have WordPress forget the Mastodon URL.
 		delete_post_meta( $post_id, '_share_on_mastodon_url' );
-		delete_post_meta( $post_id, '_share_on_mastodon' );
+		delete_transient( "share_on_mastodon:$post_id:url" );
 
 		return new \WP_REST_Response( array( 'status' => 204 ) );
 	}
