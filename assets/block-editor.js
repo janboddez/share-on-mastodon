@@ -100,7 +100,7 @@
 			var wasSavingPost     = data.select( 'core/editor' ).isSavingPost();
 			var wasAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
 
-			wp.data.subscribe( () => {
+			data.subscribe( () => {
 				var isSavingPost     = data.select( 'core/editor' ).isSavingPost();
 				var isAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
 				var publishPost      = wasSavingPost && ! wasAutosavingPost && ! isSavingPost && ( 'publish' === data.select( 'core/editor' ).getEditedPostAttribute( 'status' ) );
