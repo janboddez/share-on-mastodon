@@ -1,39 +1,41 @@
 ( function ( element, components, i18n, data, coreData, plugins, editPost, apiFetch, url ) {
-	var el                         = element.createElement;
-	var interpolate                = element.createInterpolateElement;
-	var useState                   = element.useState;
-	var TextareaControl            = components.TextareaControl;
-	var ToggleControl              = components.ToggleControl;
-	var __                         = i18n.__;
-	var sprintf                    = i18n.sprintf;
-	var useSelect                  = data.useSelect;
-	var useEntityProp              = coreData.useEntityProp;
-	var registerPlugin             = plugins.registerPlugin;
-	var PluginDocumentSettingPanel = editPost.PluginDocumentSettingPanel;
+	const el                         = element.createElement;
+	const interpolate                = element.createInterpolateElement;
+	const useState                   = element.useState;
+	const TextareaControl            = components.TextareaControl;
+	const ToggleControl              = components.ToggleControl;
+	const __                         = i18n.__;
+	const sprintf                    = i18n.sprintf;
+	const useSelect                  = data.useSelect;
+	const useEntityProp              = coreData.useEntityProp;
+	const registerPlugin             = plugins.registerPlugin;
+	const PluginDocumentSettingPanel = editPost.PluginDocumentSettingPanel;
 
 	function displayUrl( mastodonUrl ) {
 		try {
-			var parser = new URL( mastodonUrl );
-		} catch ( e ) {
-			return '';
+			let parser = new URL( mastodonUrl );
+
+			return sprintf(
+				'<a><b>%1$s</b><c>%2$s</c><b>%3$s</b></a>',
+				parser.protocol + '://' + ( parser.username ? parser.username + ( parser.password ? ':' + parser.password : '' ) + '@' : '' ),
+				parser.hostname.concat( parser.pathname ).slice( 0, 20 ),
+				parser.hostname.concat( parser.pathname ).slice( 20 ),
+			);
+		} catch ( error ) {
+			// Invalid URL.
 		}
 
-		return sprintf(
-			'<a><b>%1$s</b><c>%2$s</c><b>%3$s</b></a>',
-			parser.protocol + '://' + ( parser.username ? parser.username + ( parser.password ? ':' + parser.password : '' ) + '@' : '' ),
-			parser.hostname.concat( parser.pathname ).slice( 0, 20 ),
-			parser.hostname.concat( parser.pathname ).slice( 20 ),
-		);
+		return '';
 	}
 
 	function updateUrl( postId, setMastodonUrl ) {
 		if ( ! postId ) {
-			return;
+			return false;
 		}
 
 		// Like a time-out.
-		var controller = new AbortController();
-		var timeoutId  = setTimeout( function() {
+		const controller = new AbortController();
+		const timeoutId  = setTimeout( function() {
 			controller.abort();
 		}, 6000 );
 
@@ -49,17 +51,16 @@
 				throw new Error( 'The "Get URL" request failed.' )
 			} );
 		} catch ( error ) {
-			console.log( error );
 			return false;
 		}
 
-		console.log( 'All good.' );
+		// All good.
 		return true;
 	}
 
 	function unlinkUrl( postId, setMastodonUrl ) {
 		if ( ! postId ) {
-			return;
+			return false;
 		}
 
 		// Like a time-out.
@@ -68,13 +69,15 @@
 			controller.abort();
 		}, 6000 );
 
-		// @todo: Actually use the same old AJAX call as the "classic" meta box.
 		try {
-			apiFetch( {
-				path: '/share-on-mastodon/v1/unlink',
+			fetch( share_on_mastodon_obj.ajaxurl, {
 				signal: controller.signal, // That time-out thingy.
 				method: 'POST',
-				data: { post_id: postId },
+				body: new URLSearchParams( {
+					action: 'share_on_mastodon_unlink_url',
+					post_id: postId,
+					share_on_mastodon_nonce: share_on_mastodon_obj.nonce,
+				} ),
 			} ).then( function( response ) {
 				clearTimeout( timeoutId );
 				setMastodonUrl( '' ); // To force a re-render.
@@ -91,34 +94,38 @@
 
 	registerPlugin( 'share-on-mastodon-panel', {
 		render: function( props ) {
-			var postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId(), [] );
-			var postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
+			const postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId(), [] );
+			const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
 
-			var [ meta, setMeta ]               = useEntityProp( 'postType', postType, 'meta' );
-			var [ mastodonUrl, setMastodonUrl ] = useState( ( 'undefined' !== typeof meta && meta.hasOwnProperty( '_share_on_mastodon_url' ) && meta._share_on_mastodon_url ? meta._share_on_mastodon_url : '' ) );
+			const [ meta, setMeta ]               = useEntityProp( 'postType', postType, 'meta' );
+			const [ mastodonUrl, setMastodonUrl ] = useState( meta._share_on_mastodon_url ?? '' );
+			const [ updated, setUpdated ]         = useState( false );
 
-			var wasSavingPost     = data.select( 'core/editor' ).isSavingPost();
-			var wasAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
+			// *Should* the code below use `useSelect()`? I have no clue.
+			let wasSavingPost     = data.select( 'core/editor' ).isSavingPost();
+			let wasAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
 
-			data.subscribe( () => {
-				var isSavingPost     = data.select( 'core/editor' ).isSavingPost();
-				var isAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
-				var publishPost      = wasSavingPost && ! wasAutosavingPost && ! isSavingPost && ( 'publish' === data.select( 'core/editor' ).getEditedPostAttribute( 'status' ) );
-				wasSavingPost        = isSavingPost;
-				wasAutosavingPost    = isAutosavingPost;
+			data.subscribe( () => { // Kinda like `publish_post`, I guess.
+				const isSavingPost     = data.select( 'core/editor' ).isSavingPost();
+				const isAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
+				const publishPost      = wasSavingPost && ! wasAutosavingPost && ! isSavingPost && ( 'publish' === data.select( 'core/editor' ).getEditedPostAttribute( 'status' ) );
+				wasSavingPost          = isSavingPost;
+				wasAutosavingPost      = isAutosavingPost;
 
 				if ( publishPost ) {
-					console.log( 'Starting timer.' );
-					// This unfortunately runs a bunch of times, still. Wanted to use `useEffect()`, but no dice, yet.
-					setTimeout( () => {
-						updateUrl( postId, setMastodonUrl ); // Ideally, we'd just grab the URL from the `meta` object, but alas, the back-end changes aren't picked up, and I haven't yet figured out how to force-update `meta`.
-					}, 2000 );
+					setUpdated( true ); // You'd think one could just `setUpdated( publishPost )` or similar, but, no?
 				}
 			} );
 
+			if ( updated ) { // Using `useState()` so that this runs only once (per "save").
+				setTimeout( () => {
+					updateUrl( postId, setMastodonUrl );
+					setUpdated( false );
+				}, 2000 ); // Need a "shortish" delay or it won't work. There's probably instances where these 2 seconds aren't enough, but whatevs.
+			}
+
 			return el( PluginDocumentSettingPanel, {
 					name: 'share-on-mastodon-panel',
-					// icon: 'share',
 					title: __( 'Share on Mastodon', 'share-on-mastodon' ),
 				},
 				el( ToggleControl, {

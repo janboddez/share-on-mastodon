@@ -502,10 +502,12 @@ class Post_Handler {
 		delete_post_meta( $post_id, '_share_on_mastodon_url' );
 		delete_transient( "share_on_mastodon:$post_id:url" );
 
-		if ( use_block_editor_for_post( $post_id ) ) {
+		$options = get_options();
+
+		if ( ! empty( $options['use_meta_box'] ) && use_block_editor_for_post( $post_id ) ) {
 			// Delete the checkbox value, too, to prevent Gutenberg's' odd meta
 			// box behavior from triggering an immediate re-share.
-			delete_post_meta( $post_id, '_share_on_mastodon' );
+		 	delete_post_meta( $post_id, '_share_on_mastodon' );
 		}
 
 		wp_die();
@@ -545,6 +547,8 @@ class Post_Handler {
 			array(
 				'message' => esc_attr__( 'Forget this URL?', 'share-on-mastodon' ), // Confirmation message.
 				'post_id' => $post->ID, // Pass current post ID to JS.
+				'nonce'   => wp_create_nonce( basename( __FILE__ ) ),
+				'ajaxurl' => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 			)
 		);
 	}
