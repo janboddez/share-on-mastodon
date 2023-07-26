@@ -98,7 +98,7 @@
 			const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
 
 			const [ meta, setMeta ]               = useEntityProp( 'postType', postType, 'meta' );
-			const [ mastodonUrl, setMastodonUrl ] = useState( meta._share_on_mastodon_url ?? '' );
+			const [ mastodonUrl, setMastodonUrl ] = useState( meta?._share_on_mastodon_url ?? '' );
 			const [ updated, setUpdated ]         = useState( false );
 
 			// *Should* the code below use `useSelect()`? I have no clue.
@@ -124,6 +124,8 @@
 				}, 2000 ); // Need a "shortish" delay or it won't work. There's probably instances where these 2 seconds aren't enough, but whatevs.
 			}
 
+			const customStatusField = meta?._share_on_mastodon_custom_status_field ?? '0';
+
 			return el( PluginDocumentSettingPanel, {
 					name: 'share-on-mastodon-panel',
 					title: __( 'Share on Mastodon', 'share-on-mastodon' ),
@@ -135,16 +137,20 @@
 						setMeta( { ...meta, _share_on_mastodon: ( newValue ? '1' : '0' ) } );
 					},
 				} ),
-				el( TextareaControl, {
-					label: __( '(Optional) Custom Message', 'share-on-mastodon' ),
-					value: meta._share_on_mastodon_status ? meta._share_on_mastodon_status : '',
-					onChange: ( newValue ) => {
-						setMeta( { ...meta, _share_on_mastodon_status: ( newValue ? newValue : null ) } );
-					},
-				} ),
-				el ('p', { className: 'description' },
-					__( 'Customize this post’s Mastodon status.', 'share-on-mastodon' ),
-				),
+				'1' === customStatusField
+					? [
+						el( TextareaControl, {
+							label: __( '(Optional) Custom Message', 'share-on-mastodon' ),
+							value: meta._share_on_mastodon_status ?? '',
+							onChange: ( newValue ) => {
+								setMeta( { ...meta, _share_on_mastodon_status: ( newValue ? newValue : null ) } );
+							},
+						} ),
+						el ( 'p', { className: 'description' },
+							__( 'Customize this post’s Mastodon status.', 'share-on-mastodon' ),
+						),
+					]
+					: null,
 				'' !== mastodonUrl
 					? el( 'div', {},
 						// @todo: "Shorten" the URL.

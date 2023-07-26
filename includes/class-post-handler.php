@@ -348,32 +348,50 @@ class Post_Handler {
 						return current_user_can( 'edit_posts' );
 					},
 					'sanitize_callback' => function( $meta_value ) {
-						return wp_http_validate_url( $meta_value )
-							? esc_url_raw( wp_http_validate_url( $meta_value ) )
-							: null;
+						return filter_var( $meta_value, FILTER_VALIDATE_URL )
+							? esc_url_raw( $meta_value )
+							: '';
 					},
 				)
 			);
 
-			// @codingStandardsIgnoreStart
-			// Allow the block editor to set `_share_on_mastodon`.
-			// register_post_meta(
-			// 	$post_type,
-			// 	'_share_on_mastodon',
-			// 	array(
-			// 		'single'            => true,
-			// 		'show_in_rest'      => true,
-			// 		'type'              => 'string',
-			// 		'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1',
-			// 		'auth_callback'     => function() {
-			// 			return current_user_can( 'edit_posts' );
-			// 		},
-			// 		'sanitize_callback' => function( $meta_value ) {
-			// 			return '1' === $meta_value ? '1' : '0';
-			// 		},
-			// 	)
-			// );
-			// @codingStandardsIgnoreEnd
+			register_post_meta(
+				$post_type,
+				'_share_on_mastodon_status',
+				array(
+					'single'            => true,
+					'show_in_rest'      => true,
+					'type'              => 'string',
+					'default'           => ! empty( $this->options['status_template'] ) ? $this->options['status_template'] : '',
+					'auth_callback'     => function() {
+						return current_user_can( 'edit_posts' );
+					},
+					'sanitize_callback' => function( $meta_value ) {
+						return sanitize_textarea_field( $meta_value );
+					},
+				)
+			);
+
+			register_post_meta(
+				$post_type,
+				'_share_on_mastodon_custom_status_field',
+				array(
+					'single'            => true,
+					'show_in_rest'      => array(
+						'prepare_callback' => function( $value ) {
+							return ! empty( $this->options['custom_status_field'] ) ? '1' : '0';
+						},
+					),
+					'type'              => 'string',
+					'default'           => ! empty( $this->options['custom_status_field'] ) ? '1' : '0',
+					'auth_callback'     => function() {
+						return current_user_can( 'edit_posts' );
+					},
+					// 'sanitize_callback' => function( $meta_value ) {
+					// 	return '0';
+					// },
+				)
+			);
 		}
 	}
 
@@ -507,7 +525,7 @@ class Post_Handler {
 		if ( ! empty( $options['use_meta_box'] ) && use_block_editor_for_post( $post_id ) ) {
 			// Delete the checkbox value, too, to prevent Gutenberg's' odd meta
 			// box behavior from triggering an immediate re-share.
-		 	delete_post_meta( $post_id, '_share_on_mastodon' );
+			delete_post_meta( $post_id, '_share_on_mastodon' );
 		}
 
 		wp_die();

@@ -53,27 +53,6 @@ class Blocks {
 	 * Registers (block-related) REST API endpoints.
 	 */
 	public static function register_api_endpoints() {
-		$options    = get_options();
-		$post_types = (array) $options['post_types'];
-
-		foreach ( $post_types as $post_type ) {
-			register_post_meta(
-				$post_type,
-				'_share_on_mastodon_status',
-				array(
-					'single'            => true,
-					'show_in_rest'      => true,
-					'type'              => 'string',
-					'auth_callback'     => function() {
-						return current_user_can( 'edit_posts' );
-					},
-					'sanitize_callback' => function( $meta_value ) {
-						return sanitize_textarea_field( $meta_value );
-					},
-				)
-			);
-		}
-
 		register_rest_route(
 			'share-on-mastodon/v1',
 			'/url',

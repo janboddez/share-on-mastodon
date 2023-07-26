@@ -12,29 +12,82 @@ namespace Share_On_Mastodon;
  */
 class Options_Handler {
 	/**
-	 * This plugin's default options.
-	 *
-	 * @since 0.11.0
+	 * Plugin option schema.
 	 */
-	const DEFAULT_OPTIONS = array(
-		'mastodon_host'          => '',
-		'mastodon_client_id'     => '',
-		'mastodon_client_secret' => '',
-		'mastodon_access_token'  => '',
-		'mastodon_username'      => '',
-		'post_types'             => array(),
-		'featured_images'        => true,
-		'attached_images'        => true,
-		'referenced_images'      => false,
-		'max_images'             => 4,
-		'optin'                  => false,
-		'share_always'           => false,
-		'delay_sharing'          => 0,
-		'micropub_compat'        => false,
-		'syn_links_compat'       => false,
-		'debug_logging'          => false,
-		'custom_status_field'    => false,
-		'status_template'        => '%title% %permalink%',
+	const SCHEMA = array(
+		'mastodon_host'          => array(
+			'type'    => 'string',
+			'default' => '',
+		),
+		'mastodon_client_id'     => array(
+			'type'    => 'string',
+			'default' => '',
+		),
+		'mastodon_client_secret' => array(
+			'type'    => 'string',
+			'default' => '',
+		),
+		'mastodon_access_token'  => array(
+			'type'    => 'string',
+			'default' => '',
+		),
+		'mastodon_username'      => array(
+			'type'    => 'string',
+			'default' => '',
+		),
+		'post_types'             => array(
+			'type'    => 'array',
+			'default' => array( 'post' ),
+			'items'   => array( 'type' => 'string' ),
+		),
+		'featured_images'        => array(
+			'type'    => 'boolean',
+			'default' => true,
+		),
+		'attached_images'        => array(
+			'type'    => 'boolean',
+			'default' => true,
+		),
+		'referenced_images'      => array(
+			'type'    => 'boolean',
+			'default' => false,
+		),
+		'max_images'             => array(
+			'type'    => 'integer',
+			'default' => 4,
+		),
+		'optin'                  => array(
+			'type'    => 'boolean',
+			'default' => false,
+		),
+		'share_always'           => array(
+			'type'    => 'boolean',
+			'default' => false,
+		),
+		'delay_sharing'          => array(
+			'type'    => 'integer',
+			'default' => 0,
+		),
+		'micropub_compat'        => array(
+			'type'    => 'boolean',
+			'default' => false,
+		),
+		'syn_links_compat'       => array(
+			'type'    => 'boolean',
+			'default' => false,
+		),
+		'debug_logging'          => array(
+			'type'    => 'boolean',
+			'default' => false,
+		),
+		'custom_status_field'    => array(
+			'type'    => 'boolean',
+			'default' => false,
+		),
+		'status_template'        => array(
+			'type'    => 'string',
+			'default' => '%title% %permalink%',
+		),
 	);
 
 	/**
@@ -62,9 +115,13 @@ class Options_Handler {
 	 * @since 0.1.0
 	 */
 	public function __construct() {
+		$options = get_option( 'share_on_mastodon_settings' );
+
 		$this->options = array_merge(
-			self::DEFAULT_OPTIONS,
-			get_option( 'share_on_mastodon_settings', array() )
+			array_combine( array_keys( self::SCHEMA ), array_column( self::SCHEMA, 'default' ) ),
+			is_array( $options )
+				? $options
+				: array()
 		);
 	}
 
@@ -101,9 +158,15 @@ class Options_Handler {
 	 * @since 0.1.0
 	 */
 	public function add_settings() {
-		add_option( 'share_on_mastodon_settings', self::DEFAULT_OPTIONS );
+		add_option( 'share_on_mastodon_settings', $this->options );
 
+		// @todo: Get move to `sanitize_settings()`?
 		$active_tab = $this->get_active_tab();
+
+		$schema = self::SCHEMA;
+		foreach ( $schema as &$row ) {
+			unset( $row['default'] );
+		}
 
 		register_setting(
 			'share-on-mastodon-settings-group',
@@ -118,7 +181,7 @@ class Options_Handler {
 	 * @since 0.11.0
 	 *
 	 * @param  array $settings Settings as submitted through WP Admin.
-	 * @return array Options to be stored.
+	 * @return array           Options to be stored.
 	 */
 	public function sanitize_setup_settings( $settings ) {
 		$this->options['post_types'] = array();
@@ -706,8 +769,7 @@ class Options_Handler {
 			return false;
 		}
 
-		/* @todo: Store defaults as a class constant. Currently, they're defined twice. */
-		$this->options = self::DEFAULT_OPTIONS;
+		$this->options = array_combine( array_keys( self::SCHEMA ), array_column( self::SCHEMA, 'default' ) );
 
 		update_option( 'share_on_mastodon_settings', $this->options );
 	}
