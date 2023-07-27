@@ -372,6 +372,11 @@ class Post_Handler {
 				)
 			);
 
+			// Registering this "post meta" for the block editor only; we're
+			// really only mapping an option to a "custom field." The classic
+			// editor doesn't need this; we can use PHP to read from the plugin
+			// settings, even if the "current user" lacks the `manage_options`
+			// capability.
 			register_post_meta(
 				$post_type,
 				'_share_on_mastodon_custom_status_field',
@@ -387,9 +392,9 @@ class Post_Handler {
 					'auth_callback'     => function() {
 						return current_user_can( 'edit_posts' );
 					},
-					// 'sanitize_callback' => function( $meta_value ) {
-					// 	return '0';
-					// },
+					'sanitize_callback' => function( $meta_value ) {
+						return '0'; // Not saving the actual setting, as we re-read it from the options everytime.
+					},
 				)
 			);
 		}
