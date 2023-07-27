@@ -94,21 +94,24 @@
 
 	registerPlugin( 'share-on-mastodon-panel', {
 		render: function( props ) {
-			const postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId(), [] );
-			const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
+			const postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId() );
+			const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType() );
 
 			const [ meta, setMeta ]               = useEntityProp( 'postType', postType, 'meta' );
 			const [ mastodonUrl, setMastodonUrl ] = useState( meta?._share_on_mastodon_url ?? '' );
 			const [ updated, setUpdated ]         = useState( false );
 
-			// *Should* the code below use `useSelect()`? I have no clue.
-			let wasSavingPost     = data.select( 'core/editor' ).isSavingPost();
-			let wasAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
+			// *Should* the code below use `useSelect()`? I have no clue. Looks
+			// like `useSelect()` and so on *inside* `data.subscribe()` leads to
+			// errors.
+			let wasSavingPost     = useSelect( ( select ) => select( 'core/editor' ).isSavingPost() );
+			let wasAutosavingPost = useSelect( ( select ) => select( 'core/editor' ).isAutosavingPost() );
 
 			data.subscribe( () => { // Kinda like `publish_post`, I guess.
 				const isSavingPost     = data.select( 'core/editor' ).isSavingPost();
 				const isAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
-				const publishPost      = wasSavingPost && ! wasAutosavingPost && ! isSavingPost && ( 'publish' === data.select( 'core/editor' ).getEditedPostAttribute( 'status' ) );
+				const status           = data.select( 'core/editor' ).getEditedPostAttribute( 'status' );
+				const publishPost      = wasSavingPost && ! wasAutosavingPost && ! isSavingPost && 'publish' === status;
 				wasSavingPost          = isSavingPost;
 				wasAutosavingPost      = isAutosavingPost;
 
