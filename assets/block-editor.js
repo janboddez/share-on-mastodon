@@ -35,21 +35,30 @@
 		return false;
 	};
 
-	const displayUrl = ( mastodonUrl ) => {
+	const isValidUrl = ( mastodonUrl ) => {
 		try {
-			let parser = new URL( mastodonUrl );
-
-			return sprintf(
-				'<a><b>%1$s</b><c>%2$s</c><b>%3$s</b></a>',
-				parser.protocol + '://' + ( parser.username ? parser.username + ( parser.password ? ':' + parser.password : '' ) + '@' : '' ),
-				parser.hostname.concat( parser.pathname ).slice( 0, 20 ),
-				parser.hostname.concat( parser.pathname ).slice( 20 ),
-			);
+			const parser = new URL( mastodonUrl );
+			return true;
 		} catch ( error ) {
 			// Invalid URL.
 		}
 
-		return '';
+		return false;
+	};
+
+	const displayUrl = ( mastodonUrl ) => {
+		if ( ! isValidUrl( mastodonUrl ) ) {
+			return ''
+		};
+
+		const parser = new URL( mastodonUrl );
+
+		return sprintf(
+			'<a><b>%1$s</b><c>%2$s</c><b>%3$s</b></a>',
+			parser.protocol + '://' + ( parser.username ? parser.username + ( parser.password ? ':' + parser.password : '' ) + '@' : '' ),
+			parser.hostname.concat( parser.pathname ).slice( 0, 20 ),
+			parser.hostname.concat( parser.pathname ).slice( 20 ),
+		);
 	};
 
 	const updateUrl = ( postId, setMastodonUrl ) => {
@@ -69,8 +78,12 @@
 				signal: controller.signal, // That time-out thingy.
 			} ).then( function( response ) {
 				clearTimeout( timeoutId );
-				setMastodonUrl( response );
+
+				if ( isValidUrl( response ) ) {
+					setMastodonUrl( response );
+				}
 			} ).catch( function( error ) {
+				console.log( error );
 				// The request timed out or otherwise failed. Leave as is.
 				throw new Error( 'The "Get URL" request failed.' )
 			} );
@@ -124,9 +137,9 @@
 			const [ meta, setMeta ]               = useEntityProp( 'postType', postType, 'meta' );
 			const [ mastodonUrl, setMastodonUrl ] = useState( meta?._share_on_mastodon_url ?? '' ); // So that we can overwrite and remember an updated URL.
 
-			if ( doneSaving() ) {
+			if ( doneSaving() && '' === mastodonUrl ) { // Post was updated, Mastodon URL is (still) empty.
 				setTimeout( () => {
-					updateUrl( postId, setMastodonUrl );
+					updateUrl( postId, setMastodonUrl ); // Fetch, and store, the new URL (if any).
 				}, 1000 ); // Not sure we still need this now that the "done saving" part seemes figured out.
 			}
 
