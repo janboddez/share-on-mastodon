@@ -83,7 +83,6 @@
 					setMastodonUrl( response );
 				}
 			} ).catch( function( error ) {
-				console.log( error );
 				// The request timed out or otherwise failed. Leave as is.
 				throw new Error( 'The "Get URL" request failed.' )
 			} );
