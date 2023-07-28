@@ -99,9 +99,9 @@ class Blocks {
 
 		$url = get_transient( "share_on_mastodon:$post_id:url" );
 
-		if ( false === $url ) {
+		if ( false === $url ) { // If no such transient exists.
 			$url = get_post_meta( $post_id, '_share_on_mastodon_url', true );
-			set_transient( "share_on_mastodon:$post_id:url", $url, 300 );
+			set_transient( "share_on_mastodon:$post_id:url", $url, 300 ); // If no URL exists, this will cache an empty string instead. Is that what we want?
 		}
 
 		return $url;

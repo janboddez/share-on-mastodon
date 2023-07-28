@@ -11,7 +11,31 @@
 	const registerPlugin             = plugins.registerPlugin;
 	const PluginDocumentSettingPanel = editPost.PluginDocumentSettingPanel;
 
-	function displayUrl( mastodonUrl ) {
+	// @see https://wordpress.stackexchange.com/questions/362975/admin-notification-after-save-post-when-ajax-saving-in-gutenberg
+	const doneSaving = () => {
+		const { isSaving, isAutosaving, status } = useSelect( ( select ) => {
+			return {
+				isSaving:     select( 'core/editor' ).isSavingPost(),
+				isAutosaving: select( 'core/editor' ).isAutosavingPost(),
+				status:       select( 'core/editor' ).getEditedPostAttribute( 'status' ),
+			};
+		} );
+
+		const [ wasSaving, setWasSaving ] = useState( isSaving && ! isAutosaving && 'publish' === status ); // Ignore autosaves, unpublished posts.
+
+		if ( wasSaving ) {
+			if ( ! isSaving ) {
+				setWasSaving( false );
+				return true;
+			}
+		} else if ( isSaving && ! isAutosaving && 'publish' === status ) {
+			setWasSaving( true );
+		}
+
+		return false;
+	};
+
+	const displayUrl = ( mastodonUrl ) => {
 		try {
 			let parser = new URL( mastodonUrl );
 
@@ -26,9 +50,9 @@
 		}
 
 		return '';
-	}
+	};
 
-	function updateUrl( postId, setMastodonUrl ) {
+	const updateUrl = ( postId, setMastodonUrl ) => {
 		if ( ! postId ) {
 			return false;
 		}
@@ -56,9 +80,9 @@
 
 		// All good.
 		return true;
-	}
+	};
 
-	function unlinkUrl( postId, setMastodonUrl ) {
+	const unlinkUrl = ( postId, setMastodonUrl ) => {
 		if ( ! postId ) {
 			return false;
 		}
@@ -73,9 +97,9 @@
 			fetch( share_on_mastodon_obj.ajaxurl, {
 				signal: controller.signal, // That time-out thingy.
 				method: 'POST',
-				body: new URLSearchParams( {
-					action: 'share_on_mastodon_unlink_url',
-					post_id: postId,
+				body:   new URLSearchParams( {
+					action:                  'share_on_mastodon_unlink_url',
+					post_id:                 postId,
 					share_on_mastodon_nonce: share_on_mastodon_obj.nonce,
 				} ),
 			} ).then( function( response ) {
@@ -90,43 +114,23 @@
 		}
 
 		return true;
-	}
+	};
 
 	registerPlugin( 'share-on-mastodon-panel', {
 		render: function( props ) {
-			const postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId() );
-			const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType() );
+			const postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId(), [] );
+			const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
 
 			const [ meta, setMeta ]               = useEntityProp( 'postType', postType, 'meta' );
-			const [ mastodonUrl, setMastodonUrl ] = useState( meta?._share_on_mastodon_url ?? '' );
-			const [ updated, setUpdated ]         = useState( false );
+			const [ mastodonUrl, setMastodonUrl ] = useState( meta?._share_on_mastodon_url ?? '' ); // So that we can overwrite and remember an updated URL.
 
-			// *Should* the code below use `useSelect()`? I have no clue. Looks
-			// like `useSelect()` and so on *inside* `data.subscribe()` leads to
-			// errors.
-			let wasSavingPost     = useSelect( ( select ) => select( 'core/editor' ).isSavingPost() );
-			let wasAutosavingPost = useSelect( ( select ) => select( 'core/editor' ).isAutosavingPost() );
-
-			data.subscribe( () => { // Kinda like `publish_post`, I guess.
-				const isSavingPost     = data.select( 'core/editor' ).isSavingPost();
-				const isAutosavingPost = data.select( 'core/editor' ).isAutosavingPost();
-				const status           = data.select( 'core/editor' ).getEditedPostAttribute( 'status' );
-				const publishPost      = wasSavingPost && ! wasAutosavingPost && ! isSavingPost && 'publish' === status;
-				wasSavingPost          = isSavingPost;
-				wasAutosavingPost      = isAutosavingPost;
-
-				if ( publishPost ) {
-					setUpdated( true ); // You'd think one could just `setUpdated( publishPost )` or similar, but, no?
-				}
-			} );
-
-			if ( updated ) { // Using `useState()` so that this runs only once (per "save").
+			if ( doneSaving() ) {
 				setTimeout( () => {
 					updateUrl( postId, setMastodonUrl );
-					setUpdated( false );
-				}, 2000 ); // Need a "shortish" delay or it won't work. There's probably instances where these 2 seconds aren't enough, but whatevs.
+				}, 1000 ); // Not sure we still need this now that the "done saving" part seemes figured out.
 			}
 
+			// Wether to show the `TextareaControl` component.
 			const customStatusField = meta?._share_on_mastodon_custom_status_field ?? '0';
 
 			return el( PluginDocumentSettingPanel, {
@@ -156,7 +160,6 @@
 					: null,
 				'' !== mastodonUrl
 					? el( 'div', {},
-						// @todo: "Shorten" the URL.
 						interpolate( sprintf( __( 'Shared at %s', 'share-on-mastodon' ), displayUrl( mastodonUrl ) ), {
 							a: el( 'a', { className: 'share-on-mastodon-url', href: encodeURI( mastodonUrl ), target: '_blank', rel: 'noreferrer noopener' } ),
 							b: el( 'span', { className: 'screen-reader-text' } ),
