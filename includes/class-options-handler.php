@@ -88,6 +88,10 @@ class Options_Handler {
 			'type'    => 'string',
 			'default' => '%title% %permalink%',
 		),
+		'meta_box'               => array(
+			'type'    => 'boolean',
+			'default' => false,
+		),
 	);
 
 	/**
@@ -281,6 +285,7 @@ class Options_Handler {
 			'status_template'     => isset( $settings['status_template'] ) && is_string( $settings['status_template'] )
 				? preg_replace( '~\R~u', "\r\n", sanitize_textarea_field( $settings['status_template'] ) )
 				: '',
+			'meta_box'            => isset( $settings['meta_box'] ) ? true : false,
 		);
 
 		// Updated settings.
@@ -513,6 +518,12 @@ class Options_Handler {
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[custom_status_field]" value="1" <?php checked( ! empty( $this->options['custom_status_field'] ) ); ?> /> <?php esc_html_e( 'Allow customizing Mastodon statuses', 'share-on-mastodon' ); ?></label>
 								<?php /* translators: %s: link to the `share_on_mastodon_status` documentation */ ?>
 							<p class="description"><?php printf( __( '(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)', 'share-on-mastodon' ), '<a href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_status" target="_blank" rel="noopener noreferrer"><code>share_on_mastodon_status</code></a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p></td>
+						</tr>
+
+						<tr valign="top">
+							<th scope="row"><?php esc_html_e( 'Meta Box', 'share-on-mastodon' ); ?></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[meta_box]" value="1" <?php checked( ! empty( $this->options['meta_box'] ) ); ?> /> <?php esc_html_e( 'Use &ldquo;classic&rdquo; meta box', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php esc_html_e( '(Experimental) Replace Share on Mastodon&rsquo;s &ldquo;block editor sidebar panel&rdquo; with a &ldquo;classic&rdquo; meta box (even for post types that use the block editor).', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 
 						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>

@@ -171,7 +171,7 @@
 					]
 					: null,
 				'' !== mastodonUrl
-					? el( 'div', {},
+					? el( 'p', { className: 'description', style: { marginTop: '1em', marginBottom: '0' } },
 						interpolate( sprintf( __( 'Shared at %s', 'share-on-mastodon' ), displayUrl( mastodonUrl ) ), {
 							a: el( 'a', { className: 'share-on-mastodon-url', href: encodeURI( mastodonUrl ), target: '_blank', rel: 'noreferrer noopener' } ),
 							b: el( 'span', { className: 'screen-reader-text' } ),
