@@ -15,7 +15,7 @@ class Blocks {
 	 * Registers hook callbacks.
 	 */
 	public static function register() {
-		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_scripts' ) );
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_scripts' ), 11 );
 		add_action( 'rest_api_init', array( __CLASS__, 'register_api_endpoints' ) );
 	}
 
@@ -45,6 +45,7 @@ class Blocks {
 					'wp-edit-post',
 					'wp-api-fetch',
 					'wp-url',
+					'share-on-mastodon',
 				),
 				\Share_On_Mastodon\Share_On_Mastodon::PLUGIN_VERSION,
 				false

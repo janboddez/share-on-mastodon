@@ -45,6 +45,7 @@ class Post_Handler {
 
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_scripts' ) ); // Just in case (although I'm relatively sure `admin_enqueue_scripts` has already run at this point).
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
 
 		Notices::register();
@@ -322,23 +323,6 @@ class Post_Handler {
 		foreach ( $post_types as $post_type ) {
 			register_post_meta(
 				$post_type,
-				'_share_on_mastodon',
-				array(
-					'single'            => true,
-					'show_in_rest'      => true,
-					'type'              => 'string',
-					'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1',
-					'auth_callback'     => function() {
-						return current_user_can( 'edit_posts' );
-					},
-					'sanitize_callback' => function( $meta_value ) {
-						return '1' === $meta_value ? '1' : '0';
-					},
-				)
-			);
-
-			register_post_meta(
-				$post_type,
 				'_share_on_mastodon_url',
 				array(
 					'single'            => true,
@@ -355,47 +339,42 @@ class Post_Handler {
 				)
 			);
 
-			register_post_meta(
-				$post_type,
-				'_share_on_mastodon_status',
-				array(
-					'single'            => true,
-					'show_in_rest'      => true,
-					'type'              => 'string',
-					'default'           => ! empty( $this->options['status_template'] ) ? $this->options['status_template'] : '',
-					'auth_callback'     => function() {
-						return current_user_can( 'edit_posts' );
-					},
-					'sanitize_callback' => function( $meta_value ) {
-						return sanitize_textarea_field( $meta_value );
-					},
-				)
-			);
-
 			if ( use_block_editor_for_post_type( $post_type ) && empty( $this->options['meta_box'] ) ) {
-				// Register a faux custom field so that we have access to the
-				// `custom_status_field` setting.
-				// @todo: As this gets saved in the database, we should probably make this setting available another way (like in a JS object).
 				register_post_meta(
 					$post_type,
-					'_share_on_mastodon_custom_status_field',
+					'_share_on_mastodon',
 					array(
 						'single'            => true,
-						'show_in_rest'      => array(
-							'prepare_callback' => function( $value ) {
-								return ! empty( $this->options['custom_status_field'] ) ? '1' : '0';
-							},
-						),
+						'show_in_rest'      => true,
 						'type'              => 'string',
-						'default'           => ! empty( $this->options['custom_status_field'] ) ? '1' : '0',
+						'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1',
 						'auth_callback'     => function() {
 							return current_user_can( 'edit_posts' );
 						},
 						'sanitize_callback' => function( $meta_value ) {
-							return '0'; // Dummy value.
+							return '1' === $meta_value ? '1' : '0';
 						},
 					)
 				);
+
+				if ( ! empty( $this->options['custom_status_field'] ) ) {
+					register_post_meta(
+						$post_type,
+						'_share_on_mastodon_status',
+						array(
+							'single'            => true,
+							'show_in_rest'      => true,
+							'type'              => 'string',
+							'default'           => ! empty( $this->options['status_template'] ) ? $this->options['status_template'] : '',
+							'auth_callback'     => function() {
+								return current_user_can( 'edit_posts' );
+							},
+							'sanitize_callback' => function( $meta_value ) {
+								return sanitize_textarea_field( $meta_value );
+							},
+						)
+					);
+				}
 			}
 		}
 	}
@@ -555,17 +534,14 @@ class Post_Handler {
 			return;
 		}
 
+		$current_screen = get_current_screen();
+		if ( ( isset( $current_screen->post_type ) && ! in_array( $current_screen->post_type, (array) $this->options['post_types'], true ) ) ) {
+			// The current post type uses the block editor (and the "classic"
+			// meta box is disabled).
+			return;
+		}
+
 		global $post;
-
-		if ( empty( $post ) ) {
-			// Can't do much without a `$post` object.
-			return;
-		}
-
-		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
-			// Unsupported post type.
-			return;
-		}
 
 		// Enqueue CSS and JS.
 		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), Share_On_Mastodon::PLUGIN_VERSION );
@@ -574,10 +550,11 @@ class Post_Handler {
 			'share-on-mastodon',
 			'share_on_mastodon_obj',
 			array(
-				'message' => esc_attr__( 'Forget this URL?', 'share-on-mastodon' ), // Confirmation message.
-				'post_id' => $post->ID, // Pass current post ID to JS.
-				'nonce'   => wp_create_nonce( basename( __FILE__ ) ),
-				'ajaxurl' => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+				'message'             => esc_attr__( 'Forget this URL?', 'share-on-mastodon' ), // Confirmation message.
+				'post_id'             => $post->ID, // Pass current post ID to JS.
+				'nonce'               => wp_create_nonce( basename( __FILE__ ) ),
+				'ajaxurl'             => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+				'custom_status_field' => ! empty( $this->options['custom_status_field'] ) ? '1' : '0',
 			)
 		);
 	}

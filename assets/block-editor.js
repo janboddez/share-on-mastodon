@@ -1,4 +1,4 @@
-( function ( element, components, i18n, data, coreData, plugins, editPost, apiFetch, url ) {
+( function ( element, components, i18n, data, coreData, plugins, editPost, apiFetch, url, share_on_mastodon_obj ) {
 	const el                         = element.createElement;
 	const interpolate                = element.createInterpolateElement;
 	const useState                   = element.useState;
@@ -139,11 +139,11 @@
 			if ( doneSaving() && '' === mastodonUrl ) { // Post was updated, Mastodon URL is (still) empty.
 				setTimeout( () => {
 					updateUrl( postId, setMastodonUrl ); // Fetch, and store, the new URL (if any).
-				}, 1000 ); // Not sure we still need this now that the "done saving" part seemes figured out.
+				}, 1000 ); // Need a shortish delay, even after the "done saving" part seems figured out.
 			}
 
 			// Wether to show the `TextareaControl` component.
-			const customStatusField = meta?._share_on_mastodon_custom_status_field ?? '0';
+			const customStatusField = share_on_mastodon_obj?.custom_status_field ?? '0';
 
 			return el( PluginDocumentSettingPanel, {
 					name: 'share-on-mastodon-panel',
@@ -193,4 +193,4 @@
 			);
 		},
 	} );
-} )( window.wp.element, window.wp.components, window.wp.i18n, window.wp.data, window.wp.coreData, window.wp.plugins, window.wp.editPost, window.wp.apiFetch, window.wp.url );
+} )( window.wp.element, window.wp.components, window.wp.i18n, window.wp.data, window.wp.coreData, window.wp.plugins, window.wp.editPost, window.wp.apiFetch, window.wp.url, window.share_on_mastodon_obj );
