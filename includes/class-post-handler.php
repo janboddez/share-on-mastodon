@@ -292,6 +292,7 @@ class Post_Handler {
 		if ( ! empty( $status->url ) ) {
 			delete_post_meta( $post->ID, '_share_on_mastodon_error' );
 			update_post_meta( $post->ID, '_share_on_mastodon_url', esc_url_raw( $status->url ) );
+			delete_transient( "share_on_mastodon:{$post->ID}:url" );
 
 			if ( 'share_on_mastodon_post' !== current_filter() ) {
 				// Show a notice only when this function was called directly.
@@ -353,6 +354,22 @@ class Post_Handler {
 						},
 						'sanitize_callback' => function( $meta_value ) {
 							return '1' === $meta_value ? '1' : '0';
+						},
+					)
+				);
+
+				register_post_meta(
+					$post_type,
+					'_share_on_mastodon_error',
+					array(
+						'single'            => true,
+						'show_in_rest'      => true,
+						'type'              => 'string',
+						'auth_callback'     => function() {
+							return current_user_can( 'edit_posts' );
+						},
+						'sanitize_callback' => function( $meta_value ) {
+							return sanitize_text_field( $meta_value );
 						},
 					)
 				);

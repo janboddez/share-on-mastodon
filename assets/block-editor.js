@@ -61,7 +61,7 @@
 		);
 	};
 
-	const updateUrl = ( postId, setMastodonUrl ) => {
+	const updateUrl = ( postId, setMastodonUrl, setError ) => {
 		if ( ! postId ) {
 			return false;
 		}
@@ -81,6 +81,7 @@
 
 				if ( isValidUrl( response ) ) {
 					setMastodonUrl( response );
+					setError( '' );
 				}
 			} ).catch( function( error ) {
 				// The request timed out or otherwise failed. Leave as is.
@@ -135,10 +136,11 @@
 
 			const [ meta, setMeta ]               = useEntityProp( 'postType', postType, 'meta' );
 			const [ mastodonUrl, setMastodonUrl ] = useState( meta?._share_on_mastodon_url ?? '' ); // So that we can overwrite and remember an updated URL.
+			const [ error, setError ]             = useState( meta?._share_on_mastodon_error ?? '' );
 
 			if ( doneSaving() && '' === mastodonUrl ) { // Post was updated, Mastodon URL is (still) empty.
 				setTimeout( () => {
-					updateUrl( postId, setMastodonUrl ); // Fetch, and store, the new URL (if any).
+					updateUrl( postId, setMastodonUrl, setError ); // Fetch, and store, the new URL (if any).
 				}, 1000 ); // Need a shortish delay, even after the "done saving" part seems figured out.
 			}
 
@@ -189,6 +191,9 @@
 							__( 'Unlink', 'share-on-mastodon' )
 						)
 					)
+					: null,
+				'' !== error && '' === mastodonUrl
+					? el( 'p', { className: 'description', style: { marginTop: '1em', marginBottom: '0' } }, error )
 					: null,
 			);
 		},
