@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require __DIR__ . '/includes/class-blocks.php';
+require __DIR__ . '/includes/class-block-editor.php';
 require __DIR__ . '/includes/class-image-handler.php';
 require __DIR__ . '/includes/class-micropub-compat.php';
 require __DIR__ . '/includes/class-notices.php';

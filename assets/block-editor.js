@@ -35,9 +35,9 @@
 		return false;
 	};
 
-	const isValidUrl = ( mastodonUrl ) => {
+	const isValidUrl = ( mastoUrl ) => {
 		try {
-			const parser = new URL( mastodonUrl );
+			const parser = new URL( mastoUrl );
 			return true;
 		} catch ( error ) {
 			// Invalid URL.
@@ -46,12 +46,12 @@
 		return false;
 	};
 
-	const displayUrl = ( mastodonUrl ) => {
-		if ( ! isValidUrl( mastodonUrl ) ) {
+	const displayUrl = ( mastoUrl ) => {
+		if ( ! isValidUrl( mastoUrl ) ) {
 			return ''
 		};
 
-		const parser = new URL( mastodonUrl );
+		const parser = new URL( mastoUrl );
 
 		return sprintf(
 			'<a><b>%1$s</b><c>%2$s</c><b>%3$s</b></a>',
@@ -61,7 +61,7 @@
 		);
 	};
 
-	const updateUrl = ( postId, setMastodonUrl, setError ) => {
+	const updateUrl = ( postId, setMastoUrl, setError ) => {
 		if ( ! postId ) {
 			return false;
 		}
@@ -80,8 +80,8 @@
 				clearTimeout( timeoutId );
 
 				if ( isValidUrl( response ) ) {
-					setMastodonUrl( response );
-					setError( '' );
+					setMastoUrl( response ); // So as to trigger a re-render?
+					setMastoError( '' ); // So as to trigger a re-render?
 				}
 			} ).catch( function( error ) {
 				// The request timed out or otherwise failed. Leave as is.
@@ -95,7 +95,7 @@
 		return true;
 	};
 
-	const unlinkUrl = ( postId, setMastodonUrl ) => {
+	const unlinkUrl = ( postId, setMastoUrl ) => {
 		if ( ! postId ) {
 			return false;
 		}
@@ -117,7 +117,7 @@
 				} ),
 			} ).then( function( response ) {
 				clearTimeout( timeoutId );
-				setMastodonUrl( '' ); // To force a re-render.
+				setMastoUrl( '' ); // So as to trigger a re-render.
 			} ).catch( function( error ) {
 				// The request timed out or otherwise failed. Leave as is.
 				throw new Error( 'The "Unlink" request failed.' )
@@ -134,13 +134,18 @@
 			const postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId(), [] );
 			const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
 
-			const [ meta, setMeta ]               = useEntityProp( 'postType', postType, 'meta' );
-			const [ mastodonUrl, setMastodonUrl ] = useState( meta?._share_on_mastodon_url ?? '' ); // So that we can overwrite and remember an updated URL.
-			const [ error, setError ]             = useState( meta?._share_on_mastodon_error ?? '' );
+			const [ meta, setMeta ]         = useEntityProp( 'postType', postType, 'meta' );
 
-			if ( doneSaving() && '' === mastodonUrl ) { // Post was updated, Mastodon URL is (still) empty.
+			const [ mastoUrl, setMastoUrl ] = useState( meta?._share_on_mastodon_url ?? '' );   // Need `useState()` to keep track of things.
+			const [ error, setError ]       = useState( meta?._share_on_mastodon_error ?? '' ); // Need `useState()` to keep track of things.
+
+			// delete meta?._share_on_mastodon_url;
+			// delete meta?._share_on_mastodon_error;
+			const { _share_on_mastodon_url, _share_on_mastodon_error, ...newMeta } = meta;
+
+			if ( doneSaving() && '' === mastoUrl ) { // Post was updated, Mastodon URL is (still) empty.
 				setTimeout( () => {
-					updateUrl( postId, setMastodonUrl, setError ); // Fetch, and store, the new URL (if any).
+					updateUrl( postId, setMastoUrl, setError ); // Fetch, and store, the new URL (if any).
 				}, 1000 ); // Need a shortish delay, even after the "done saving" part seems figured out.
 			}
 
@@ -155,7 +160,7 @@
 					label: __( 'Share on Mastodon', 'share-on-mastodon' ),
 					checked: '1' === meta._share_on_mastodon,
 					onChange: ( newValue ) => {
-						setMeta( { ...meta, _share_on_mastodon: ( newValue ? '1' : '0' ) } );
+						setMeta( { ...newMeta, _share_on_mastodon: ( newValue ? '1' : '0' ) } );
 					},
 				} ),
 				'1' === customStatusField
@@ -164,7 +169,7 @@
 							label: __( '(Optional) Custom Message', 'share-on-mastodon' ),
 							value: meta._share_on_mastodon_status ?? '',
 							onChange: ( newValue ) => {
-								setMeta( { ...meta, _share_on_mastodon_status: ( newValue ? newValue : null ) } );
+								setMeta( { ...newMeta, _share_on_mastodon_status: ( newValue ? newValue : null ) } );
 							},
 						} ),
 						el ( 'p', { className: 'description' },
@@ -172,10 +177,10 @@
 						),
 					]
 					: null,
-				'' !== mastodonUrl
+				'' !== mastoUrl
 					? el( 'p', { className: 'description', style: { marginTop: '1em', marginBottom: '0' } },
-						interpolate( sprintf( __( 'Shared at %s', 'share-on-mastodon' ), displayUrl( mastodonUrl ) ), {
-							a: el( 'a', { className: 'share-on-mastodon-url', href: encodeURI( mastodonUrl ), target: '_blank', rel: 'noreferrer noopener' } ),
+						interpolate( sprintf( __( 'Shared at %s', 'share-on-mastodon' ), displayUrl( mastoUrl ) ), {
+							a: el( 'a', { className: 'share-on-mastodon-url', href: encodeURI( mastoUrl ), target: '_blank', rel: 'noreferrer noopener' } ),
 							b: el( 'span', { className: 'screen-reader-text' } ),
 							c: el( 'span', { className: 'ellipsis' } ),
 						} ),
@@ -184,7 +189,7 @@
 								href: '#',
 								onClick: () => {
 									if ( confirm( __( 'Forget this URL?', 'share-on-mastodon' ) ) ) {
-										unlinkUrl( postId, setMastodonUrl );
+										unlinkUrl( postId, setMastoUrl );
 									}
 								},
 							},
@@ -192,7 +197,7 @@
 						)
 					)
 					: null,
-				'' !== error && '' === mastodonUrl
+				'' !== error && '' === mastoUrl
 					? el( 'p', { className: 'description', style: { marginTop: '1em', marginBottom: '0' } }, error )
 					: null,
 			);
