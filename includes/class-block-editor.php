@@ -10,13 +10,14 @@ namespace Share_On_Mastodon;
 /**
  * Block editor goodness.
  */
-class Blocks {
+class Block_Editor {
 	/**
 	 * Registers hook callbacks.
 	 */
 	public static function register() {
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_scripts' ), 11 );
 		add_action( 'rest_api_init', array( __CLASS__, 'register_api_endpoints' ) );
+		add_action( 'rest_api_init', array( __CLASS__, 'register_meta' ) );
 	}
 
 	/**
@@ -109,5 +110,111 @@ class Blocks {
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Registers Share on Mastodon's custom fields for use with the REST API.
+	 *
+	 * @since 0.11.0
+	 */
+	public static function register_meta() {
+		$options = get_options();
+
+		if ( empty( $options['post_types'] ) ) {
+			return;
+		}
+
+		$post_types = (array) $options['post_types'];
+
+		foreach ( $post_types as $post_type ) {
+			// Expose Share on Mastodon's custom fields to the REST API.
+			register_rest_field(
+				$post_type,
+				'share_on_mastodon',
+				array(
+					'get_callback'    => array( __CLASS__, 'get_meta' ),
+					'update_callback' => null,
+					'schema'          => array(
+						'type'       => 'object',
+						'properties' => array(
+							'url'   => array(
+								'type' => 'string',
+							),
+							'error' => array(
+								'type' => 'string',
+							),
+
+						),
+					),
+				)
+			);
+
+			if ( use_block_editor_for_post_type( $post_type ) && empty( $options['meta_box'] ) ) {
+				// Allow these fields to be *set* by the block editor.
+				register_post_meta(
+					$post_type,
+					'_share_on_mastodon',
+					array(
+						'single'            => true,
+						'show_in_rest'      => true,
+						'type'              => 'string',
+						'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) ? '0' : '1',
+						'auth_callback'     => function() {
+							return current_user_can( 'edit_posts' );
+						},
+						'sanitize_callback' => function( $meta_value ) {
+							return '1' === $meta_value ? '1' : '0';
+						},
+					)
+				);
+
+				if ( ! empty( $options['custom_status_field'] ) ) {
+					// No need to register (and thus save) anything we won't be
+					// using.
+					register_post_meta(
+						$post_type,
+						'_share_on_mastodon_status',
+						array(
+							'single'            => true,
+							'show_in_rest'      => true,
+							'type'              => 'string',
+							'default'           => ! empty( $options['status_template'] ) ? $options['status_template'] : '',
+							'auth_callback'     => function() {
+								return current_user_can( 'edit_posts' );
+							},
+							'sanitize_callback' => function( $meta_value ) {
+								// @todo: Check if different from `$this->options['status_template']` and save an empty string or `null` if so?
+								return sanitize_textarea_field( $meta_value );
+							},
+						)
+					);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Exposes Share on Mastodon's metadata to the REST API.
+	 *
+	 * @param  array $params Request parameters.
+	 * @return array         Response.
+	 */
+	public static function get_meta( $params ) {
+		$post_id = $params['id'];
+
+		if ( empty( $post_id ) || ! ctype_digit( $post_id ) ) {
+			return new WP_Error( 'invalid_id', 'Invalid post ID.', array( 'status' => 400 ) );
+		}
+
+		$post_id = (int) $post_id;
+
+		$url = get_post_meta( $post_id, '_share_on_mastodon_url', true );
+
+		return array(
+			'url'   => get_post_meta( $post_id, '_share_on_mastodon_url', true ),
+			'error' => empty( $url ) // Don't bother if we've got a URL.
+				? get_post_meta( $post_id, '_share_on_mastodon_error', true )
+				: '',
+		);
 	}
 }

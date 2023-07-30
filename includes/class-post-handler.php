@@ -41,8 +41,6 @@ class Post_Handler {
 		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
 		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ) );
 
-		add_action( 'rest_api_init', array( $this, 'register_meta' ) );
-
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_scripts' ) ); // Just in case (although I'm relatively sure `admin_enqueue_scripts` has already run at this point).
@@ -309,90 +307,6 @@ class Post_Handler {
 			// Provided debugging's enabled, let's store the (somehow faulty)
 			// response.
 			debug_log( $response );
-		}
-	}
-
-	/**
-	 * Register a post's Mastodon URL for use with the REST API.
-	 *
-	 * @since 0.11.0
-	 */
-	public function register_meta() {
-		$post_types = (array) $this->options['post_types'];
-
-		// Make Share on Mastodon's custom fields available in the REST API.
-		foreach ( $post_types as $post_type ) {
-			register_post_meta(
-				$post_type,
-				'_share_on_mastodon_url',
-				array(
-					'single'            => true,
-					'show_in_rest'      => true,
-					'type'              => 'string',
-					'auth_callback'     => function() {
-						return current_user_can( 'edit_posts' );
-					},
-					'sanitize_callback' => function( $meta_value ) {
-						return filter_var( $meta_value, FILTER_VALIDATE_URL )
-							? esc_url_raw( $meta_value )
-							: '';
-					},
-				)
-			);
-
-			if ( use_block_editor_for_post_type( $post_type ) && empty( $this->options['meta_box'] ) ) {
-				register_post_meta(
-					$post_type,
-					'_share_on_mastodon',
-					array(
-						'single'            => true,
-						'show_in_rest'      => true,
-						'type'              => 'string',
-						'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1',
-						'auth_callback'     => function() {
-							return current_user_can( 'edit_posts' );
-						},
-						'sanitize_callback' => function( $meta_value ) {
-							return '1' === $meta_value ? '1' : '0';
-						},
-					)
-				);
-
-				register_post_meta(
-					$post_type,
-					'_share_on_mastodon_error',
-					array(
-						'single'            => true,
-						'show_in_rest'      => true,
-						'type'              => 'string',
-						'auth_callback'     => function() {
-							return current_user_can( 'edit_posts' );
-						},
-						'sanitize_callback' => function( $meta_value ) {
-							return sanitize_text_field( $meta_value );
-						},
-					)
-				);
-
-				if ( ! empty( $this->options['custom_status_field'] ) ) {
-					register_post_meta(
-						$post_type,
-						'_share_on_mastodon_status',
-						array(
-							'single'            => true,
-							'show_in_rest'      => true,
-							'type'              => 'string',
-							'default'           => ! empty( $this->options['status_template'] ) ? $this->options['status_template'] : '',
-							'auth_callback'     => function() {
-								return current_user_can( 'edit_posts' );
-							},
-							'sanitize_callback' => function( $meta_value ) {
-								return sanitize_textarea_field( $meta_value );
-							},
-						)
-					);
-				}
-			}
 		}
 	}
 

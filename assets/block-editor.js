@@ -7,7 +7,6 @@
 	const __                         = i18n.__;
 	const sprintf                    = i18n.sprintf;
 	const useSelect                  = data.useSelect;
-	const useEntityProp              = coreData.useEntityProp;
 	const registerPlugin             = plugins.registerPlugin;
 	const PluginDocumentSettingPanel = editPost.PluginDocumentSettingPanel;
 
@@ -81,7 +80,7 @@
 
 				if ( isValidUrl( response ) ) {
 					setMastoUrl( response ); // So as to trigger a re-render?
-					setMastoError( '' ); // So as to trigger a re-render?
+					setError( '' ); // So as to trigger a re-render?
 				}
 			} ).catch( function( error ) {
 				// The request timed out or otherwise failed. Leave as is.
@@ -134,23 +133,20 @@
 			const postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId(), [] );
 			const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
 
-			const [ meta, setMeta ]         = useEntityProp( 'postType', postType, 'meta' );
-
-			const [ mastoUrl, setMastoUrl ] = useState( meta?._share_on_mastodon_url ?? '' );   // Need `useState()` to keep track of things.
-			const [ error, setError ]       = useState( meta?._share_on_mastodon_error ?? '' ); // Need `useState()` to keep track of things.
-
-			// delete meta?._share_on_mastodon_url;
-			// delete meta?._share_on_mastodon_error;
-			const { _share_on_mastodon_url, _share_on_mastodon_error, ...newMeta } = meta;
+			const { record, isResolving }   = coreData.useEntityRecord( 'postType', postType, postId );
+			const [ mastoUrl, setMastoUrl ] = useState( record?.share_on_mastodon?.url ?? '' );
+			const [ error, setError ]       = useState( record?.share_on_mastodon?.error ?? '' );
 
 			if ( doneSaving() && '' === mastoUrl ) { // Post was updated, Mastodon URL is (still) empty.
 				setTimeout( () => {
 					updateUrl( postId, setMastoUrl, setError ); // Fetch, and store, the new URL (if any).
-				}, 1000 ); // Need a shortish delay, even after the "done saving" part seems figured out.
+				}, 1500 ); // Need a shortish delay, even after the "done saving" part seems figured out.
 			}
 
 			// Wether to show the `TextareaControl` component.
 			const customStatusField = share_on_mastodon_obj?.custom_status_field ?? '0';
+
+			const [ meta, setMeta ] = coreData.useEntityProp( 'postType', postType, 'meta' );
 
 			return el( PluginDocumentSettingPanel, {
 					name: 'share-on-mastodon-panel',
@@ -159,8 +155,8 @@
 				el( ToggleControl, {
 					label: __( 'Share on Mastodon', 'share-on-mastodon' ),
 					checked: '1' === meta._share_on_mastodon,
-					onChange: ( newValue ) => {
-						setMeta( { ...newMeta, _share_on_mastodon: ( newValue ? '1' : '0' ) } );
+					onChange: ( value ) => {
+						setMeta( { ...meta, _share_on_mastodon: ( value ? '1' : '0' ) } );
 					},
 				} ),
 				'1' === customStatusField
@@ -168,8 +164,8 @@
 						el( TextareaControl, {
 							label: __( '(Optional) Custom Message', 'share-on-mastodon' ),
 							value: meta._share_on_mastodon_status ?? '',
-							onChange: ( newValue ) => {
-								setMeta( { ...newMeta, _share_on_mastodon_status: ( newValue ? newValue : null ) } );
+							onChange: ( value ) => {
+								setMeta( { ...meta, _share_on_mastodon_status: ( value ? value : null ) } );
 							},
 						} ),
 						el ( 'p', { className: 'description' },
