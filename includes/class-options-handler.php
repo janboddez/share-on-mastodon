@@ -122,7 +122,7 @@ class Options_Handler {
 		$options = get_option( 'share_on_mastodon_settings' );
 
 		$this->options = array_merge(
-			array_combine( array_keys( self::SCHEMA ), array_column( self::SCHEMA, 'default' ) ),
+			static::get_default_options(),
 			is_array( $options )
 				? $options
 				: array()
@@ -862,7 +862,7 @@ class Options_Handler {
 	}
 
 	/**
-	 * Returns the plugin options.
+	 * Returns the plugin's options.
 	 *
 	 * @since 0.3.0
 	 *
@@ -870,6 +870,17 @@ class Options_Handler {
 	 */
 	public function get_options() {
 		return $this->options;
+	}
+
+	/**
+	 * Returns the plugin's default options.
+	 *
+	 * @since 0.17.0
+	 *
+	 * @return array Default options.
+	 */
+	public static function get_default_options() {
+		return array_combine( array_keys( self::SCHEMA ), array_column( self::SCHEMA, 'default' ) );
 	}
 
 	/**

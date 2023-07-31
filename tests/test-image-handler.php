@@ -12,7 +12,7 @@ class Test_Image_Handler extends \WP_Mock\Tools\TestCase {
 	public function test_get_referenced_images() {
 		\WP_Mock::userFunction( 'get_option', array(
 			'times'  => 1,
-			'args'   => array( 'share_on_mastodon_settings', array() ),
+			'args'   => array( 'share_on_mastodon_settings' ),
 			'return' => array( 'referenced_images' => true ),
 		) );
 

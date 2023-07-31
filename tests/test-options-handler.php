@@ -12,8 +12,8 @@ class Test_Options_Handler extends \WP_Mock\Tools\TestCase {
 	public function test_options_handler_register() {
 		\WP_Mock::userFunction( 'get_option', array(
 			'times'  => 1,
-			'args'   => array( 'share_on_mastodon_settings', array() ),
-			'return' => \Share_On_Mastodon\Options_Handler::DEFAULT_OPTIONS,
+			'args'   => array( 'share_on_mastodon_settings' ),
+			'return' => \Share_On_Mastodon\Options_Handler::get_default_options(),
 		) );
 
 		$options_handler = new \Share_On_Mastodon\Options_Handler();
@@ -30,8 +30,8 @@ class Test_Options_Handler extends \WP_Mock\Tools\TestCase {
 	public function test_options_handler_add_settings() {
 		\WP_Mock::userFunction( 'get_option', array(
 			'times'  => 1,
-			'args'   => array( 'share_on_mastodon_settings', array() ),
-			'return' => \Share_On_Mastodon\Options_Handler::DEFAULT_OPTIONS,
+			'args'   => array( 'share_on_mastodon_settings' ),
+			'return' => \Share_On_Mastodon\Options_Handler::get_default_options(),
 		) );
 
  		$options_handler = new \Share_On_Mastodon\Options_Handler();
