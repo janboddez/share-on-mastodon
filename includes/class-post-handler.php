@@ -41,10 +41,9 @@ class Post_Handler {
 		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
 		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ) );
 
-		add_action( 'rest_api_init', array( $this, 'register_meta' ) );
-
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_scripts' ) ); // Just in case (although I'm relatively sure `admin_enqueue_scripts` has already run at this point).
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
 
 		Notices::register();
@@ -62,6 +61,11 @@ class Post_Handler {
 	public function update_meta( $new_status, $old_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
 			// Prevent double posting.
+			return;
+		}
+
+		if ( use_block_editor_for_post( $post ) ) {
+			// We have the block editor deal with updating post meta.
 			return;
 		}
 
@@ -286,6 +290,7 @@ class Post_Handler {
 		if ( ! empty( $status->url ) ) {
 			delete_post_meta( $post->ID, '_share_on_mastodon_error' );
 			update_post_meta( $post->ID, '_share_on_mastodon_url', esc_url_raw( $status->url ) );
+			delete_transient( "share_on_mastodon:{$post->ID}:url" );
 
 			if ( 'share_on_mastodon_post' !== current_filter() ) {
 				// Show a notice only when this function was called directly.
@@ -306,56 +311,6 @@ class Post_Handler {
 	}
 
 	/**
-	 * Register a post's Mastodon URL for use with the REST API.
-	 *
-	 * @since 0.11.0
-	 */
-	public function register_meta() {
-		$post_types = (array) $this->options['post_types'];
-
-		// Make Share on Mastodon's URL available in the REST API.
-		foreach ( $post_types as $post_type ) {
-			register_post_meta(
-				$post_type,
-				'_share_on_mastodon_url',
-				array(
-					'single'            => true,
-					'show_in_rest'      => true,
-					'type'              => 'string',
-					'auth_callback'     => function() {
-						return current_user_can( 'edit_posts' );
-					},
-					'sanitize_callback' => function( $meta_value ) {
-						return wp_http_validate_url( $meta_value )
-							? esc_url_raw( wp_http_validate_url( $meta_value ) )
-							: null;
-					},
-				)
-			);
-
-			// @codingStandardsIgnoreStart
-			// Allow the block editor to set `_share_on_mastodon`.
-			// register_post_meta(
-			// 	$post_type,
-			// 	'_share_on_mastodon',
-			// 	array(
-			// 		'single'            => true,
-			// 		'show_in_rest'      => true,
-			// 		'type'              => 'string',
-			// 		'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) ? '0' : '1',
-			// 		'auth_callback'     => function() {
-			// 			return current_user_can( 'edit_posts' );
-			// 		},
-			// 		'sanitize_callback' => function( $meta_value ) {
-			// 			return '1' === $meta_value ? '1' : '0';
-			// 		},
-			// 	)
-			// );
-			// @codingStandardsIgnoreEnd
-		}
-	}
-
-	/**
 	 * Registers a new meta box.
 	 *
 	 * @since 0.1.0
@@ -363,6 +318,13 @@ class Post_Handler {
 	public function add_meta_box() {
 		if ( empty( $this->options['post_types'] ) ) {
 			// Sharing disabled for all post types.
+			return;
+		}
+
+		$current_screen = get_current_screen();
+		if ( ( isset( $current_screen->post_type ) && use_block_editor_for_post_type( $current_screen->post_type ) ) && empty( $this->options['meta_box'] ) ) {
+			// The current post type uses the block editor (and the "classic"
+			// meta box is disabled).
 			return;
 		}
 
@@ -473,8 +435,11 @@ class Post_Handler {
 
 		// Have WordPress forget the Mastodon URL.
 		delete_post_meta( $post_id, '_share_on_mastodon_url' );
+		delete_transient( "share_on_mastodon:$post_id:url" );
 
-		if ( use_block_editor_for_post( $post_id ) ) {
+		$options = get_options();
+
+		if ( ! empty( $options['use_meta_box'] ) && use_block_editor_for_post( $post_id ) ) {
 			// Delete the checkbox value, too, to prevent Gutenberg's' odd meta
 			// box behavior from triggering an immediate re-share.
 			delete_post_meta( $post_id, '_share_on_mastodon' );
@@ -496,17 +461,18 @@ class Post_Handler {
 			return;
 		}
 
+		if ( empty( $this->options['post_types'] ) ) {
+			return;
+		}
+
+		$current_screen = get_current_screen();
+		if ( ( isset( $current_screen->post_type ) && ! in_array( $current_screen->post_type, (array) $this->options['post_types'], true ) ) ) {
+			// The current post type uses the block editor (and the "classic"
+			// meta box is disabled).
+			return;
+		}
+
 		global $post;
-
-		if ( empty( $post ) ) {
-			// Can't do much without a `$post` object.
-			return;
-		}
-
-		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
-			// Unsupported post type.
-			return;
-		}
 
 		// Enqueue CSS and JS.
 		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), Share_On_Mastodon::PLUGIN_VERSION );
@@ -515,8 +481,11 @@ class Post_Handler {
 			'share-on-mastodon',
 			'share_on_mastodon_obj',
 			array(
-				'message' => esc_attr__( 'Forget this URL?', 'share-on-mastodon' ), // Confirmation message.
-				'post_id' => $post->ID, // Pass current post ID to JS.
+				'message'             => esc_attr__( 'Forget this URL?', 'share-on-mastodon' ), // Confirmation message.
+				'post_id'             => $post->ID, // Pass current post ID to JS.
+				'nonce'               => wp_create_nonce( basename( __FILE__ ) ),
+				'ajaxurl'             => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+				'custom_status_field' => ! empty( $this->options['custom_status_field'] ) ? '1' : '0',
 			)
 		);
 	}
