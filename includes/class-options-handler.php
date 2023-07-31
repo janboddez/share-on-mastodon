@@ -342,7 +342,7 @@ class Options_Handler {
 						</tr>
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Supported Post Types', 'share-on-mastodon' ); ?></th>
-							<td><ul style="list-style: none; margin-top: 4px;">
+							<td><ul style="list-style: none; margin-top: 0;">
 								<?php
 								// Post types considered valid.
 								$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
@@ -459,6 +459,11 @@ class Options_Handler {
 					?>
 					<table class="form-table">
 						<tr valign="top">
+							<th scope="row"><label for="share_on_mastodon_settings[max_images]"><?php esc_html_e( 'Max. No. of Images', 'share-on-mastodon' ); ?></label></th>
+							<td><input type="number" min="0" max="4" style="width: 6em;" id="share_on_mastodon_settings[max_images]" name="share_on_mastodon_settings[max_images]" value="<?php echo esc_attr( ! empty( $this->options['max_images'] ) ? $this->options['max_images'] : '4' ); ?>" />
+							<p class="description"><?php esc_html_e( 'The maximum number of images that will be uploaded. (Mastodon supports up to 4 images.)', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Featured Images', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[featured_images]" value="1" <?php checked( ! isset( $this->options['featured_images'] ) || $this->options['featured_images'] ); ?> /> <?php esc_html_e( 'Include featured images', 'share-on-mastodon' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Upload featured images.', 'share-on-mastodon' ); ?></p></td>
@@ -466,17 +471,13 @@ class Options_Handler {
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Attached Images', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[attached_images]" value="1" <?php checked( ! isset( $this->options['attached_images'] ) || $this->options['attached_images'] ); ?> /> <?php esc_html_e( 'Include attached images', 'share-on-mastodon' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Upload attached images.', 'share-on-mastodon' ); ?></p></td>
+							<?php /* translators: %s: link to official WordPress documentation.  */ ?>
+							<p class="description"><?php printf( esc_html__( 'Upload %s.', 'share-on-mastodon' ), sprintf( '<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>', 'https://wordpress.org/documentation/article/use-image-and-file-attachments/#attachment-to-a-post', esc_html__( 'attached images', 'share-on-mastodon' ) ) ); ?></p></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'In-Post Images', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[referenced_images]" value="1" <?php checked( ! empty( $this->options['referenced_images'] ) ); ?> /> <?php esc_html_e( 'Include &ldquo;in-post&rdquo; images', 'share-on-mastodon' ); ?></label>
 							<p class="description"><?php esc_html_e( '(Experimental) Upload &ldquo;in-content&rdquo; images.', 'share-on-mastodon' ); ?></p></td>
-						</tr>
-						<tr valign="top">
-							<th scope="row"><label for="share_on_mastodon_settings[max_images]"><?php esc_html_e( 'Max. No. of Images', 'share-on-mastodon' ); ?></label></th>
-							<td><input type="number" min="0" max="4" style="width: 6em;" id="share_on_mastodon_settings[max_images]" name="share_on_mastodon_settings[max_images]" value="<?php echo esc_attr( ! empty( $this->options['max_images'] ) ? $this->options['max_images'] : '4' ); ?>" />
-							<p class="description"><?php esc_html_e( 'The maximum number of images that will be uploaded. (Mastodon supports up to 4 images.)', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 					</table>
 					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
@@ -511,13 +512,13 @@ class Options_Handler {
 							<th scope="row"><label for="share_on_mastodon_status_template"><?php esc_html_e( 'Status Template', 'share-on-mastodon' ); ?></label></th>
 							<td><textarea name="share_on_mastodon_settings[status_template]" id="share_on_mastodon_status_template" rows="5" style="min-width: 33%;"><?php echo ! empty( $this->options['status_template'] ) ? esc_html( $this->options['status_template'] ) : ''; ?></textarea>
 							<?php /* translators: %s: supported template tags */ ?>
-							<p class="description"><?php printf( __( '(Experimental) Customize the default status template. Supported &ldquo;template tags&rdquo;: %s.', 'share-on-mastodon' ), '<code>%title%</code>, <code>%excerpt%</code>, <code>%tags%</code>, <code>%permalink%</code>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p></td>
+							<p class="description"><?php printf( esc_html__( '(Experimental) Customize the default status template. Supported &ldquo;template tags&rdquo;: %s.', 'share-on-mastodon' ), '<code>%title%</code>, <code>%excerpt%</code>, <code>%tags%</code>, <code>%permalink%</code>' ); ?></p></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Customize Status', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[custom_status_field]" value="1" <?php checked( ! empty( $this->options['custom_status_field'] ) ); ?> /> <?php esc_html_e( 'Allow customizing Mastodon statuses', 'share-on-mastodon' ); ?></label>
 								<?php /* translators: %s: link to the `share_on_mastodon_status` documentation */ ?>
-							<p class="description"><?php printf( __( '(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)', 'share-on-mastodon' ), '<a href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_status" target="_blank" rel="noopener noreferrer"><code>share_on_mastodon_status</code></a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p></td>
+							<p class="description"><?php printf( esc_html__( '(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)', 'share-on-mastodon' ), '<a href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_status" target="_blank" rel="noopener noreferrer"><code>share_on_mastodon_status</code></a>' ); ?></p></td>
 						</tr>
 
 						<tr valign="top">
@@ -558,7 +559,8 @@ class Options_Handler {
 						<tr valign="top">
 							<th scope="row"><label for="share_on_mastodon_settings[debug_logging]"><?php esc_html_e( 'Logging', 'share-on-mastodon' ); ?></label></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[debug_logging]" value="1" <?php checked( ! empty( $this->options['debug_logging'] ) ); ?> /> <?php esc_html_e( 'Enable debug logging', 'share-on-mastodon' ); ?></label>
-							<p class="description"><?php _e( 'You&rsquo;ll <em>also</em> need to set WordPress&rsquo; <a href="https://wordpress.org/documentation/article/debugging-in-wordpress/#example-wp-config-php-for-debugging" target="_blank" rel="noopener noreferrer">debug logging constants</a>.', 'share-on-mastodon' ); // phpcs:ignore WordPress.Security.EscapeOutput.UnsafePrintingFunction ?></p></td>
+							<?php /* translators: %s: link to the official WordPress documentation */ ?>
+							<p class="description"><?php printf( esc_html__( 'You&rsquo;ll also need to set WordPress&rsquo; %s.', 'share-on-mastodon' ), sprintf( '<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>', 'https://wordpress.org/documentation/article/debugging-in-wordpress/#example-wp-config-php-for-debugging', esc_html__( 'debug logging constants', 'share-on-mastodon' ) ) ); ?></p></td>
 						</tr>
 					</table>
 					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
