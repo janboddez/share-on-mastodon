@@ -42,6 +42,7 @@ class Block_Editor {
 					'wp-components',
 					'wp-i18n',
 					'wp-data',
+					'wp-core-data',
 					'wp-plugins',
 					'wp-edit-post',
 					'wp-api-fetch',
