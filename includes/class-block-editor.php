@@ -134,18 +134,6 @@ class Block_Editor {
 				array(
 					'get_callback'    => array( __CLASS__, 'get_meta' ),
 					'update_callback' => null,
-					'schema'          => array(
-						'type'       => 'object',
-						'properties' => array(
-							'url'   => array(
-								'type' => 'string',
-							),
-							'error' => array(
-								'type' => 'string',
-							),
-
-						),
-					),
 				)
 			);
 
