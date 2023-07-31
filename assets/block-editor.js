@@ -20,7 +20,7 @@
 			};
 		} );
 
-		const [ wasSaving, setWasSaving ] = useState( isSaving && ! isAutosaving && 'publish' === status ); // Ignore autosaves, unpublished posts.
+		const [ wasSaving, setWasSaving ] = useState( isSaving && ! isAutosaving && 'publish' === status ); // Ignore autosaves, and unpublished posts.
 
 		if ( wasSaving ) {
 			if ( ! isSaving ) {
@@ -133,20 +133,23 @@
 			const postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId(), [] );
 			const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
 
+			// To be able to actually save post meta (namely, `_share_on_mastodon` and `_share_on_mastodon_status`).
+			const [ meta, setMeta ] = coreData.useEntityProp( 'postType', postType, 'meta' );
+
+			// These are the custom fields we *don't* want to be set by `setMeta()`.
 			const { record, isResolving }   = coreData.useEntityRecord( 'postType', postType, postId );
 			const [ mastoUrl, setMastoUrl ] = useState( record?.share_on_mastodon?.url ?? '' );
 			const [ error, setError ]       = useState( record?.share_on_mastodon?.error ?? '' );
 
-			if ( doneSaving() && '' === mastoUrl ) { // Post was updated, Mastodon URL is (still) empty.
+			if ( doneSaving() && '' === mastoUrl ) {
+				// Post was updated, Mastodon URL is (still) empty.
 				setTimeout( () => {
 					updateUrl( postId, setMastoUrl, setError ); // Fetch, and store, the new URL (if any).
-				}, 1500 ); // Need a shortish delay, even after the "done saving" part seems figured out.
+				}, 1500 ); // Need a shortish delay, and possibly more in certain cases, but something's better than nothing.
 			}
 
-			// Wether to show the `TextareaControl` component.
+			// Wether to also show the `TextareaControl` component.
 			const customStatusField = share_on_mastodon_obj?.custom_status_field ?? '0';
-
-			const [ meta, setMeta ] = coreData.useEntityProp( 'postType', postType, 'meta' );
 
 			return el( PluginDocumentSettingPanel, {
 					name: 'share-on-mastodon-panel',
