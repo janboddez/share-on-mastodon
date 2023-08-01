@@ -78,10 +78,11 @@
 			} ).then( function( response ) {
 				clearTimeout( timeoutId );
 
-				if ( isValidUrl( response ) ) {
-					setMastoUrl( response ); // So as to trigger a re-render?
-					setError( '' ); // So as to trigger a re-render?
+				if ( response.hasOwnProperty( 'url' ) && isValidUrl( response.url ) ) {
+					setMastoUrl( response.url );
 				}
+
+				setError( response.error ?? '' );
 			} ).catch( function( error ) {
 				// The request timed out or otherwise failed. Leave as is.
 				throw new Error( 'The "Get URL" request failed.' )
@@ -141,11 +142,21 @@
 			const [ mastoUrl, setMastoUrl ] = useState( record?.share_on_mastodon?.url ?? '' );
 			const [ error, setError ]       = useState( record?.share_on_mastodon?.error ?? '' );
 
-			if ( doneSaving() && '' === mastoUrl ) {
+			if ( doneSaving() && '' === mastoUrl && '1' === meta._share_on_mastodon ) {
 				// Post was updated, Mastodon URL is (still) empty.
 				setTimeout( () => {
-					updateUrl( postId, setMastoUrl, setError ); // Fetch, and store, the new URL (if any).
-				}, 1500 ); // Need a shortish delay, and possibly more in certain cases, but something's better than nothing.
+					// After a shortish delay, fetch, and store, the new URL (if any).
+					updateUrl( postId, setMastoUrl, setError );
+				}, 1500 );
+
+				setTimeout( () => {
+					// Just in case. I thought of `setInterval()`, but if after
+					// 15 seconds it's still not there, it's likely not going to
+					// happen. Unless of course the "Delay" option is set to
+					// something larger, but then there's no point in displaying
+					// this type of feedback anyway.
+					updateUrl( postId, setMastoUrl, setError );
+				}, 15000 );
 			}
 
 			// Wether to also show the `TextareaControl` component.

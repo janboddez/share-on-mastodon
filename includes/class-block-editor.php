@@ -64,7 +64,7 @@ class Block_Editor {
 			'/url',
 			array(
 				'methods'             => array( 'GET' ),
-				'callback'            => array( __CLASS__, 'get_url' ),
+				'callback'            => array( __CLASS__, 'get_meta' ),
 				'permission_callback' => array( __CLASS__, 'permission_callback' ),
 			)
 		);
@@ -84,33 +84,6 @@ class Block_Editor {
 		}
 
 		return current_user_can( 'edit_post', $post_id );
-	}
-
-	/**
-	 * Fetches a post's Mastodon URL.
-	 *
-	 * Should only ever be called as a REST API endpoint.
-	 *
-	 * @param  \WP_REST_Request $request   WP REST API request.
-	 * @return \WP_REST_Response|\WP_Error Response.
-	 */
-	public static function get_url( $request ) {
-		$post_id = $request->get_param( 'post_id' );
-
-		if ( empty( $post_id ) || ! ctype_digit( $post_id ) ) {
-			return new WP_Error( 'invalid_id', 'Invalid post ID.', array( 'status' => 400 ) );
-		}
-
-		$post_id = (int) $post_id;
-
-		$url = get_transient( "share_on_mastodon:$post_id:url" );
-
-		if ( false === $url ) { // If no such transient exists.
-			$url = get_post_meta( $post_id, '_share_on_mastodon_url', true );
-			set_transient( "share_on_mastodon:$post_id:url", $url, 300 ); // If no URL exists, this will cache an empty string instead. Is that what we want?
-		}
-
-		return $url;
 	}
 
 	/**
@@ -185,11 +158,15 @@ class Block_Editor {
 	/**
 	 * Exposes Share on Mastodon's metadata to the REST API.
 	 *
-	 * @param  array $params Request parameters.
-	 * @return array         Response.
+	 * @param  \WP_REST_Request|array $request Request (parameters).
+	 * @return array                           Response.
 	 */
-	public static function get_meta( $params ) {
-		$post_id = $params['id'];
+	public static function get_meta( $request ) {
+		if ( is_array( $request ) ) {
+			$post_id = $request['id'];
+		} else {
+			$post_id = $request->get_param( 'post_id' );
+		}
 
 		if ( empty( $post_id ) || ! ctype_digit( $post_id ) ) {
 			return new WP_Error( 'invalid_id', 'Invalid post ID.', array( 'status' => 400 ) );
