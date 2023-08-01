@@ -66,8 +66,6 @@ class Share_On_Mastodon {
 
 		$this->post_handler = new Post_Handler( $this->options_handler->get_options() );
 		$this->post_handler->register();
-
-		Block_Editor::register();
 	}
 
 	/**
@@ -91,8 +89,9 @@ class Share_On_Mastodon {
 		if ( ! empty( $options['syn_links_compat'] ) ) {
 			Syn_Links_Compat::register();
 		}
-	}
 
+		Block_Editor::register();
+	}
 
 	/**
 	 * Ensures cron job is scheduled.

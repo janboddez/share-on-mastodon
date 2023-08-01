@@ -7,8 +7,12 @@
 	word-break: break-word;
 }
 
-.share-on-mastodon-url {
+.share-on-mastodon-url,
+.share-on-mastodon-url:active,
+.share-on-mastodon-url:hover,
+.share-on-mastodon-url:focus {
 	margin-inline-end: 0.33em;
+	color: #007cba;
 }
 
 #share-on-mastodon .url .ellipsis::after,
@@ -17,10 +21,13 @@
 	content: "\2026";
 }
 
-#share-on-mastodon .unlink,
+#share-on-mastodon .unlink {
+	color: #a00;
+}
+
 .share-on-mastodon-unlink,
 .share-on-mastodon-unlink:active,
 .share-on-mastodon-unlink:hover,
 .share-on-mastodon-unlink:focus {
-	color: #a00;
+	color: #cc1818;
 }

@@ -13,6 +13,8 @@ namespace Share_On_Mastodon;
 class Block_Editor {
 	/**
 	 * Registers hook callbacks.
+	 *
+	 * @since 0.17.0
 	 */
 	public static function register() {
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_scripts' ), 11 );
@@ -22,6 +24,8 @@ class Block_Editor {
 
 	/**
 	 * Enqueues block editor scripts.
+	 *
+	 * @since 0.17.0
 	 */
 	public static function enqueue_scripts() {
 		$options = get_options();
@@ -57,6 +61,8 @@ class Block_Editor {
 
 	/**
 	 * Registers (block-related) REST API endpoints.
+	 *
+	 * @since 0.17.0
 	 */
 	public static function register_api_endpoints() {
 		register_rest_route(
@@ -73,6 +79,8 @@ class Block_Editor {
 	/**
 	 * The one, for now, REST API permission callback.
 	 *
+	 * @since 0.17.0
+	 *
 	 * @param  \WP_REST_Request $request WP REST API request.
 	 * @return bool                      If the request's authorized.
 	 */
@@ -84,6 +92,37 @@ class Block_Editor {
 		}
 
 		return current_user_can( 'edit_post', $post_id );
+	}
+
+	/**
+	 * Exposes Share on Mastodon's metadata to the REST API.
+	 *
+	 * @since 0.17.0
+	 *
+	 * @param  \WP_REST_Request|array $request API request (parameters).
+	 * @return array|\WP_Error                 Response (or error).
+	 */
+	public static function get_meta( $request ) {
+		if ( is_array( $request ) ) {
+			$post_id = $request['id'];
+		} else {
+			$post_id = $request->get_param( 'post_id' );
+		}
+
+		if ( empty( $post_id ) || ! ctype_digit( $post_id ) ) {
+			return new \WP_Error( 'invalid_id', 'Invalid post ID.', array( 'status' => 400 ) );
+		}
+
+		$post_id = (int) $post_id;
+
+		$url = get_post_meta( $post_id, '_share_on_mastodon_url', true );
+
+		return array(
+			'url'   => get_post_meta( $post_id, '_share_on_mastodon_url', true ),
+			'error' => empty( $url ) // Don't bother if we've got a URL.
+				? get_post_meta( $post_id, '_share_on_mastodon_error', true )
+				: '',
+		);
 	}
 
 	/**
@@ -144,43 +183,15 @@ class Block_Editor {
 							'auth_callback'     => function() {
 								return current_user_can( 'edit_posts' );
 							},
-							'sanitize_callback' => function( $meta_value ) {
-								// @todo: Check if different from `$this->options['status_template']` and save an empty string or `null` if so?
-								return sanitize_textarea_field( $meta_value );
+							'sanitize_callback' => function( $status ) {
+								$status = sanitize_textarea_field( $status );
+								$status = preg_replace( '~\R~u', "\r\n", $status );
+								return $status;
 							},
 						)
 					);
 				}
 			}
 		}
-	}
-
-	/**
-	 * Exposes Share on Mastodon's metadata to the REST API.
-	 *
-	 * @param  \WP_REST_Request|array $request Request (parameters).
-	 * @return array                           Response.
-	 */
-	public static function get_meta( $request ) {
-		if ( is_array( $request ) ) {
-			$post_id = $request['id'];
-		} else {
-			$post_id = $request->get_param( 'post_id' );
-		}
-
-		if ( empty( $post_id ) || ! ctype_digit( $post_id ) ) {
-			return new WP_Error( 'invalid_id', 'Invalid post ID.', array( 'status' => 400 ) );
-		}
-
-		$post_id = (int) $post_id;
-
-		$url = get_post_meta( $post_id, '_share_on_mastodon_url', true );
-
-		return array(
-			'url'   => get_post_meta( $post_id, '_share_on_mastodon_url', true ),
-			'error' => empty( $url ) // Don't bother if we've got a URL.
-				? get_post_meta( $post_id, '_share_on_mastodon_error', true )
-				: '',
-		);
 	}
 }

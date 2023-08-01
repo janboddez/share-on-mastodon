@@ -46,10 +46,6 @@
 	};
 
 	const displayUrl = ( mastoUrl ) => {
-		if ( ! isValidUrl( mastoUrl ) ) {
-			return ''
-		};
-
 		const parser = new URL( mastoUrl );
 
 		return sprintf(
@@ -179,7 +175,7 @@
 							label: __( '(Optional) Custom Message', 'share-on-mastodon' ),
 							value: meta._share_on_mastodon_status ?? '',
 							onChange: ( value ) => {
-								setMeta( { ...meta, _share_on_mastodon_status: ( value ? value : null ) } );
+								setMeta( { ...meta, _share_on_mastodon_status: value } );
 							},
 						} ),
 						el ( 'p', { className: 'description' },
@@ -187,7 +183,7 @@
 						),
 					]
 					: null,
-				'' !== mastoUrl
+				'' !== mastoUrl && isValidUrl( mastoUrl )
 					? el( 'p', { className: 'description', style: { marginTop: '1em', marginBottom: '0' } },
 						interpolate( sprintf( __( 'Shared at %s', 'share-on-mastodon' ), displayUrl( mastoUrl ) ), {
 							a: el( 'a', { className: 'share-on-mastodon-url', href: encodeURI( mastoUrl ), target: '_blank', rel: 'noreferrer noopener' } ),
