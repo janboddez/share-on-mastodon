@@ -14,9 +14,9 @@
 	const doneSaving = () => {
 		const { isSaving, isAutosaving, status } = useSelect( ( select ) => {
 			return {
-				isSaving:     select( 'core/editor' ).isSavingPost(),
+				isSaving: select( 'core/editor' ).isSavingPost(),
 				isAutosaving: select( 'core/editor' ).isAutosavingPost(),
-				status:       select( 'core/editor' ).getEditedPostAttribute( 'status' ),
+				status: select( 'core/editor' ).getEditedPostAttribute( 'status' ),
 			};
 		} );
 
@@ -106,7 +106,7 @@
 			fetch( share_on_mastodon_obj.ajaxurl, {
 				signal: controller.signal, // That time-out thingy.
 				method: 'POST',
-				body:   new URLSearchParams( {
+				body: new URLSearchParams( {
 					action: 'share_on_mastodon_unlink_url',
 					post_id: postId,
 					share_on_mastodon_nonce: share_on_mastodon_obj.nonce,
