@@ -97,8 +97,8 @@
 		}
 
 		// Like a time-out.
-		var controller = new AbortController();
-		var timeoutId  = setTimeout( function() {
+		const controller = new AbortController();
+		const timeoutId  = setTimeout( function() {
 			controller.abort();
 		}, 6000 );
 
@@ -107,8 +107,8 @@
 				signal: controller.signal, // That time-out thingy.
 				method: 'POST',
 				body:   new URLSearchParams( {
-					action:                  'share_on_mastodon_unlink_url',
-					post_id:                 postId,
+					action: 'share_on_mastodon_unlink_url',
+					post_id: postId,
 					share_on_mastodon_nonce: share_on_mastodon_obj.nonce,
 				} ),
 			} ).then( function( response ) {
