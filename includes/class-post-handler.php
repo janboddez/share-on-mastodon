@@ -597,7 +597,7 @@ class Post_Handler {
 	 * @return string       (Possibly shortened) excerpt.
 	 */
 	protected function get_excerpt( $post_id ) {
-		$orig    = get_the_excerpt( $post_id );
+		$orig    = apply_filters( 'the_excerpt', get_the_excerpt( $post_id ) );
 		$excerpt = mb_substr( $orig, 0, apply_filters( 'share_on_mastodon_excerpt_length', 125 ) );
 
 		if ( $excerpt !== $orig && ! ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
