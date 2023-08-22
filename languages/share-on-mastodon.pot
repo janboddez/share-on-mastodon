@@ -2,25 +2,27 @@
 # This file is distributed under the GNU General Public License v3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Share on Mastodon 0.16.2\n"
+"Project-Id-Version: Share on Mastodon 0.17.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/share-on-mastodon\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-07-16T18:57:27+00:00\n"
+"POT-Creation-Date: 2023-08-22T08:25:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: share-on-mastodon\n"
 
 #. Plugin Name of the plugin
-#: includes/class-options-handler.php:89
-#: includes/class-options-handler.php:90
-#: includes/class-options-handler.php:253
-#: includes/class-options-handler.php:558
-#: includes/class-post-handler.php:372
-#: includes/class-post-handler.php:399
+#: includes/class-options-handler.php:150
+#: includes/class-options-handler.php:151
+#: includes/class-options-handler.php:321
+#: includes/class-options-handler.php:634
+#: includes/class-post-handler.php:334
+#: includes/class-post-handler.php:361
+#: assets/block-editor.js:163
+#: assets/block-editor.js:166
 msgid "Share on Mastodon"
 msgstr ""
 
@@ -50,252 +52,287 @@ msgstr ""
 msgid "Shared on Mastodon at %s."
 msgstr ""
 
-#: includes/class-options-handler.php:166
+#: includes/class-options-handler.php:233
 msgid "Please provide a valid URL."
 msgstr ""
 
-#: includes/class-options-handler.php:256
+#: includes/class-options-handler.php:324
 msgid "Setup"
 msgstr ""
 
-#: includes/class-options-handler.php:257
+#: includes/class-options-handler.php:325
 msgid "Images"
 msgstr ""
 
-#: includes/class-options-handler.php:258
+#: includes/class-options-handler.php:326
 msgid "Advanced"
 msgstr ""
 
-#: includes/class-options-handler.php:259
+#: includes/class-options-handler.php:327
 msgid "Debugging"
 msgstr ""
 
-#: includes/class-options-handler.php:270
+#: includes/class-options-handler.php:338
 msgid "Instance"
 msgstr ""
 
 #. translators: %s: example URL.
-#: includes/class-options-handler.php:273
+#: includes/class-options-handler.php:341
 msgid "Your Mastodon instance&rsquo;s URL. E.g., %s."
 msgstr ""
 
-#: includes/class-options-handler.php:276
+#: includes/class-options-handler.php:344
 msgid "Supported Post Types"
 msgstr ""
 
-#: includes/class-options-handler.php:291
+#: includes/class-options-handler.php:359
 msgid "Post types for which sharing to Mastodon is possible. (Sharing can still be disabled on a per-post basis.)"
 msgstr ""
 
-#: includes/class-options-handler.php:297
-#: includes/class-options-handler.php:345
+#: includes/class-options-handler.php:365
+#: includes/class-options-handler.php:413
 msgid "Authorize Access"
 msgstr ""
 
-#: includes/class-options-handler.php:313
+#: includes/class-options-handler.php:381
 msgid "Access granted!"
 msgstr ""
 
-#: includes/class-options-handler.php:344
+#: includes/class-options-handler.php:412
 msgid "Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication."
 msgstr ""
 
-#: includes/class-options-handler.php:350
+#: includes/class-options-handler.php:418
 msgid "You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline."
 msgstr ""
 
-#: includes/class-options-handler.php:365
+#: includes/class-options-handler.php:433
 msgid "Revoke Access"
 msgstr ""
 
-#: includes/class-options-handler.php:374
+#: includes/class-options-handler.php:442
 msgid "Something went wrong contacting your Mastodon instance. Please reload this page to try again."
 msgstr ""
 
-#: includes/class-options-handler.php:380
+#: includes/class-options-handler.php:448
 msgid "Please fill out and save your Mastodon instance&rsquo;s URL first."
 msgstr ""
 
-#: includes/class-options-handler.php:394
-msgid "Featured Images"
-msgstr ""
-
-#: includes/class-options-handler.php:395
-msgid "Include featured images"
-msgstr ""
-
-#: includes/class-options-handler.php:396
-msgid "Upload featured images."
-msgstr ""
-
-#: includes/class-options-handler.php:399
-msgid "Attached Images"
-msgstr ""
-
-#: includes/class-options-handler.php:400
-msgid "Include attached images"
-msgstr ""
-
-#: includes/class-options-handler.php:401
-msgid "Upload attached images."
-msgstr ""
-
-#: includes/class-options-handler.php:404
-msgid "In-Post Images"
-msgstr ""
-
-#: includes/class-options-handler.php:405
-msgid "Include &ldquo;in-post&rdquo; images"
-msgstr ""
-
-#: includes/class-options-handler.php:406
-msgid "(Experimental) Upload &ldquo;in-content&rdquo; images."
-msgstr ""
-
-#: includes/class-options-handler.php:409
+#: includes/class-options-handler.php:462
 msgid "Max. No. of Images"
 msgstr ""
 
-#: includes/class-options-handler.php:411
+#: includes/class-options-handler.php:464
 msgid "The maximum number of images that will be uploaded. (Mastodon supports up to 4 images.)"
 msgstr ""
 
-#: includes/class-options-handler.php:428
+#: includes/class-options-handler.php:467
+msgid "Featured Images"
+msgstr ""
+
+#: includes/class-options-handler.php:468
+msgid "Include featured images"
+msgstr ""
+
+#: includes/class-options-handler.php:469
+msgid "Upload featured images."
+msgstr ""
+
+#: includes/class-options-handler.php:472
+msgid "Attached Images"
+msgstr ""
+
+#: includes/class-options-handler.php:473
+msgid "Include attached images"
+msgstr ""
+
+#. translators: %s: link to official WordPress documentation.
+#: includes/class-options-handler.php:475
+msgid "Upload %s."
+msgstr ""
+
+#. translators: %s: link to official WordPress documentation.
+#: includes/class-options-handler.php:475
+msgid "attached images"
+msgstr ""
+
+#: includes/class-options-handler.php:478
+msgid "In-Post Images"
+msgstr ""
+
+#: includes/class-options-handler.php:479
+msgid "Include &ldquo;in-post&rdquo; images"
+msgstr ""
+
+#: includes/class-options-handler.php:480
+msgid "(Experimental) Upload &ldquo;in-content&rdquo; images."
+msgstr ""
+
+#: includes/class-options-handler.php:497
 msgid "Delayed Sharing"
 msgstr ""
 
-#: includes/class-options-handler.php:430
+#: includes/class-options-handler.php:499
 msgid "The number of seconds (0&ndash;3600) WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;that&rsquo;s 5 minutes&mdash;may resolve issues with image uploads.)"
 msgstr ""
 
-#: includes/class-options-handler.php:433
+#: includes/class-options-handler.php:502
 msgid "Opt-In"
 msgstr ""
 
-#: includes/class-options-handler.php:434
+#: includes/class-options-handler.php:503
 msgid "Make sharing opt-in rather than opt-out"
 msgstr ""
 
-#: includes/class-options-handler.php:435
+#: includes/class-options-handler.php:504
 msgid "Have the &ldquo;Share on Mastodon&rdquo; checkbox unchecked by default."
 msgstr ""
 
-#: includes/class-options-handler.php:438
+#: includes/class-options-handler.php:507
 msgid "Share Always"
 msgstr ""
 
-#: includes/class-options-handler.php:439
+#: includes/class-options-handler.php:508
 msgid "Always share on Mastodon"
 msgstr ""
 
-#: includes/class-options-handler.php:440
+#: includes/class-options-handler.php:509
 msgid "&ldquo;Force&rdquo; sharing (regardless of the &ldquo;Share on Mastodon&rdquo; checkbox&rsquo;s state), like when posting from a mobile app."
 msgstr ""
 
-#: includes/class-options-handler.php:443
+#: includes/class-options-handler.php:512
 msgid "Status Template"
 msgstr ""
 
 #. translators: %s: supported template tags
-#: includes/class-options-handler.php:446
+#: includes/class-options-handler.php:515
 msgid "(Experimental) Customize the default status template. Supported &ldquo;template tags&rdquo;: %s."
 msgstr ""
 
-#: includes/class-options-handler.php:449
+#: includes/class-options-handler.php:518
 msgid "Customize Status"
 msgstr ""
 
-#: includes/class-options-handler.php:450
+#: includes/class-options-handler.php:519
 msgid "Allow customizing Mastodon statuses"
 msgstr ""
 
 #. translators: %s: link to the `share_on_mastodon_status` documentation
-#: includes/class-options-handler.php:452
+#: includes/class-options-handler.php:521
 msgid "(Experimental) Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)"
 msgstr ""
 
-#: includes/class-options-handler.php:457
+#: includes/class-options-handler.php:525
+msgid "Meta Box"
+msgstr ""
+
+#: includes/class-options-handler.php:526
+msgid "Use &ldquo;classic&rdquo; meta box"
+msgstr ""
+
+#: includes/class-options-handler.php:527
+msgid "(Experimental) Replace Share on Mastodon&rsquo;s &ldquo;block editor sidebar panel&rdquo; with a &ldquo;classic&rdquo; meta box (even for post types that use the block editor)."
+msgstr ""
+
+#: includes/class-options-handler.php:532
 msgid "Micropub"
 msgstr ""
 
-#: includes/class-options-handler.php:458
+#: includes/class-options-handler.php:533
 msgid "Add syndication target"
 msgstr ""
 
-#: includes/class-options-handler.php:459
+#: includes/class-options-handler.php:534
 msgid "Add &ldquo;Mastodon&rdquo; as a Micropub syndication target."
 msgstr ""
 
-#: includes/class-options-handler.php:465
+#: includes/class-options-handler.php:540
 msgid "Syndication Links"
 msgstr ""
 
-#: includes/class-options-handler.php:466
+#: includes/class-options-handler.php:541
 msgid "Add Mastodon URLs to syndication links"
 msgstr ""
 
-#: includes/class-options-handler.php:467
+#: includes/class-options-handler.php:542
 msgid "(Experimental) Add Mastodon URLs to Syndication Links&rsquo; list of syndication links."
 msgstr ""
 
-#: includes/class-options-handler.php:485
+#: includes/class-options-handler.php:560
 msgid "Logging"
 msgstr ""
 
-#: includes/class-options-handler.php:486
+#: includes/class-options-handler.php:561
 msgid "Enable debug logging"
 msgstr ""
 
-#: includes/class-options-handler.php:487
-msgid "You&rsquo;ll <em>also</em> need to set WordPress&rsquo; <a href=\"https://wordpress.org/documentation/article/debugging-in-wordpress/#example-wp-config-php-for-debugging\" target=\"_blank\" rel=\"noopener noreferrer\">debug logging constants</a>."
+#. translators: %s: link to the official WordPress documentation
+#: includes/class-options-handler.php:563
+msgid "You&rsquo;ll also need to set WordPress&rsquo; %s."
 msgstr ""
 
-#: includes/class-options-handler.php:493
+#. translators: %s: link to the official WordPress documentation
+#: includes/class-options-handler.php:563
+msgid "debug logging constants"
+msgstr ""
+
+#: includes/class-options-handler.php:569
 msgid "Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)"
 msgstr ""
 
-#: includes/class-options-handler.php:508
+#: includes/class-options-handler.php:584
 msgid "Reset Settings"
 msgstr ""
 
-#: includes/class-options-handler.php:515
+#: includes/class-options-handler.php:591
 msgid "Below information is not meant to be shared with anyone but may help when troubleshooting issues."
 msgstr ""
 
-#: includes/class-options-handler.php:543
+#: includes/class-options-handler.php:619
 msgid "Are you sure you want to reset all settings?"
 msgstr ""
 
-#: includes/class-post-handler.php:412
+#: includes/class-post-handler.php:374
 msgid "(Optional) Message"
 msgstr ""
 
-#: includes/class-post-handler.php:414
+#: includes/class-post-handler.php:376
 msgid "Customize this post&rsquo;s Mastodon status."
 msgstr ""
 
 #. translators: toot URL
-#: includes/class-post-handler.php:430
+#: includes/class-post-handler.php:392
+#: assets/block-editor.js:188
 msgid "Shared at %s"
 msgstr ""
 
 #. translators: "unlink" link text
-#: includes/class-post-handler.php:432
+#: includes/class-post-handler.php:394
+#: assets/block-editor.js:202
 msgid "Unlink"
 msgstr ""
 
-#: includes/class-post-handler.php:456
+#: includes/class-post-handler.php:418
 msgid "Missing or invalid nonce."
 msgstr ""
 
-#: includes/class-post-handler.php:462
+#: includes/class-post-handler.php:424
 msgid "Missing or incorrect post ID."
 msgstr ""
 
-#: includes/class-post-handler.php:468
+#: includes/class-post-handler.php:430
 msgid "Insufficient rights."
 msgstr ""
 
-#: includes/class-post-handler.php:518
+#: includes/class-post-handler.php:484
+#: assets/block-editor.js:197
 msgid "Forget this URL?"
+msgstr ""
+
+#: assets/block-editor.js:175
+msgid "(Optional) Custom Message"
+msgstr ""
+
+#: assets/block-editor.js:182
+msgid "Customize this post’s Mastodon status."
 msgstr ""

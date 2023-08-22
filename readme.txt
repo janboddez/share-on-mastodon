@@ -1,7 +1,7 @@
 === Share on Mastodon ===
 Contributors: janboddez
 Tags: mastodon, share, publicize, crosspost, fediverse, syndication
-Tested up to: 6.2
+Tested up to: 6.3
 Stable tag: 0.17.0
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
