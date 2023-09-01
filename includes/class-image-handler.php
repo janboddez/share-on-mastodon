@@ -14,8 +14,8 @@ class Image_Handler {
 	/**
 	 * Returns a post's associated images.
 	 *
-	 * @param  WP_Post $post Post object.
-	 * @return array         Attachment array.
+	 * @param  \WP_Post $post Post object.
+	 * @return array          Attachment array.
 	 */
 	public static function get_images( $post ) {
 		$options = get_options();
