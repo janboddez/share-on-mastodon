@@ -321,11 +321,14 @@ class Post_Handler {
 			return;
 		}
 
-		$current_screen = get_current_screen();
-		if ( ( isset( $current_screen->post_type ) && use_block_editor_for_post_type( $current_screen->post_type ) ) && empty( $this->options['meta_box'] ) ) {
-			// The current post type uses the block editor (and the "classic"
-			// meta box is disabled).
-			return;
+		// This'll hide the meta box for Gutenberg users, who by default get the
+		// new sidebar panel.
+		$args = array(
+			'__back_compat_meta_box' => true,
+		);
+		if ( ! empty( $this->options['meta_box'] ) ) {
+			// And this will bring it back.
+			$args = null;
 		}
 
 		// Add meta box, for those post types that are supported.
@@ -335,7 +338,8 @@ class Post_Handler {
 			array( $this, 'render_meta_box' ),
 			(array) $this->options['post_types'],
 			'side',
-			'default'
+			'default',
+			$args
 		);
 	}
 

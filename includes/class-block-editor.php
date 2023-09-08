@@ -34,29 +34,28 @@ class Block_Editor {
 			return;
 		}
 
-		$current_screen = get_current_screen();
-		if ( isset( $current_screen->post_type ) && use_block_editor_for_post_type( $current_screen->post_type ) && empty( $options['meta_box'] ) ) {
-			// The current post type uses the block editor (and the "classic"
-			// meta box is disabled).
-			wp_enqueue_script(
-				'share-on-mastodon-editor',
-				plugins_url( '/assets/block-editor.js', dirname( __FILE__ ) ),
-				array(
-					'wp-element',
-					'wp-components',
-					'wp-i18n',
-					'wp-data',
-					'wp-core-data',
-					'wp-plugins',
-					'wp-edit-post',
-					'wp-api-fetch',
-					'wp-url',
-					'share-on-mastodon',
-				),
-				\Share_On_Mastodon\Share_On_Mastodon::PLUGIN_VERSION,
-				false
-			);
+		if ( ! empty( $options['meta_box'] ) ) {
+			return;
 		}
+
+		wp_enqueue_script(
+			'share-on-mastodon-editor',
+			plugins_url( '/assets/block-editor.js', dirname( __FILE__ ) ),
+			array(
+				'wp-element',
+				'wp-components',
+				'wp-i18n',
+				'wp-data',
+				'wp-core-data',
+				'wp-plugins',
+				'wp-edit-post',
+				'wp-api-fetch',
+				'wp-url',
+				'share-on-mastodon',
+			),
+			\Share_On_Mastodon\Share_On_Mastodon::PLUGIN_VERSION,
+			false
+		);
 	}
 
 	/**
