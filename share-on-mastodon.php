@@ -1,14 +1,15 @@
 <?php
 /**
- * Plugin Name: Share on Mastodon
- * Description: Easily share WordPress posts on Mastodon.
- * Plugin URI:  https://jan.boddez.net/wordpress/share-on-mastodon
- * Author:      Jan Boddez
- * Author URI:  https://jan.boddez.net/
- * License: GNU General Public License v3
- * License URI: http://www.gnu.org/licenses/gpl-3.0.html
- * Text Domain: share-on-mastodon
- * Version:     0.17.1
+ * Plugin Name:       Share on Mastodon
+ * Description:       Easily share WordPress posts on Mastodon.
+ * Plugin URI:        https://jan.boddez.net/wordpress/share-on-mastodon
+ * Author:            Jan Boddez
+ * Author URI:        https://jan.boddez.net/
+ * License:           GNU General Public License v3
+ * License URI:       http://www.gnu.org/licenses/gpl-3.0.html
+ * Text Domain:       share-on-mastodon
+ * Version:           0.17.1
+ * Requires at least: 5.8
  *
  * @author  Jan Boddez <jan@janboddez.be>
  * @license http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
