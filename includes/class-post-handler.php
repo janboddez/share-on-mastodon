@@ -65,7 +65,10 @@ class Post_Handler {
 		}
 
 		if ( use_block_editor_for_post( $post ) ) {
-			// We have the block editor deal with updating post meta.
+			// Prevent the code below from overriding the post meta set by the
+			// block editor.
+			// @todo: How about post types that incorrectly indicate support for the block editor?
+			// A: The above check is `false` whenever `$_GET['meta-box-loader']` is set, so we're safe here.
 			return;
 		}
 
@@ -125,22 +128,18 @@ class Post_Handler {
 			return;
 		}
 
+		$options = get_options();
 		if (
 			defined( 'REST_REQUEST' ) && REST_REQUEST &&
 			empty( $_REQUEST['meta-box-loader'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			0 === strpos( wp_get_referer(), admin_url() )
+			0 === strpos( wp_get_referer(), admin_url() ) &&
+			! empty( $options['meta_box'] )
 		) {
-			// Looks like this call to `transition_post_status` was initiated by
-			// the block editor. In that case, this function will be called a
-			// second time after custom meta, including `custom_status_field`,
-			// is processed. Unless, of course, all meta boxes, including Share
-			// on Mastodon's, were hidden (e.g., when a site owner relies on the
-			// "Share Always" setting).
-
-			// This behavior will change once we switch to a Gutenberg sidebar
-			// panel and hide "Share on Mastodon's" meta box (for the block
-			// editor only, obiously); then, these variables will have been
-			// saved the first time around.
+			// *If* this call to `transition_post_status` is the *first*
+			// initiated by the *block editor* (and not, e.g., a third-party
+			// app), and the classic meta box is active (and a second call will
+			// thus be made), return early. This will *not* affect "classic
+			// editor" users, as `REST_REQUEST` will not be `true`.
 			return;
 		}
 
@@ -471,8 +470,7 @@ class Post_Handler {
 
 		$current_screen = get_current_screen();
 		if ( ( isset( $current_screen->post_type ) && ! in_array( $current_screen->post_type, (array) $this->options['post_types'], true ) ) ) {
-			// The current post type uses the block editor (and the "classic"
-			// meta box is disabled).
+			// Only load JS for actually supported post types.
 			return;
 		}
 
@@ -486,7 +484,7 @@ class Post_Handler {
 			'share_on_mastodon_obj',
 			array(
 				'message'             => esc_attr__( 'Forget this URL?', 'share-on-mastodon' ), // Confirmation message.
-				'post_id'             => $post->ID, // Pass current post ID to JS.
+				'post_id'             => ! empty( $post->ID ) ? $post->ID : 0, // Pass current post ID to JS.
 				'nonce'               => wp_create_nonce( basename( __FILE__ ) ),
 				'ajaxurl'             => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 				'custom_status_field' => ! empty( $this->options['custom_status_field'] ) ? '1' : '0',
@@ -497,8 +495,8 @@ class Post_Handler {
 	/**
 	 * Determines if a post should, in fact, be shared.
 	 *
-	 * @param  WP_Post $post Post object.
-	 * @return bool          If the post should be shared.
+	 * @param  \WP_Post $post Post object.
+	 * @return bool           If the post should be shared.
 	 */
 	protected function is_valid( $post ) {
 		if ( 'publish' !== $post->post_status ) {
@@ -521,9 +519,20 @@ class Post_Handler {
 			return false;
 		}
 
+		// If the post was previously set up for sharing.
+		return $this->is_enabled( $post );
+	}
+
+	/**
+	 * Determines if a post is set up for sharing.
+	 *
+	 * @param  \WP_Post $post Post object.
+	 * @return bool           If the post is set up for sharing.
+	 */
+	protected function is_enabled( $post ) {
 		// A post should only be shared when either the "Share on Mastodon"
-		// checkbox was checked (and its value saved), or when "Share Always" is
-		// active (and the post isn't "too old," to avoid mishaps).
+		// checkbox was checked (and its value saved), *or* when "Share Always"
+		// is active (and the post isn't "too old," to avoid mishaps).
 		$share_always = false;
 		$is_enabled   = false;
 
@@ -532,20 +541,22 @@ class Post_Handler {
 			$is_enabled = true;
 		}
 
+		// That's not it, though; we have a setting that enables posts to be
+		// share nevertheless.
 		if ( ! empty( $this->options['share_always'] ) ) {
 			$share_always = true;
 		}
 
-		// We have let developers override `$is_enabled` through a callback
-		// function. In practice, this is almost always used to force sharing.
+		// We used to let developers override `$is_enabled` through a callback
+		// function. Or rather, we still do, because *reasons*.
 		if ( apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID ) ) {
 			$share_always = true;
 		}
 
 		if ( $this->is_older_than( DAY_IN_SECONDS / 2, $post ) ) {
-			// Since v0.13.0, we disallow automatic sharing of "older" posts.
-			// This sort of changes the behavior of the hook above, which would
-			// always come last.
+			// Since v0.13.0, we prevent automatic sharing of "older" posts.
+			// This sort of changes the behavior of the hook above, which used
+			// to always come last.
 			$share_always = false;
 		}
 
