@@ -128,18 +128,69 @@ class Post_Handler {
 			return;
 		}
 
-		$options = get_options();
 		if (
 			defined( 'REST_REQUEST' ) && REST_REQUEST &&
 			empty( $_REQUEST['meta-box-loader'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			0 === strpos( wp_get_referer(), admin_url() ) &&
-			! empty( $options['meta_box'] )
+			0 === strpos( wp_get_referer(), admin_url() )
 		) {
 			// *If* this call to `transition_post_status` is the *first*
 			// initiated by the *block editor* (and not, e.g., a third-party
-			// app), and the classic meta box is active (and a second call will
-			// thus be made), return early. This will *not* affect "classic
-			// editor" users, as `REST_REQUEST` will not be `true`.
+			// app), return early. This will *not* affect "classic editor"
+			// users, as `REST_REQUEST` will not be `true` for them.
+			$options = get_options();
+			if ( empty( $options['meta_box'] ) ) {
+				// If we're using the new panel, the following hook will run
+				// after we've actually saved metadata.
+				add_action( "rest_after_insert_{$post->post_type}", array( $this, 'gutentoot' ), 999, 3 );
+			}
+
+			return; // Here's that early return.
+		}
+
+		if ( ! $this->is_valid( $post ) ) {
+			return;
+		}
+
+		if ( empty( $this->options['mastodon_host'] ) ) {
+			return;
+		}
+
+		if ( ! wp_http_validate_url( $this->options['mastodon_host'] ) ) {
+			return;
+		}
+
+		if ( empty( $this->options['mastodon_access_token'] ) ) {
+			return;
+		}
+
+		if ( ! empty( $this->options['delay_sharing'] ) ) {
+			// Since version 0.7.0, there's an option to "schedule" sharing
+			// rather than do everything inline.
+			wp_schedule_single_event(
+				time() + min( $this->options['delay_sharing'], 3600 ), // Limit to one hour.
+				'share_on_mastodon_post',
+				array( $post->ID )
+			);
+		} else {
+			// Share immediately.
+			$this->post_to_mastodon( $post->ID );
+		}
+	}
+
+	/**
+	 * Schedules sharing to Mastodon, Gutenberg version.
+	 *
+	 * Of course the hook for this callback is incompatible with `transition_post_status`. Yay, duplicate code.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param \WP_Post         $post     Post object.
+	 * @param \WP_REST_request $request  Request object.
+	 * @param bool             $updating Whether a new post is being created.
+	 */
+	public function gutentoot( $post, $request, $updating ) {
+		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
+			// Prevent accidental double posting.
 			return;
 		}
 
