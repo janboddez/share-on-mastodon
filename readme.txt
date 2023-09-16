@@ -2,7 +2,7 @@
 Contributors: janboddez
 Tags: mastodon, share, publicize, crosspost, fediverse, syndication
 Tested up to: 6.3
-Stable tag: 0.17.1
+Stable tag: 0.18.0
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
