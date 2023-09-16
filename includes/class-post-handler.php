@@ -613,6 +613,8 @@ class Post_Handler {
 	 */
 	protected function get_excerpt( $post_id ) {
 		$orig    = apply_filters( 'the_excerpt', get_the_excerpt( $post_id ) );
+		$orig    = wp_strip_all_tags( $orig ); // Just in case a site owner's allowing HTML in their excerpts or something.
+		$orig    = html_entity_decode( $orig, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ); // Prevent special characters from messing things up.
 		$excerpt = mb_substr( $orig, 0, apply_filters( 'share_on_mastodon_excerpt_length', 125 ) );
 
 		if ( $excerpt !== $orig && ! ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
