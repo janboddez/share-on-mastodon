@@ -130,9 +130,6 @@ class Post_Handler {
 				// will run after we've *actually saved* metadata (as part of
 				// the current request).
 				add_action( "rest_after_insert_{$post->post_type}", array( $this, 'schedule' ) );
-
-				// In all other cases, i.e., when the "legacy" meta box is being
-				// used, there *will* be a second, non-REST request.
 			}
 
 			return; // Here's that early return.
