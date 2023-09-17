@@ -68,23 +68,8 @@ class Post_Handler {
 			return;
 		}
 
-		// @codingStandardsIgnoreStart
-		// We don't need this here check; the nonce check covers this for us. If
-		// we sue the new Gutenberg panel, the nonce will be non-existing. And
-		// in all other cases, we *want* to override earlier metadata.
-		// if ( use_block_editor_for_post( $post ) ) {
-		// 	// Prevent the code below from overriding the post meta set by the
-		// 	// block editor.
-		// 	return;
-		// }
-		// @codingStandardsIgnoreEnd
-
 		if ( ! isset( $_POST['share_on_mastodon_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['share_on_mastodon_nonce'] ), basename( __FILE__ ) ) ) {
-			// Nonce missing or invalid. On sites that use the block editor and
-			// the "classic" meta box, this will also cause the rest of this
-			// function to _not_ run the _first_ time this hook is called. For
-			// sites that use the block editor and new sidebar panel, things
-			// will end here, as we rely on the editor itself to save post meta.
+			// Nonce missing or invalid.
 			return;
 		}
 
@@ -133,19 +118,21 @@ class Post_Handler {
 			return;
 		}
 
-		if (
-			defined( 'REST_REQUEST' ) && REST_REQUEST &&
-			empty( $_REQUEST['meta-box-loader'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			0 === strpos( wp_get_referer(), admin_url() ) // To exclude 3rd-party apps.
-		) {
-			// *If* this call to `transition_post_status` is the *first*
-			// initiated by the *block editor* (and not, e.g., a third-party
-			// app), return early. This will *not* affect "classic editor"
-			// users, as `REST_REQUEST` will not be `true` for them.
+		if ( $this->is_gutenberg() && empty( $_REQUEST['meta-box-loader'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// If this call to `transition_post_status` is the *first*
+			// initiated by the *block editor*, return early. When the "legacy"
+			// meta box is being used, there *will* be a second, non-REST
+			// request containing our metadata, which will have been saved by
+			// the time this function runs again. For 3rd-party apps, there are
+			// other options (e.g., "Share Always").
 			if ( empty( $this->options['meta_box'] ) ) {
-				// If we're using the new panel, the following hook will run
-				// after we've *actually saved* metadata.
+				// If we're using the new panel, however, the following hook
+				// will run after we've *actually saved* metadata (as part of
+				// the current request).
 				add_action( "rest_after_insert_{$post->post_type}", array( $this, 'schedule' ) );
+
+				// In all other cases, i.e., when the "legacy" meta box is being
+				// used, there *will* be a second, non-REST request.
 			}
 
 			return; // Here's that early return.
@@ -676,5 +663,32 @@ class Post_Handler {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks whether the current request was initiated by the block editor.
+	 *
+	 * @return bool Whether the current request was initiated by the block editor.
+	 */
+	protected function is_gutenberg() {
+		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
+			// Not a REST request.
+			return false;
+		}
+
+		$nonce = null;
+
+		if ( isset( $_REQUEST['_wpnonce'] ) ) {
+			$nonce = $_REQUEST['_wpnonce']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		} elseif ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) ) {
+			$nonce = $_SERVER['HTTP_X_WP_NONCE']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		}
+
+		if ( null === $nonce ) {
+			return false;
+		}
+
+		// Check the nonce.
+		return wp_verify_nonce( $nonce, 'wp_rest' );
 	}
 }
