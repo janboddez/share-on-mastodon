@@ -177,6 +177,9 @@ class Post_Handler {
 	/**
 	 * Actually shares a post on Mastodon.
 	 *
+	 * Can be called directly or as a (scheduled) `share_on_mastodon_post`
+	 * callback.
+	 *
 	 * @since 0.7.0
 	 *
 	 * @param int|\WP_Post $post Post ID or object.
