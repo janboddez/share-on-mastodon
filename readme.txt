@@ -1,6 +1,6 @@
 === Share on Mastodon ===
 Contributors: janboddez
-Tags: mastodon, share, publicize, crosspost, fediverse, syndication
+Tags: mastodon, share, publicize, crosspost, fediverse, syndication, posse
 Tested up to: 6.3
 Stable tag: 0.17.1
 License: GNU General Public License v3.0
@@ -11,11 +11,11 @@ Automatically share WordPress posts on Mastodon.
 == Description ==
 Automatically share WordPress posts on [Mastodon](https://joinmastodon.org/).
 
-You choose which Post Types are shared, though sharing can still be disabled on a per-post basis.
+You choose which post types are shared, though sharing can still be disabled on a per-post basis.
 
 Supports image uploads, WordPress's new block editor, and comes with a number of filter hooks for developers.
 
-More details can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
+More details can be found on [this plugin's web page](https://jan.boddez.net/wordpress/share-on-mastodon).
 
 = Credit =
 Share icon by [Heroicons](https://heroicons.dev/), licensed under the terms of the MIT License. Elephant illustration sourced from Mastodon's [Press Kit](https://joinmastodon.org/press-kit.zip).
