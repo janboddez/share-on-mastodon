@@ -160,13 +160,14 @@ class Post_Handler {
 	/**
 	 * Actually schedules sharing to Mastodon.
 	 *
-	 * Currently, can be called directly or as a `rest_after_insert_{$post->post_type}` callback.
+	 * Currently, can be called directly or as a `rest_after_insert_{$post->post_type}`
+	 * callback (which is why it's public).
 	 *
 	 * @since 0.17.1
 	 *
 	 * @param \WP_Post $post Post object.
 	 */
-	protected function schedule( $post ) {
+	public function schedule( $post ) {
 		if ( ! $this->setup_completed() ) {
 			return;
 		}
