@@ -64,22 +64,27 @@ class Post_Handler {
 			return;
 		}
 
-		if ( use_block_editor_for_post( $post ) ) {
-			// Prevent the code below from overriding the post meta set by the
-			// block editor.
-			// @todo: How about post types that incorrectly indicate support for the block editor?
-			// A: The above check is `false` whenever `$_GET['meta-box-loader']` is set, so we're safe here.
-			return;
-		}
-
 		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 			return;
 		}
 
+		// @codingStandardsIgnoreStart
+		// We don't need this here check; the nonce check covers this for us. If
+		// we sue the new Gutenberg panel, the nonce will be non-existing. And
+		// in all other cases, we *want* to override earlier metadata.
+		// if ( use_block_editor_for_post( $post ) ) {
+		// 	// Prevent the code below from overriding the post meta set by the
+		// 	// block editor.
+		// 	return;
+		// }
+		// @codingStandardsIgnoreEnd
+
 		if ( ! isset( $_POST['share_on_mastodon_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['share_on_mastodon_nonce'] ), basename( __FILE__ ) ) ) {
-			// Nonce missing or invalid. On sites that use the block editor,
-			// this will also cause the rest of this function to _not_ run the
-			// first time this hook is called.
+			// Nonce missing or invalid. On sites that use the block editor and
+			// the "classic" meta box, this will also cause the rest of this
+			// function to _not_ run the _first_ time this hook is called. For
+			// sites that use the block editor and new sidebar panel, things
+			// will end here, as we rely on the editor itself to save post meta.
 			return;
 		}
 
@@ -131,82 +136,42 @@ class Post_Handler {
 		if (
 			defined( 'REST_REQUEST' ) && REST_REQUEST &&
 			empty( $_REQUEST['meta-box-loader'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			0 === strpos( wp_get_referer(), admin_url() )
+			0 === strpos( wp_get_referer(), admin_url() ) // To exclude 3rd-party apps.
 		) {
 			// *If* this call to `transition_post_status` is the *first*
 			// initiated by the *block editor* (and not, e.g., a third-party
 			// app), return early. This will *not* affect "classic editor"
 			// users, as `REST_REQUEST` will not be `true` for them.
-			$options = get_options();
-			if ( empty( $options['meta_box'] ) ) {
+			if ( empty( $this->options['meta_box'] ) ) {
 				// If we're using the new panel, the following hook will run
-				// after we've actually saved metadata.
-				add_action( "rest_after_insert_{$post->post_type}", array( $this, 'gutentoot' ), 999, 3 );
+				// after we've *actually saved* metadata.
+				add_action( "rest_after_insert_{$post->post_type}", array( $this, 'schedule' ) );
 			}
 
 			return; // Here's that early return.
 		}
 
-		if ( ! $this->is_valid( $post ) ) {
-			return;
-		}
-
-		if ( empty( $this->options['mastodon_host'] ) ) {
-			return;
-		}
-
-		if ( ! wp_http_validate_url( $this->options['mastodon_host'] ) ) {
-			return;
-		}
-
-		if ( empty( $this->options['mastodon_access_token'] ) ) {
-			return;
-		}
-
-		if ( ! empty( $this->options['delay_sharing'] ) ) {
-			// Since version 0.7.0, there's an option to "schedule" sharing
-			// rather than do everything inline.
-			wp_schedule_single_event(
-				time() + min( $this->options['delay_sharing'], 3600 ), // Limit to one hour.
-				'share_on_mastodon_post',
-				array( $post->ID )
-			);
-		} else {
-			// Share immediately.
-			$this->post_to_mastodon( $post->ID );
-		}
+		// Either this is the second Gutenberg-induced request, or we're using
+		// the good ol' classic editor. Either way, metadata will have been
+		// saved by now.
+		$this->schedule( $post );
 	}
 
 	/**
-	 * Schedules sharing to Mastodon, Gutenberg version.
+	 * Actually schedules sharing to Mastodon.
 	 *
-	 * Of course the hook for this callback is incompatible with `transition_post_status`. Yay, duplicate code.
+	 * Currently, can be called directly or as a `rest_after_insert_{$post->post_type}` callback.
 	 *
-	 * @since 0.18.0
+	 * @since 0.17.1
 	 *
-	 * @param \WP_Post         $post     Post object.
-	 * @param \WP_REST_request $request  Request object.
-	 * @param bool             $updating Whether a new post is being created.
+	 * @param \WP_Post $post Post object.
 	 */
-	public function gutentoot( $post, $request, $updating ) {
-		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
-			// Prevent accidental double posting.
+	protected function schedule( $post ) {
+		if ( ! $this->setup_completed() ) {
 			return;
 		}
 
 		if ( ! $this->is_valid( $post ) ) {
-			return;
-		}
-
-		if ( empty( $this->options['mastodon_host'] ) ) {
-			return;
-		}
-
-		if ( ! wp_http_validate_url( $this->options['mastodon_host'] ) ) {
-			return;
-		}
-
-		if ( empty( $this->options['mastodon_access_token'] ) ) {
 			return;
 		}
 
@@ -216,38 +181,28 @@ class Post_Handler {
 			wp_schedule_single_event(
 				time() + min( $this->options['delay_sharing'], 3600 ), // Limit to one hour.
 				'share_on_mastodon_post',
-				array( $post->ID )
+				array( $post )
 			);
 		} else {
 			// Share immediately.
-			$this->post_to_mastodon( $post->ID );
+			$this->post_to_mastodon( $post );
 		}
 	}
 
 	/**
-	 * Shares a post on Mastodon.
+	 * Actually shares a post on Mastodon.
 	 *
 	 * @since 0.7.0
 	 *
-	 * @param int $post_id Post ID.
+	 * @param int|\WP_Post $post Post ID or object.
 	 */
-	public function post_to_mastodon( $post_id ) {
-		$post = get_post( $post_id );
+	public function post_to_mastodon( $post ) {
+		if ( ! $this->setup_completed() ) {
+			return;
+		}
 
-		// Things may have changed ...
+		$post = get_post( $post );
 		if ( ! $this->is_valid( $post ) ) {
-			return;
-		}
-
-		if ( empty( $this->options['mastodon_host'] ) ) {
-			return;
-		}
-
-		if ( ! wp_http_validate_url( $this->options['mastodon_host'] ) ) {
-			return;
-		}
-
-		if ( empty( $this->options['mastodon_access_token'] ) ) {
 			return;
 		}
 
@@ -381,7 +336,6 @@ class Post_Handler {
 			$args = null;
 		}
 
-		// Add meta box, for those post types that are supported.
 		add_meta_box(
 			'share-on-mastodon',
 			__( 'Share on Mastodon', 'share-on-mastodon' ),
@@ -570,17 +524,6 @@ class Post_Handler {
 			return false;
 		}
 
-		// If the post was previously set up for sharing.
-		return $this->is_enabled( $post );
-	}
-
-	/**
-	 * Determines if a post is set up for sharing.
-	 *
-	 * @param  \WP_Post $post Post object.
-	 * @return bool           If the post is set up for sharing.
-	 */
-	protected function is_enabled( $post ) {
 		// A post should only be shared when either the "Share on Mastodon"
 		// checkbox was checked (and its value saved), *or* when "Share Always"
 		// is active (and the post isn't "too old," to avoid mishaps).
@@ -621,6 +564,8 @@ class Post_Handler {
 	/**
 	 * Determines whether a post is older than a certain number of seconds.
 	 *
+	 * @since 0.13.0
+	 *
 	 * @param  int     $seconds Minimum "age," in secondss.
 	 * @param  WP_Post $post    Post object.
 	 * @return bool             True if the post exists and is older than `$seconds`, false otherwise.
@@ -642,6 +587,8 @@ class Post_Handler {
 	/**
 	 * Parses `%title%`, etc. template tags.
 	 *
+	 * @since 0.15.0
+	 *
 	 * @param  string $status  Mastodon status, or template.
 	 * @param  int    $post_id Post ID.
 	 * @return string          Parsed status.
@@ -658,6 +605,8 @@ class Post_Handler {
 
 	/**
 	 * Returns a post's excerpt, but limited to approx. 125 characters.
+	 *
+	 * @since 0.15.0
 	 *
 	 * @param  int $post_id Post ID.
 	 * @return string       (Possibly shortened) excerpt.
@@ -677,6 +626,8 @@ class Post_Handler {
 
 	/**
 	 * Returns a post's tags as a string of space-separated hashtags.
+	 *
+	 * @since 0.15.0
 	 *
 	 * @param  int $post_id Post ID.
 	 * @return string       Hashtag string.
@@ -701,5 +652,28 @@ class Post_Handler {
 		}
 
 		return trim( $hashtags );
+	}
+
+	/**
+	 * Checks for a Mastodon instance and auth token.
+	 *
+	 * @since 0.17.1
+	 *
+	 * @return bool Whether auth access was set up okay.
+	 */
+	protected function setup_completed() {
+		if ( empty( $this->options['mastodon_host'] ) ) {
+			return false;
+		}
+
+		if ( ! wp_http_validate_url( $this->options['mastodon_host'] ) ) {
+			return false;
+		}
+
+		if ( empty( $this->options['mastodon_access_token'] ) ) {
+			return false;
+		}
+
+		return true;
 	}
 }
