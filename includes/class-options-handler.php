@@ -524,7 +524,7 @@ class Options_Handler {
 						<tr valign="top">
 							<th scope="row"><?php esc_html_e( 'Meta Box', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[meta_box]" value="1" <?php checked( ! empty( $this->options['meta_box'] ) ); ?> /> <?php esc_html_e( 'Use &ldquo;classic&rdquo; meta box', 'share-on-mastodon' ); ?></label>
-							<p class="description"><?php esc_html_e( '(Experimental) Replace Share on Mastodon&rsquo;s &ldquo;block editor sidebar panel&rdquo; with a &ldquo;classic&rdquo; meta box (even for post types that use the block editor).', 'share-on-mastodon' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Replace Share on Mastodon&rsquo;s &ldquo;block editor sidebar panel&rdquo; with a &ldquo;classic&rdquo; meta box (even for post types that use the block editor).', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 
 						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
