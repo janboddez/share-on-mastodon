@@ -45,7 +45,6 @@ class Post_Handler {
 		foreach ( $this->options['post_types'] as $post_type ) {
 			add_action( "save_post_{$post_type}", array( $this, 'update_meta' ), 10 );
 			add_action( "save_post_{$post_type}", array( $this, 'toot' ), 20 ); // Can't use `publish_{$post_type}`, as it runs _before_ `save_post_{$post_type}`.
-			add_action( "rest_after_insert_{$post_type}", array( $this, 'toot' ), 20 );
 		}
 
 		// "Delayed" sharing.
@@ -113,19 +112,24 @@ class Post_Handler {
 	 */
 	public function toot( $post ) {
 		if ( 0 === strpos( current_action(), 'save_' ) && defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			// REST requests are dealt with by a later hook.
+			// For REST requests, we use a *later* hook, which runs *after*
+			// metadata, if any, has been saved.
+			add_action( "rest_after_insert_{$post->post_type}", array( $this, 'toot' ), 20 );
+
+			// Don't do anything just yet.
 			return;
 		}
 
 		if ( $this->is_gutenberg() && empty( $_REQUEST['meta-box-loader'] ) && ! empty( $this->options['meta_box'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// This is the first of two Gutenberg requests, and we should ignore it.
+			// This is the first of *two* "Gutenberg requests," and we should
+			// ignore it. Now, it could be that `$this->is_gutenberg()` always
+			// returns `false` whenever `$_REQUEST['meta-box-loader']` is
+			// present. Still, doesn't hurt to check.
 			return;
 		}
 
-		/**
-		 * In all other cases (non-REST request, non-Gutenberg REST request, or
-		 * second Gutenberg request), we move on.
-		 */
+		// In all other cases (non-REST request, non-Gutenberg REST request, or
+		// *second* Gutenberg request), we move on.
 		$post = get_post( $post );
 
 		if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
