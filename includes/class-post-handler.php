@@ -111,6 +111,8 @@ class Post_Handler {
 	 * @param int|\WP_Post $post Post ID or object.
 	 */
 	public function toot( $post ) {
+		$post = get_post( $post );
+
 		if ( 0 === strpos( current_action(), 'save_' ) && defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 			// For REST requests, we use a *later* hook, which runs *after*
 			// metadata, if any, has been saved.
@@ -130,10 +132,7 @@ class Post_Handler {
 
 		// In all other cases (non-REST request, non-Gutenberg REST request, or
 		// *second* Gutenberg request), we move on.
-		$post = get_post( $post );
-
 		if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
-			// Prevent accidental double posting.
 			return;
 		}
 
