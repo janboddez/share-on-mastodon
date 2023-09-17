@@ -135,7 +135,7 @@ class Post_Handler {
 			return; // Here's that early return.
 		}
 
-		// Either this is the second Gutenberg-induced request, or we're using
+		// Either this is the second Gutenberg-initiated request, or we're using
 		// the good ol' classic editor. Either way, metadata will have been
 		// saved by now.
 		$this->schedule( $post );
