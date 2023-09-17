@@ -28,11 +28,11 @@ class Syn_Links_Compat {
 	/**
 	 * Adds the Mastodon URL to Syndication Links' list of URLs.
 	 *
+	 * @since 0.11.0
+	 *
 	 * @param  array $urls      Syndication links.
 	 * @param  array $object_id The post we're gathering these links for.
 	 * @return array            Modified syndication links.
-	 *
-	 * @since 0.11.0
 	 */
 	public static function syndication_links( $urls, $object_id ) {
 		$mastodon_url = get_post_meta( $object_id, '_share_on_mastodon_url', true );

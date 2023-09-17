@@ -54,9 +54,9 @@ class Post_Handler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string  $new_status Old post status.
-	 * @param string  $old_status New post status.
-	 * @param WP_Post $post       Post object.
+	 * @param string   $new_status Old post status.
+	 * @param string   $old_status New post status.
+	 * @param \WP_Post $post       Post object.
 	 */
 	public function update_meta( $new_status, $old_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
@@ -108,9 +108,9 @@ class Post_Handler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string  $new_status New post status.
-	 * @param string  $old_status Old post status.
-	 * @param WP_Post $post       Post object.
+	 * @param string   $new_status New post status.
+	 * @param string   $old_status Old post status.
+	 * @param \WP_Post $post       Post object.
 	 */
 	public function toot( $new_status, $old_status, $post ) {
 		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
@@ -340,7 +340,7 @@ class Post_Handler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param WP_Post $post Post being edited.
+	 * @param \WP_Post $post Post being edited.
 	 */
 	public function render_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' );
@@ -554,9 +554,9 @@ class Post_Handler {
 	 *
 	 * @since 0.13.0
 	 *
-	 * @param  int     $seconds Minimum "age," in secondss.
-	 * @param  WP_Post $post    Post object.
-	 * @return bool             True if the post exists and is older than `$seconds`, false otherwise.
+	 * @param  int      $seconds Minimum "age," in secondss.
+	 * @param  \WP_Post $post    Post object.
+	 * @return bool              True if the post exists and is older than `$seconds`, false otherwise.
 	 */
 	protected function is_older_than( $seconds, $post ) {
 		$post_time = get_post_time( 'U', true, $post );

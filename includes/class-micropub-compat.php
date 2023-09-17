@@ -25,10 +25,10 @@ class Micropub_Compat {
 	/**
 	 * Registers a Micropub syndication target.
 	 *
+	 * @since 0.8.0
+	 *
 	 * @param  array $syndicate_to Syndication targets.
 	 * @return array               Modified syndication targets.
-	 *
-	 * @since 0.8.0
 	 */
 	public static function syndicate_to( $syndicate_to ) {
 		$options = get_options();
@@ -52,10 +52,10 @@ class Micropub_Compat {
 	/**
 	 * Triggers syndication to Mastodon.
 	 *
+	 * @since 0.8.0
+	 *
 	 * @param int   $post_id        Post ID.
 	 * @param array $synd_requested Selected syndication targets.
-	 *
-	 * @since 0.8.0
 	 */
 	public static function syndication( $post_id, $synd_requested ) {
 		$options = get_options();

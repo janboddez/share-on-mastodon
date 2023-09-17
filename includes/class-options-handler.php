@@ -932,6 +932,8 @@ class Options_Handler {
 	/**
 	 * Returns this plugin's options URL with a `tab` query parameter.
 	 *
+	 * @since 0.11.0
+	 *
 	 * @param  string $tab Target tab.
 	 * @return string      Options page URL.
 	 */
@@ -947,6 +949,8 @@ class Options_Handler {
 
 	/**
 	 * Returns the active tab.
+	 *
+	 * @since 0.11.0
 	 *
 	 * @return string Active tab.
 	 */

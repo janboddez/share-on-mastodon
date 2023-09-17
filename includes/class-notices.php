@@ -120,7 +120,8 @@ class Notices {
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param array $args Array of query variables to remove from a URL.
+	 * @param  array $args Array of query variables to remove from a URL.
+	 * @return array       Filtered array.
 	 */
 	public static function removable_query_args( $args ) {
 		$args[] = 'share_on_mastodon_success';
