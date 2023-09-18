@@ -37,15 +37,19 @@ class Post_Handler {
 	 * @since 0.5.0
 	 */
 	public function register() {
-		add_action( 'transition_post_status', array( $this, 'update_meta' ), 11, 3 );
-		add_action( 'transition_post_status', array( $this, 'toot' ), 999, 3 );
-		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ) );
-
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_scripts' ) ); // Just in case (although I'm relatively sure `admin_enqueue_scripts` has already run at this point).
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
 
+		foreach ( $this->options['post_types'] as $post_type ) {
+			add_action( "save_post_{$post_type}", array( $this, 'update_meta' ), 10 );
+			add_action( "save_post_{$post_type}", array( $this, 'toot' ), 20 ); // Can't use `publish_{$post_type}`, as it runs _before_ `save_post_{$post_type}`.
+		}
+
+		// "Delayed" sharing.
+		add_action( 'share_on_mastodon_post', array( $this, 'post_to_mastodon' ) );
+
+		// Classic editor notices.
 		Notices::register();
 	}
 
@@ -54,12 +58,12 @@ class Post_Handler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string   $new_status Old post status.
-	 * @param string   $old_status New post status.
-	 * @param \WP_Post $post       Post object.
+	 * @param int|\WP_Post $post Post ID or object.
 	 */
-	public function update_meta( $new_status, $old_status, $post ) {
-		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
+	public function update_meta( $post ) {
+		$post = get_post( $post );
+
+		if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
 			// Prevent double posting.
 			return;
 		}
@@ -70,11 +74,6 @@ class Post_Handler {
 
 		if ( ! isset( $_POST['share_on_mastodon_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['share_on_mastodon_nonce'] ), basename( __FILE__ ) ) ) {
 			// Nonce missing or invalid.
-			return;
-		}
-
-		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
-			// Unsupported post type.
 			return;
 		}
 
@@ -108,50 +107,34 @@ class Post_Handler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string   $new_status New post status.
-	 * @param string   $old_status Old post status.
-	 * @param \WP_Post $post       Post object.
+	 * @param int|\WP_Post $post Post ID or object.
 	 */
-	public function toot( $new_status, $old_status, $post ) {
-		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
-			// Prevent accidental double posting.
+	public function toot( $post ) {
+		$post = get_post( $post );
+
+		if ( 0 === strpos( current_action(), 'save_' ) && defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			// For REST requests, we use a *later* hook, which runs *after*
+			// metadata, if any, has been saved.
+			add_action( "rest_after_insert_{$post->post_type}", array( $this, 'toot' ), 20 );
+
+			// Don't do anything just yet.
 			return;
 		}
 
-		if ( $this->is_gutenberg() && empty( $_REQUEST['meta-box-loader'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// If this call to `transition_post_status` is the *first*
-			// initiated by the *block editor*, return early. When the "legacy"
-			// meta box is being used, there *will* be a second, non-REST
-			// request containing our metadata, which will have been saved by
-			// the time this function runs again. For 3rd-party apps, there are
-			// other options (e.g., "Share Always").
-			if ( empty( $this->options['meta_box'] ) ) {
-				// If we're using the new panel, however, the following hook
-				// will run after we've *actually saved* metadata (as part of
-				// the current request).
-				add_action( "rest_after_insert_{$post->post_type}", array( $this, 'schedule' ) );
-			}
-
-			return; // Here's that early return.
+		if ( $this->is_gutenberg() && empty( $_REQUEST['meta-box-loader'] ) && ! empty( $this->options['meta_box'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// This is the first of *two* "Gutenberg requests," and we should
+			// ignore it. Now, it could be that `$this->is_gutenberg()` always
+			// returns `false` whenever `$_REQUEST['meta-box-loader']` is
+			// present. Still, doesn't hurt to check.
+			return;
 		}
 
-		// Either this is the second Gutenberg-initiated request, or we're using
-		// the good ol' classic editor. Either way, metadata will have been
-		// saved by now.
-		$this->schedule( $post );
-	}
+		// In all other cases (non-REST request, non-Gutenberg REST request, or
+		// *second* Gutenberg request), we move on.
+		if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
+			return;
+		}
 
-	/**
-	 * Actually schedules sharing to Mastodon.
-	 *
-	 * Currently, can be called directly or as a `rest_after_insert_{$post->post_type}`
-	 * callback (which is why it's public).
-	 *
-	 * @since 0.17.1
-	 *
-	 * @param \WP_Post $post Post object.
-	 */
-	public function schedule( $post ) {
 		if ( ! $this->setup_completed() ) {
 			return;
 		}
@@ -190,6 +173,7 @@ class Post_Handler {
 		}
 
 		$post = get_post( $post );
+
 		if ( ! $this->is_valid( $post ) ) {
 			return;
 		}

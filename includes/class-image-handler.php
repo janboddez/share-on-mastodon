@@ -85,8 +85,8 @@ class Image_Handler {
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param  WP_Post $post Post object.
-	 * @return array         Image array.
+	 * @param  \WP_Post $post Post object.
+	 * @return array          Image array.
 	 */
 	protected static function get_referenced_images( $post ) {
 		$images = array();

@@ -9,7 +9,7 @@
  * License URI:       http://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain:       share-on-mastodon
  * Version:           0.17.1
- * Requires at least: 5.8
+ * Requires at least: 5.9
  *
  * @author  Jan Boddez <jan@janboddez.be>
  * @license http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
