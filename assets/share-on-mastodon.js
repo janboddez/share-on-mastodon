@@ -27,7 +27,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 			// @todo: Should we uncheck the box also if we don't delete the value server-side?
 			const checkbox = document.querySelector( 'input[name="share_on_mastodon"]' );
-			if ( checkbox ) {
+			if ( checkbox && 'undefined' !== typeof wp && 'undefined' !== typeof wp.blocks ) {
+				// Uncheck only within a block editor context.
 				checkbox.checked = false;
 			}
 
