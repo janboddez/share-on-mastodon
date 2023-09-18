@@ -39,7 +39,6 @@ class Post_Handler {
 	public function register() {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_scripts' ) ); // Just in case (although I'm relatively sure `admin_enqueue_scripts` has already run at this point).
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
 
 		foreach ( $this->options['post_types'] as $post_type ) {
