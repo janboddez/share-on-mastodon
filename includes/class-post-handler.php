@@ -41,9 +41,11 @@ class Post_Handler {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
 
-		foreach ( $this->options['post_types'] as $post_type ) {
-			add_action( "save_post_{$post_type}", array( $this, 'update_meta' ), 10 );
-			add_action( "save_post_{$post_type}", array( $this, 'toot' ), 20 ); // Can't use `publish_{$post_type}`, as it runs _before_ `save_post_{$post_type}`.
+		if ( ! empty( $this->options['post_types'] ) ) {
+			foreach ( (array) $this->options['post_types'] as $post_type ) {
+				add_action( "save_post_{$post_type}", array( $this, 'update_meta' ), 11 );
+				add_action( "save_post_{$post_type}", array( $this, 'toot' ), 20 );
+			}
 		}
 
 		// "Delayed" sharing.
