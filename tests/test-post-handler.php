@@ -18,7 +18,7 @@ class Test_Post_Handler extends \WP_Mock\Tools\TestCase {
 		\WP_Mock::expectActionAdded( 'wp_ajax_share_on_mastodon_unlink_url', array( $post_handler, 'unlink_url' ) );
 
 		foreach ( $options['post_types'] as $post_type ) {
-			\WP_Mock::expectActionAdded( "save_post_{$post_type}", array( $post_handler, 'update_meta' ), 10 );
+			\WP_Mock::expectActionAdded( "save_post_{$post_type}", array( $post_handler, 'update_meta' ), 11 );
 			\WP_Mock::expectActionAdded( "save_post_{$post_type}", array( $post_handler, 'toot' ), 20 );
 		}
 
