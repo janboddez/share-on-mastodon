@@ -25,7 +25,7 @@ Within WP Admin, visit *Plugins > Add New* and search for "share on mastodon" to
 
 After activation, head over to *Settings > Share on Mastodon* to authorize WordPress to post to your Mastodon account.
 
-More detailed instructions can be found on [this plugin's GitHub page](https://github.com/janboddez/share-on-mastodon).
+More detailed instructions can be found on [this plugin's web page](https://jan.boddez.net/wordpress/share-on-mastodon).
 
 == Changelog ==
 = 0.17.1 =
