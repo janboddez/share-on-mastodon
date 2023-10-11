@@ -112,7 +112,7 @@ class Image_Handler {
 			$url = str_replace( $filename, $original, $src );
 
 			// Convert URL back to attachment ID.
-			$image_id = (int) attachment_url_to_postid( $url );
+			$image_id = attachment_url_to_postid( $url );
 
 			if ( 0 === $image_id ) {
 				// Unknown to WordPress.
