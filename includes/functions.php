@@ -19,8 +19,18 @@ function debug_log( $item ) {
 		return;
 	}
 
-	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log,WordPress.PHP.DevelopmentFunctions.error_log_print_r
-	error_log( is_string( $item ) ? $item : print_r( $item, true ) );
+	if ( is_string( $item ) ) {
+		error_log( $item ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		return;
+	}
+
+	if ( empty( $item ) && false !== $item ) {
+		// Do not print empty arrays and the like.
+		return;
+	}
+
+	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log,WordPress.PHP.DevelopmentFunctions.error_log_var_export
+	error_log( var_export( $item, true ) );
 }
 
 /**

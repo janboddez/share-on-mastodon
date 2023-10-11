@@ -42,14 +42,14 @@ class Image_Handler {
 		// Alright, let's get started.
 		$media_ids = array();
 
-		if ( $enable_referenced_images && ! empty( $referenced_images ) ) {
-			// Add in-post images.
-			$media_ids = array_keys( $referenced_images ); // We're interested only in the IDs, for now.
-		}
-
 		if ( $enable_featured_image ) {
 			// Include featured image.
 			$media_ids[] = get_post_thumbnail_id( $post->ID );
+		}
+
+		if ( $enable_referenced_images && ! empty( $referenced_images ) ) {
+			// Add in-post images.
+			$media_ids = array_merge( $media_ids, array_keys( $referenced_images ) ); // We're interested only in the IDs, for now.
 		}
 
 		if ( $enable_attached_images ) {
