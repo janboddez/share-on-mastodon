@@ -478,7 +478,7 @@ class Post_Handler {
 	 * @return bool           If the post should be shared.
 	 */
 	protected function is_valid( $post ) {
-		if ( 'publish' !== $post->post_status ) {
+		if ( empty( $post->post_status ) || 'publish' !== $post->post_status ) {
 			// Status is something other than `publish`.
 			return false;
 		}
