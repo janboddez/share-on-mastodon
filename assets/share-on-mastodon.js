@@ -38,4 +38,10 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			// The request timed out or otherwise failed.
 		} );
 	} );
+
+	document.querySelector( '.settings_page_share-on-mastodon .button-reset-settings' )?.addEventListener( 'click', ( event ) => {
+		if ( ! confirm( share_on_mastodon_obj.message ) ) {
+			event.preventDefault();
+		}
+	} );
 } );
