@@ -417,8 +417,6 @@ class Post_Handler {
 		// Have WordPress forget the Mastodon URL.
 		delete_post_meta( $post_id, '_share_on_mastodon_url' );
 
-		$options = get_options();
-
 		if ( ! empty( $_POST['is_gutenberg'] ) ) {
 			// Delete the checkbox value, too, to prevent Gutenberg's' odd meta
 			// box behavior from triggering an immediate re-share.
@@ -454,8 +452,8 @@ class Post_Handler {
 		global $post;
 
 		// Enqueue CSS and JS.
-		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', dirname( __FILE__ ) ), array(), Share_On_Mastodon::PLUGIN_VERSION );
-		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', dirname( __FILE__ ) ), array(), Share_On_Mastodon::PLUGIN_VERSION, false );
+		wp_enqueue_style( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.css', __DIR__ ), array(), Share_On_Mastodon::PLUGIN_VERSION );
+		wp_enqueue_script( 'share-on-mastodon', plugins_url( '/assets/share-on-mastodon.js', __DIR__ ), array(), Share_On_Mastodon::PLUGIN_VERSION, false );
 		wp_localize_script(
 			'share-on-mastodon',
 			'share_on_mastodon_obj',
