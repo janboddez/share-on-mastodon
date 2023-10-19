@@ -6,7 +6,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			return;
 		}
 
-		const button = event.target;
+		const button      = event.target;
+		const isGutenberg = ( 'undefined' !== typeof wp && 'undefined' !== typeof wp.blocks );
 
 		// Like a time-out.
 		const controller = new AbortController();
@@ -21,13 +22,13 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				'action': 'share_on_mastodon_unlink_url',
 				'post_id': share_on_mastodon_obj.post_id,
 				'share_on_mastodon_nonce': share_on_mastodon_obj.nonce,
+				'is_gutenberg': isGutenberg,
 			} ),
 		} ).then( ( response ) => {
 			clearTimeout( timeoutId );
 
-			// @todo: Should we uncheck the box also if we don't delete the value server-side?
 			const checkbox = document.querySelector( 'input[name="share_on_mastodon"]' );
-			if ( checkbox && 'undefined' !== typeof wp && 'undefined' !== typeof wp.blocks ) {
+			if ( checkbox && isGutenberg ) {
 				// Uncheck only within a block editor context.
 				checkbox.checked = false;
 			}

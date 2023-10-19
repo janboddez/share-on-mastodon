@@ -421,7 +421,7 @@ class Post_Handler {
 
 		$options = get_options();
 
-		if ( ! empty( $options['meta_box'] ) && use_block_editor_for_post( $post_id ) ) {
+		if ( ! empty( $_POST['is_gutenberg'] ) ) {
 			// Delete the checkbox value, too, to prevent Gutenberg's' odd meta
 			// box behavior from triggering an immediate re-share.
 			delete_post_meta( $post_id, '_share_on_mastodon' );
