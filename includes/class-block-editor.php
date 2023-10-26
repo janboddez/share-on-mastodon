@@ -165,10 +165,10 @@ class Block_Editor {
 						'show_in_rest'      => true,
 						'type'              => 'string',
 						'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) ? '0' : '1',
-						'auth_callback'     => function() {
+						'auth_callback'     => function () {
 							return current_user_can( 'edit_posts' );
 						},
-						'sanitize_callback' => function( $meta_value ) {
+						'sanitize_callback' => function ( $meta_value ) {
 							return '1' === $meta_value ? '1' : '0';
 						},
 					)
@@ -185,10 +185,10 @@ class Block_Editor {
 							'show_in_rest'      => true,
 							'type'              => 'string',
 							'default'           => ! empty( $options['status_template'] ) ? $options['status_template'] : '',
-							'auth_callback'     => function() {
+							'auth_callback'     => function () {
 								return current_user_can( 'edit_posts' );
 							},
-							'sanitize_callback' => function( $status ) {
+							'sanitize_callback' => function ( $status ) {
 								$status = sanitize_textarea_field( $status );
 								$status = preg_replace( '~\R~u', "\r\n", $status );
 								return $status;
