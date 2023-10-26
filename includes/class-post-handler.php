@@ -444,7 +444,7 @@ class Post_Handler {
 		}
 
 		$current_screen = get_current_screen();
-		if ( ( isset( $current_screen->post_type ) && ! in_array( $current_screen->post_type, (array) $this->options['post_types'], true ) ) ) {
+		if ( ( isset( $current_screen->post_type ) && ! in_array( $current_screen->post_type, $this->options['post_types'], true ) ) ) {
 			// Only load JS for actually supported post types.
 			return;
 		}

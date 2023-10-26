@@ -30,17 +30,23 @@ class Block_Editor {
 	public static function enqueue_scripts() {
 		$options = get_options();
 
+		if ( ! empty( $options['meta_box'] ) ) {
+			return;
+		}
+
 		if ( empty( $options['post_types'] ) ) {
 			return;
 		}
 
-		if ( ! empty( $options['meta_box'] ) ) {
+		$current_screen = get_current_screen();
+		if ( ( isset( $current_screen->post_type ) && ! in_array( $current_screen->post_type, $options['post_types'], true ) ) ) {
+			// Only load JS for actually supported post types.
 			return;
 		}
 
 		wp_enqueue_script(
 			'share-on-mastodon-editor',
-			plugins_url( '/assets/block-editor.js', dirname( __FILE__ ) ),
+			plugins_url( '/assets/block-editor.js', __DIR__ ),
 			array(
 				'wp-element',
 				'wp-components',
