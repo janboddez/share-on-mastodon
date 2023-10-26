@@ -53,7 +53,7 @@ class Notices {
 			?>
 			<div class="notice notice-error is-dismissible">
 				<?php /* translators: %s: error message */ ?>
-				<p><?php echo sprintf( esc_html__( 'Share on Mastodon ran into the following error: %s', 'share-on-mastodon' ), '<i>' . esc_html( $error_message ) . '</i>' ); ?></p>
+				<p><?php printf( esc_html__( 'Share on Mastodon ran into the following error: %s', 'share-on-mastodon' ), '<i>' . esc_html( $error_message ) . '</i>' ); ?></p>
 			</div>
 			<?php
 			return;

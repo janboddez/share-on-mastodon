@@ -74,7 +74,7 @@ class Share_On_Mastodon {
 	 * @since 0.5.0
 	 */
 	public function register() {
-		register_deactivation_hook( dirname( dirname( __FILE__ ) ) . '/share-on-mastodon.php', array( $this, 'deactivate' ) );
+		register_deactivation_hook( dirname( __DIR__ ) . '/share-on-mastodon.php', array( $this, 'deactivate' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		add_action( 'init', array( $this, 'register_cron' ) );
@@ -120,7 +120,7 @@ class Share_On_Mastodon {
 	 * @since 0.1.0
 	 */
 	public function load_textdomain() {
-		load_plugin_textdomain( 'share-on-mastodon', false, basename( dirname( dirname( __FILE__ ) ) ) . '/languages' );
+		load_plugin_textdomain( 'share-on-mastodon', false, basename( dirname( __DIR__ ) ) . '/languages' );
 	}
 
 	/**
