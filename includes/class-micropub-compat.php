@@ -77,7 +77,7 @@ class Micropub_Compat {
 			// Trigger syndication.
 			Share_On_Mastodon::get_instance()
 				->get_post_handler()
-				->toot( $post->post_status, $post->post_status, $post );
+				->toot( $post );
 		}
 	}
 }
