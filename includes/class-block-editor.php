@@ -92,7 +92,7 @@ class Block_Editor {
 	public static function permission_callback( $request ) {
 		$post_id = $request->get_param( 'post_id' );
 
-		if ( empty( $post_id ) || ! ctype_digit( $post_id ) ) {
+		if ( empty( $post_id ) || ! ( is_int( $post_id ) || ctype_digit( $post_id ) ) ) {
 			return false;
 		}
 
