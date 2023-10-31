@@ -160,6 +160,7 @@ class Image_Handler {
 
 		if ( ! is_file( $file_path ) ) {
 			// File doesn't seem to exist.
+			debug_log( "[Share on Mastodon] Could not read the image at `$file_path`." );
 			return;
 		}
 
@@ -169,14 +170,14 @@ class Image_Handler {
 		$body = '--' . $boundary . $eol;
 
 		if ( '' !== $alt ) {
-			debug_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: $alt" );
+			debug_log( "[Share on Mastodon] Found the following alt text for the attachment with ID $image_id: `$alt`." );
 
 			// Send along an image description, because accessibility.
 			$body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
 			$body .= $alt . $eol;
 			$body .= '--' . $boundary . $eol;
 		} else {
-			debug_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id" );
+			debug_log( "[Share on Mastodon] Did not find alt text for the attachment with ID $image_id." );
 		}
 
 		// The actual (binary) image data.
