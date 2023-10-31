@@ -567,10 +567,14 @@ class Post_Handler {
 		$status = str_replace( '%title%', get_the_title( $post_id ), $status );
 		$status = str_replace( '%excerpt%', $this->get_excerpt( $post_id ), $status );
 		$status = str_replace( '%tags%', $this->get_tags( $post_id ), $status );
-		$status = str_replace( '%permalink%', esc_url_raw( get_permalink( $post_id ) ), $status );
 		$status = preg_replace( '~(\r\n){2,}~', "\r\n\r\n", $status ); // We should have normalized line endings by now.
+		$status = sanitize_textarea_field( $status ); // Strips HTML and whatnot.
 
-		return sanitize_textarea_field( $status ); // Strips HTML and whatnot.
+		// Add the (escaped) URL after the everything else has been sanitized,
+		// so as not to garble permalinks with multi-byte characters in them.
+		$status = str_replace( '%permalink%', esc_url_raw( get_permalink( $post_id ) ), $status );
+
+		return $status;
 	}
 
 	/**
