@@ -2,7 +2,7 @@
 Contributors: janboddez
 Tags: mastodon, share, publicize, crosspost, fediverse, syndication, posse
 Tested up to: 6.4
-Stable tag: 0.17.1
+Stable tag: 0.17.2
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -28,6 +28,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's web page](https://jan.boddez.net/wordpress/share-on-mastodon).
 
 == Changelog ==
+= 0.17.2 =
+Fix permalinks with emoji in them.
+
 = 0.17.1 =
 Various bug fixes.
 
