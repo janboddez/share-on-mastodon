@@ -565,8 +565,13 @@ class Post_Handler {
 	 */
 	protected function parse_status( $status, $post_id ) {
 		$status = str_replace( '%title%', get_the_title( $post_id ), $status );
-		$status = str_replace( '%excerpt%', $this->get_excerpt( $post_id ), $status );
 		$status = str_replace( '%tags%', $this->get_tags( $post_id ), $status );
+
+		$max_length = mb_strlen( str_replace( array( '%excerpt%', '%permalink%' ), '', $status ) );
+		$max_length = max( 0, 450 - $max_length ); // For a possible permalink, and then some.
+
+		$status = str_replace( '%excerpt%', $this->get_excerpt( $post_id, $max_length ), $status );
+
 		$status = preg_replace( '~(\r\n){2,}~', "\r\n\r\n", $status ); // We should have normalized line endings by now.
 		$status = sanitize_textarea_field( $status ); // Strips HTML and whatnot.
 
@@ -582,17 +587,33 @@ class Post_Handler {
 	 *
 	 * @since 0.15.0
 	 *
-	 * @param  int $post_id Post ID.
-	 * @return string       (Possibly shortened) excerpt.
+	 * @param  int $post_id    Post ID.
+	 * @param  int $max_length Estimated maximum length.
+	 * @return string          (Possibly shortened) excerpt.
 	 */
-	protected function get_excerpt( $post_id ) {
-		$orig    = apply_filters( 'the_excerpt', get_the_excerpt( $post_id ) );
-		$orig    = wp_strip_all_tags( $orig ); // Just in case a site owner's allowing HTML in their excerpts or something.
-		$orig    = html_entity_decode( $orig, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ); // Prevent special characters from messing things up.
-		$excerpt = mb_substr( $orig, 0, apply_filters( 'share_on_mastodon_excerpt_length', 125 ) );
+	protected function get_excerpt( $post_id, $max_length = 125 ) {
+		// Grab the default `excerpt_more`.
+		$excerpt_more = apply_filters( 'excerpt_more', ' [&hellip;]' );
 
-		if ( $excerpt !== $orig && ! ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
-			$excerpt .= '…';
+		add_filter( 'excerpt_length', fn () => 150 );
+		$orig = apply_filters( 'the_excerpt', get_the_excerpt( $post_id ) );
+		$orig = preg_replace( "~$excerpt_more$~", '', $orig ); // Trim off the `excerpt_more` string.
+		$orig = wp_strip_all_tags( $orig ); // Just in case a site owner's allowing HTML in their excerpts or something.
+		$orig = html_entity_decode( $orig, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ); // Prevent special characters from messing things up.
+
+		$length = apply_filters( 'share_on_mastodon_excerpt_length', $max_length - 1 );
+		debug_log( $length );
+
+		$excerpt = mb_substr( $orig, 0, $length );
+
+		if ( $excerpt !== $orig ) {
+			// If the original excerpt got shortened.
+			if ( ! ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
+				// And the new one does not end in a punctuation char ...
+				$excerpt .= '…';
+			} else {
+				$excerpt .= ' …';
+			}
 		}
 
 		return trim( $excerpt );
