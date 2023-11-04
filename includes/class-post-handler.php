@@ -595,28 +595,26 @@ class Post_Handler {
 		// Grab the default `excerpt_more`.
 		$excerpt_more = apply_filters( 'excerpt_more', ' [&hellip;]' );
 
-		add_filter( 'excerpt_length', fn () => 150 );
 		$orig = apply_filters( 'the_excerpt', get_the_excerpt( $post_id ) );
-		$orig = preg_replace( "~$excerpt_more$~", '', $orig ); // Trim off the `excerpt_more` string.
-		$orig = wp_strip_all_tags( $orig ); // Just in case a site owner's allowing HTML in their excerpts or something.
-		$orig = html_entity_decode( $orig, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ); // Prevent special characters from messing things up.
+
+		$excerpt = preg_replace( "~$excerpt_more$~", '', $orig ); // Trim off the `excerpt_more` string.
+		$excerpt = wp_strip_all_tags( $orig ); // Just in case a site owner's allowing HTML in their excerpts or something.
+		$excerpt = html_entity_decode( $orig, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ); // Prevent special characters from messing things up.
 
 		$length = apply_filters( 'share_on_mastodon_excerpt_length', $max_length - 1 );
-		debug_log( $length );
 
-		$excerpt = mb_substr( $orig, 0, $length );
+		$shortened = mb_substr( $excerpt, 0, $length );
 
-		if ( $excerpt !== $orig ) {
-			// If the original excerpt got shortened.
-			if ( ! ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
-				// And the new one does not end in a punctuation char ...
-				$excerpt .= '…';
-			} else {
-				$excerpt .= ' …';
-			}
+		if ( $shortened === $excerpt ) {
+			// Might as well done nothing.
+			return $orig;
+		} elseif ( ! ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
+			$shortened .= '…';
+		} else {
+			$shortened .= ' …';
 		}
 
-		return trim( $excerpt );
+		return trim( $shortened );
 	}
 
 	/**
