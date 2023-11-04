@@ -614,7 +614,7 @@ class Post_Handler {
 			foreach ( $tags as $tag ) {
 				$tag_name = $tag->name;
 
-				if ( preg_match( '/\s+/', $tag_name ) ) {
+				if ( preg_match( '/(\s|-)+/', $tag_name ) ) {
 					// Try to "CamelCase" multi-word tags.
 					$tag_name = preg_replace( '~(\s|-)+~', ' ', $tag_name );
 					$tag_name = explode( ' ', $tag_name );
