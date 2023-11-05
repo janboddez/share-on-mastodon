@@ -617,7 +617,7 @@ class Post_Handler {
 		if ( $shortened === $excerpt ) {
 			// Might as well done nothing.
 			return $orig;
-		} elseif ( ctype_punct( mb_substr( $excerpt, -1 ) ) ) {
+		} elseif ( ctype_punct( mb_substr( $shortened, -1 ) ) ) {
 			// Final char is a punctuation character.
 			$shortened .= ' …';
 		} else {
