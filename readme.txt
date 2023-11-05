@@ -29,7 +29,7 @@ More detailed instructions can be found on [this plugin's web page](https://jan.
 
 == Changelog ==
 = 0.17.2 =
-Fix permalinks with emoji in them.
+Fix permalinks with emoji in them. Somewhat smarter `%excerpt%` lengths.
 
 = 0.17.1 =
 Various bug fixes.
