@@ -591,7 +591,7 @@ class Post_Handler {
 	 * @param  int $max_length Estimated maximum length.
 	 * @return string          (Possibly shortened) excerpt.
 	 */
-	protected function get_excerpt( $post_id, $max_length = 125 ) {
+	protected function get_excerpt( $post_id, $max_length = 127 ) {
 		// Grab the default `excerpt_more`.
 		$excerpt_more = apply_filters( 'excerpt_more', ' [&hellip;]' );
 
@@ -601,7 +601,7 @@ class Post_Handler {
 		$excerpt = wp_strip_all_tags( $orig ); // Just in case a site owner's allowing HTML in their excerpts or something.
 		$excerpt = html_entity_decode( $orig, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) ); // Prevent special characters from messing things up.
 
-		$length = apply_filters( 'share_on_mastodon_excerpt_length', $max_length - 1 );
+		$length = apply_filters( 'share_on_mastodon_excerpt_length', $max_length - 2 );
 
 		$shortened = mb_substr( $excerpt, 0, $length );
 
