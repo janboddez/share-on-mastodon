@@ -618,7 +618,7 @@ class Post_Handler {
 			// Might as well done nothing.
 			return $orig;
 		} elseif ( ctype_punct( mb_substr( $shortened, -1 ) ) ) {
-			// Final char is a punctuation character.
+			// Final char is a "punctuation" character.
 			$shortened .= ' …';
 		} else {
 			$shortened .= '…';
