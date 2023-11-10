@@ -782,7 +782,7 @@ class Options_Handler {
 			return false;
 		}
 
-		$this->options = array_combine( array_keys( self::SCHEMA ), array_column( self::SCHEMA, 'default' ) );
+		$this->options = static::get_default_options();
 
 		update_option( 'share_on_mastodon_settings', $this->options );
 	}
