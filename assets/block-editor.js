@@ -67,28 +67,21 @@
 			controller.abort();
 		}, 6000 );
 
-		try {
-			apiFetch( {
-				path: url.addQueryArgs( '/share-on-mastodon/v1/url', { post_id: postId } ),
-				signal: controller.signal, // That time-out thingy.
-			} ).then( function( response ) {
-				clearTimeout( timeoutId );
+		apiFetch( {
+			path: url.addQueryArgs( '/share-on-mastodon/v1/url', { post_id: postId } ),
+			signal: controller.signal, // That time-out thingy.
+		} ).then( function( response ) {
+			clearTimeout( timeoutId );
 
-				if ( response.hasOwnProperty( 'url' ) && isValidUrl( response.url ) ) {
-					setMastoUrl( response.url );
-				}
+			if ( response.hasOwnProperty( 'url' ) && isValidUrl( response.url ) ) {
+				setMastoUrl( response.url );
+			}
 
-				setError( response.error ?? '' );
-			} ).catch( function( error ) {
-				// The request timed out or otherwise failed. Leave as is.
-				throw new Error( 'The "Get URL" request failed.' )
-			} );
-		} catch ( error ) {
-			return false;
-		}
-
-		// All good.
-		return true;
+			setError( response.error ?? '' );
+		} ).catch( function( error ) {
+			// The request timed out or otherwise failed. Leave as is.
+			console.debug( '[Share on Mastodon] "Get URL" request failed.' );
+		} );
 	};
 
 	const unlinkUrl = ( postId, setMastoUrl ) => {
