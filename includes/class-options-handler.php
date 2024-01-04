@@ -460,7 +460,7 @@ class Options_Handler {
 					<table class="form-table">
 						<tr valign="top">
 							<th scope="row"><label for="share_on_mastodon_settings[max_images]"><?php esc_html_e( 'Max. No. of Images', 'share-on-mastodon' ); ?></label></th>
-							<td><input type="number" min="0" max="4" style="width: 6em;" id="share_on_mastodon_settings[max_images]" name="share_on_mastodon_settings[max_images]" value="<?php echo esc_attr( ! empty( $this->options['max_images'] ) ? $this->options['max_images'] : '4' ); ?>" />
+							<td><input type="number" min="0" max="4" style="width: 6em;" id="share_on_mastodon_settings[max_images]" name="share_on_mastodon_settings[max_images]" value="<?php echo esc_attr( isset( $this->options['max_images'] ) ? $this->options['max_images'] : '4' ); ?>" />
 							<p class="description"><?php esc_html_e( 'The maximum number of images that will be uploaded. (Mastodon supports up to 4 images.)', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
