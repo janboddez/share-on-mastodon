@@ -13,4 +13,4 @@ Share on Mastodon can also be added as a Micropub syndication target, allowing y
 Simply download the plugin from https://wordpress.org/plugins/share-on-mastodon/ or install from within your WordPress' admin interface.
 
 ## Documentation
-Complete documentation as well as example code for extending Share on Mastodon can be found at https://jan.boddez.net/wordpress/share-on-mastodon.
+Complete documentation as well as example code for extending Share on Mastodon can be found on https://jan.boddez.net/wordpress/share-on-mastodon.
