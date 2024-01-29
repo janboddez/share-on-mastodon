@@ -10,7 +10,7 @@ Share on Mastodon supports 3rd-party WordPress apps, too, on the condition that 
 Share on Mastodon can also be added as a Micropub syndication target, allowing you to enable (or disable) sharing right from your _Micropub client_. (You'll want to _disable_ "Share Always" for this.)
 
 ## Installation
-Easily install the plugin from https://wordpress.org/plugins/share-on-mastodon/ or within your WordPress' admin interface.
+Simply download the plugin from https://wordpress.org/plugins/share-on-mastodon/ or install from within your WordPress' admin interface.
 
 ## Documentation
 Complete documentation as well as example code for extending Share on Mastodon can be found at https://jan.boddez.net/wordpress/share-on-mastodon.
