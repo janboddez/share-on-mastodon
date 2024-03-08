@@ -95,16 +95,6 @@ class Options_Handler {
 	);
 
 	/**
-	 * WordPress's default post types, minus "post" itself.
-	 *
-	 * @since 0.1.0
-	 */
-	const DEFAULT_POST_TYPES = array(
-		'page',
-		'attachment',
-	);
-
-	/**
 	 * Plugin options.
 	 *
 	 * @since 0.1.0
@@ -193,7 +183,7 @@ class Options_Handler {
 		if ( isset( $settings['post_types'] ) && is_array( $settings['post_types'] ) ) {
 			// Post types considered valid.
 			$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
-			$supported_post_types = array_diff( $supported_post_types, self::DEFAULT_POST_TYPES );
+			$supported_post_types = array_diff( $supported_post_types, array( 'attachment' ) );
 
 			foreach ( $settings['post_types'] as $post_type ) {
 				if ( in_array( $post_type, $supported_post_types, true ) ) {
@@ -346,7 +336,7 @@ class Options_Handler {
 								<?php
 								// Post types considered valid.
 								$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
-								$supported_post_types = array_diff( $supported_post_types, self::DEFAULT_POST_TYPES );
+								$supported_post_types = array_diff( $supported_post_types, array( 'attachment' ) );
 
 								foreach ( $supported_post_types as $post_type ) :
 									$post_type = get_post_type_object( $post_type );
