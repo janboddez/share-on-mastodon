@@ -1,4 +1,4 @@
-( function ( element, components, i18n, data, coreData, plugins, editPost, apiFetch, url, share_on_mastodon_obj ) {
+( ( element, components, i18n, data, coreData, plugins, editPost, apiFetch, url, share_on_mastodon_obj ) => {
 	const el                         = element.createElement;
 	const interpolate                = element.createInterpolateElement;
 	const useState                   = element.useState;
@@ -10,7 +10,7 @@
 	const registerPlugin             = plugins.registerPlugin;
 	const PluginDocumentSettingPanel = editPost.PluginDocumentSettingPanel;
 
-	// @see https://wordpress.stackexchange.com/questions/362975/admin-notification-after-save-post-when-ajax-saving-in-gutenberg
+	// @link https://wordpress.stackexchange.com/questions/362975/admin-notification-after-save-post-when-ajax-saving-in-gutenberg
 	const doneSaving = () => {
 		const { isSaving, isAutosaving, status } = useSelect( ( select ) => {
 			return {
@@ -63,14 +63,14 @@
 
 		// Like a time-out.
 		const controller = new AbortController();
-		const timeoutId  = setTimeout( function() {
+		const timeoutId  = setTimeout( () => {
 			controller.abort();
 		}, 6000 );
 
 		apiFetch( {
 			path: url.addQueryArgs( '/share-on-mastodon/v1/url', { post_id: postId } ),
 			signal: controller.signal, // That time-out thingy.
-		} ).then( function( response ) {
+		} ).then( ( response ) => {
 			clearTimeout( timeoutId );
 
 			if ( response.hasOwnProperty( 'url' ) && isValidUrl( response.url ) ) {
@@ -78,7 +78,7 @@
 			}
 
 			setError( response.error ?? '' );
-		} ).catch( function( error ) {
+		} ).catch( ( error ) => {
 			// The request timed out or otherwise failed. Leave as is.
 			console.debug( '[Share on Mastodon] "Get URL" request failed.' );
 		} );
@@ -91,7 +91,7 @@
 
 		// Like a time-out.
 		const controller = new AbortController();
-		const timeoutId  = setTimeout( function() {
+		const timeoutId  = setTimeout( () => {
 			controller.abort();
 		}, 6000 );
 
@@ -104,10 +104,10 @@
 					post_id: postId,
 					share_on_mastodon_nonce: share_on_mastodon_obj.nonce,
 				} ),
-			} ).then( function( response ) {
+			} ).then( ( response ) => {
 				clearTimeout( timeoutId );
 				setMastoUrl( '' ); // So as to trigger a re-render.
-			} ).catch( function( error ) {
+			} ).catch( ( error ) => {
 				// The request timed out or otherwise failed. Leave as is.
 				throw new Error( 'The "Unlink" request failed.' )
 			} );
@@ -119,9 +119,13 @@
 	};
 
 	registerPlugin( 'share-on-mastodon-panel', {
-		render: function( props ) {
-			const postId   = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostId(), [] );
-			const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType(), [] );
+		render: ( props ) => {
+			const { postId, postType } = useSelect( ( select ) => {
+				return {
+					postId: select( 'core/editor' ).getCurrentPostId(),
+					postType: select( 'core/editor' ).getCurrentPostType(),
+				}
+			} );
 
 			// To be able to actually save post meta (namely, `_share_on_mastodon` and `_share_on_mastodon_status`).
 			const [ meta, setMeta ] = coreData.useEntityProp( 'postType', postType, 'meta' );
