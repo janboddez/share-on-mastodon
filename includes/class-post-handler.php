@@ -494,41 +494,27 @@ class Post_Handler {
 			return false;
 		}
 
-		// A post should only be shared when either the "Share on Mastodon"
-		// checkbox was checked (and its value saved), *or* when "Share Always"
-		// is active (and the post isn't "too old," to avoid mishaps).
-		$share_always = false;
-		$is_enabled   = false;
+		if ( $this->is_older_than( DAY_IN_SECONDS / 2, $post ) && '1' !== get_post_meta( $post->ID, '_share_on_mastodon', true ) ) {
+			// Unless the box was ticked explicitly, we won't share "older"
+			// posts. Since v0.13.0, sharing "older" posts is "opt-in," always.
+			return false;
+		}
+
+		$is_enabled = false;
 
 		if ( '1' === get_post_meta( $post->ID, '_share_on_mastodon', true ) ) {
-			// Sharing was "explicitly" enabled for this post.
+			// Sharing was enabled for this post.
 			$is_enabled = true;
 		}
 
 		// That's not it, though; we have a setting that enables posts to be
-		// share nevertheless.
+		// shared nevertheless.
 		if ( ! empty( $this->options['share_always'] ) ) {
-			$share_always = true;
+			$is_enabled = true;
 		}
 
-		// We used to let developers override `$is_enabled` through a callback
-		// function. Or rather, we still do, because *reasons*.
-		if ( apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID ) ) {
-			$share_always = true;
-		}
-
-		if ( $this->is_older_than( DAY_IN_SECONDS / 2, $post ) ) {
-			// Since v0.13.0, we prevent automatic sharing of "older" posts.
-			// This sort of changes the behavior of the hook above, which used
-			// to always come last.
-			$share_always = false;
-		}
-
-		if ( $is_enabled || $share_always ) {
-			return true;
-		}
-
-		return false;
+		// We let developers override `$is_enabled` through a callback function.
+		return apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID );
 	}
 
 	/**
