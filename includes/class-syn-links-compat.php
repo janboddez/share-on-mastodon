@@ -35,6 +35,10 @@ class Syn_Links_Compat {
 	 * @return array            Modified syndication links.
 	 */
 	public static function syndication_links( $urls, $object_id ) {
+		if ( is_admin() ) {
+			return $urls;
+		}
+
 		$mastodon_url = get_post_meta( $object_id, '_share_on_mastodon_url', true );
 
 		if ( ! empty( $mastodon_url ) ) {
