@@ -136,9 +136,10 @@ class Image_Handler {
 	 *
 	 * @param  int    $image_id Attachment ID.
 	 * @param  string $alt      (Optional) alt text.
+	 * @param  array  $options  Mastodon API settings.
 	 * @return string|null      Unique media ID, or nothing on failure.
 	 */
-	public static function upload_image( $image_id, $alt = '' ) {
+	public static function upload_image( $image_id, $alt = '', $options ) {
 		if ( wp_attachment_is_image( $image_id ) ) {
 			// Grab the image's "large" thumbnail.
 			$image = wp_get_attachment_image_src( $image_id, apply_filters( 'share_on_mastodon_image_size', 'large', $image_id ) );
@@ -185,8 +186,6 @@ class Image_Handler {
 		$body .= 'Content-Type: ' . mime_content_type( $file_path ) . $eol . $eol;
 		$body .= file_get_contents( $file_path ) . $eol; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$body .= '--' . $boundary . '--'; // Note the extra two hyphens at the end.
-
-		$options = get_options();
 
 		$response = wp_safe_remote_post(
 			esc_url_raw( $options['mastodon_host'] . '/api/v1/media' ),

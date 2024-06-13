@@ -137,7 +137,7 @@ class Post_Handler {
 			return;
 		}
 
-		if ( ! $this->setup_completed() ) {
+		if ( ! $this->setup_completed( $post->post_author ) ) {
 			return;
 		}
 
@@ -170,11 +170,11 @@ class Post_Handler {
 	 * @param int|\WP_Post $post Post ID or object.
 	 */
 	public function post_to_mastodon( $post ) {
-		if ( ! $this->setup_completed() ) {
+		$post = get_post( $post );
+
+		if ( ! $this->setup_completed( $post->post_author ) ) {
 			return;
 		}
-
-		$post = get_post( $post );
 
 		if ( ! $this->is_valid( $post ) ) {
 			return;
@@ -224,6 +224,13 @@ class Post_Handler {
 		// Encode, build query string.
 		$query_string = http_build_query( $args );
 
+		// Get the applicable (i.e., blog-wide or per-user) API settings.
+		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
+			$options = get_user_meta( $post->post_author, 'share_on_mastodon_settings', true );
+		} else {
+			$options = $this->options;
+		}
+
 		// And now, images.
 		$media = Image_Handler::get_images( $post );
 
@@ -236,7 +243,7 @@ class Post_Handler {
 			$media = array_slice( $media, 0, $count, true );
 
 			foreach ( $media as $id => $alt ) {
-				$media_id = Image_Handler::upload_image( $id, $alt );
+				$media_id = Image_Handler::upload_image( $id, $alt, $options );
 
 				if ( ! empty( $media_id ) ) {
 					// The image got uploaded OK.
@@ -246,10 +253,10 @@ class Post_Handler {
 		}
 
 		$response = wp_safe_remote_post(
-			esc_url_raw( $this->options['mastodon_host'] . '/api/v1/statuses' ),
+			esc_url_raw( $options['mastodon_host'] . '/api/v1/statuses' ),
 			array(
 				'headers'             => array(
-					'Authorization' => 'Bearer ' . $this->options['mastodon_access_token'],
+					'Authorization' => 'Bearer ' . $options['mastodon_access_token'],
 				),
 				// Prevent WordPress from applying `http_build_query()`.
 				'data_format'         => 'body',
@@ -649,9 +656,32 @@ class Post_Handler {
 	 *
 	 * @since 0.17.1
 	 *
-	 * @return bool Whether auth access was set up okay.
+	 * @param  int $post_author ID of the current post's author.
+	 * @return bool             Whether auth access was set up okay.
 	 */
-	protected function setup_completed() {
+	protected function setup_completed( $post_author = 0 ) {
+		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
+			if ( empty( $post_author ) ) {
+				return false;
+			}
+
+			$user_options = get_user_meta( $post_author, 'share_on_mastodon_settings', true );
+
+			if ( empty( $user_options['mastodon_host'] ) ) {
+				return false;
+			}
+
+			if ( ! wp_http_validate_url( $user_options['mastodon_host'] ) ) {
+				return false;
+			}
+
+			if ( empty( $user_options['mastodon_access_token'] ) ) {
+				return false;
+			}
+
+			return true;
+		}
+
 		if ( empty( $this->options['mastodon_host'] ) ) {
 			return false;
 		}
