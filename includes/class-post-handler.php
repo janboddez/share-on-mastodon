@@ -245,16 +245,17 @@ class Post_Handler {
 			}
 		}
 
-		$response = wp_remote_post(
+		$response = wp_safe_remote_post(
 			esc_url_raw( $this->options['mastodon_host'] . '/api/v1/statuses' ),
 			array(
-				'headers'     => array(
+				'headers'             => array(
 					'Authorization' => 'Bearer ' . $this->options['mastodon_access_token'],
 				),
 				// Prevent WordPress from applying `http_build_query()`.
-				'data_format' => 'body',
-				'body'        => $query_string,
-				'timeout'     => 15,
+				'data_format'         => 'body',
+				'body'                => $query_string,
+				'timeout'             => 15,
+				'limit_response_size' => 1048576,
 			)
 		);
 

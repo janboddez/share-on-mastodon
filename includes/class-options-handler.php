@@ -617,10 +617,10 @@ class Options_Handler {
 	 */
 	private function register_app() {
 		// Register a new app. Should probably only run once (per host).
-		$response = wp_remote_post(
+		$response = wp_safe_remote_post(
 			esc_url_raw( $this->options['mastodon_host'] ) . '/api/v1/apps',
 			array(
-				'body' => array(
+				'body'                => array(
 					'client_name'   => apply_filters( 'share_on_mastodon_client_name', __( 'Share on Mastodon', 'share-on-mastodon' ) ),
 					'redirect_uris' => add_query_arg(
 						array(
@@ -633,6 +633,8 @@ class Options_Handler {
 					'scopes'        => 'write:media write:statuses read:accounts read:statuses',
 					'website'       => home_url(),
 				),
+				'timeout'             => 15,
+				'limit_response_size' => 1048576,
 			)
 		);
 
@@ -662,10 +664,10 @@ class Options_Handler {
 	 */
 	private function request_access_token( $code ) {
 		// Request an access token.
-		$response = wp_remote_post(
+		$response = wp_safe_remote_post(
 			esc_url_raw( $this->options['mastodon_host'] ) . '/oauth/token',
 			array(
-				'body' => array(
+				'body'                => array(
 					'client_id'     => $this->options['mastodon_client_id'],
 					'client_secret' => $this->options['mastodon_client_secret'],
 					'grant_type'    => 'authorization_code',
@@ -677,6 +679,8 @@ class Options_Handler {
 						admin_url( 'options-general.php' )
 					), // Redirect here after authorization.
 				),
+				'timeout'             => 15,
+				'limit_response_size' => 1048576,
 			)
 		);
 
@@ -730,14 +734,16 @@ class Options_Handler {
 		}
 
 		// Revoke access.
-		$response = wp_remote_post(
+		$response = wp_safe_remote_post(
 			esc_url_raw( $this->options['mastodon_host'] ) . '/oauth/revoke',
 			array(
-				'body' => array(
+				'body'                => array(
 					'client_id'     => $this->options['mastodon_client_id'],
 					'client_secret' => $this->options['mastodon_client_secret'],
 					'token'         => $this->options['mastodon_access_token'],
 				),
+				'timeout'             => 15,
+				'limit_response_size' => 1048576,
 			)
 		);
 
@@ -818,12 +824,13 @@ class Options_Handler {
 		}
 
 		// Verify the current access token.
-		$response = wp_remote_get(
+		$response = wp_safe_remote_get(
 			esc_url_raw( $this->options['mastodon_host'] ) . '/api/v1/accounts/verify_credentials',
 			array(
 				'headers' => array(
 					'Authorization' => 'Bearer ' . $this->options['mastodon_access_token'],
 				),
+				'timeout' => 15,
 			)
 		);
 

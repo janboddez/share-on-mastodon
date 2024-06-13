@@ -188,16 +188,17 @@ class Image_Handler {
 
 		$options = get_options();
 
-		$response = wp_remote_post(
+		$response = wp_safe_remote_post(
 			esc_url_raw( $options['mastodon_host'] . '/api/v1/media' ),
 			array(
-				'headers'     => array(
+				'headers'             => array(
 					'Authorization' => 'Bearer ' . $options['mastodon_access_token'],
 					'Content-Type'  => 'multipart/form-data; boundary=' . $boundary,
 				),
-				'data_format' => 'body',
-				'body'        => $body,
-				'timeout'     => 15,
+				'data_format'         => 'body',
+				'body'                => $body,
+				'timeout'             => 15,
+				'limit_response_size' => 1048576,
 			)
 		);
 
