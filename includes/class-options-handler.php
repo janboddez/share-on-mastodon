@@ -128,13 +128,6 @@ class Options_Handler {
 		add_action( 'admin_menu', array( $this, 'create_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'admin_post_share_on_mastodon', array( $this, 'admin_post' ) );
-
-		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
-			add_action( 'show_user_profile', array( $this, 'profile_fields' ) );
-			add_action( 'edit_user_profile', array( $this, 'profile_fields' ) );
-			add_action( 'personal_options_update', array( $this, 'save_profile_fields' ) );
-			add_action( 'edit_user_profile_update', array( $this, 'save_profile_fields' ) );
-		}
 	}
 
 	/**
@@ -331,7 +324,7 @@ class Options_Handler {
 					settings_fields( 'share-on-mastodon-settings-group' );
 					?>
 					<table class="form-table">
-						<?php if ( ! defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) || ! SHARE_ON_MASTODON_MULTI_ACCOUNT ) : ?>
+						<?php if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) : ?>
 							<tr valign="top">
 								<th scope="row"><label for="share_on_mastodon_settings[mastodon_host]"><?php esc_html_e( 'Instance', 'share-on-mastodon' ); ?></label></th>
 								<td><input type="url" id="share_on_mastodon_settings[mastodon_host]" name="share_on_mastodon_settings[mastodon_host]" style="min-width: 33%;" value="<?php echo esc_attr( $this->options['mastodon_host'] ); ?>" />
@@ -362,8 +355,8 @@ class Options_Handler {
 					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
 				</form>
 
-				<h3><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h3>
-				<?php if ( ! defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) || ! SHARE_ON_MASTODON_MULTI_ACCOUNT ) : ?>
+				<?php if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) : ?>
+					<h3><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h3>
 					<?php
 					if ( ! empty( $this->options['mastodon_host'] ) ) {
 						// A valid instance URL was set.
@@ -449,11 +442,6 @@ class Options_Handler {
 						<p><?php esc_html_e( 'Please fill out and save your Mastodon instance&rsquo;s URL first.', 'share-on-mastodon' ); ?></p>
 						<?php
 					}
-				else :
-					?>
-						<?php /* translators: user profile link. */ ?>
-						<p><?php printf( esc_html__( 'WordPress is set up to support multiple Mastodon accounts. Instance settings can be found under %s.', 'share-on-mastodon' ), '<a href="' . esc_url( admin_url( 'profile.php#share-on-mastodon' ) ) . '">' . esc_html__( 'Users &gt; Profile', 'share-on-mastodon' ) . '</a>' ); ?></p>
-					<?php
 				endif;
 			endif;
 
@@ -605,171 +593,6 @@ class Options_Handler {
 		<?php
 	}
 
-	public function profile_fields( $user ) {
-		if ( ! user_can( $user, 'edit_posts' ) ) {
-			return;
-		}
-
-		$options = get_user_meta( $user->ID, 'share_on_mastodon_settings', true );
-		?>
-			<div id="share-on-mastodon">
-				<h2><?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?></h2>
-				<table class="form-table">
-					<tr valign="top">
-						<th scope="row"><label for="share_on_mastodon_settings[mastodon_host]"><?php esc_html_e( 'Instance', 'share-on-mastodon' ); ?></label></th>
-						<td><input type="url" id="share_on_mastodon_settings[mastodon_host]" name="share_on_mastodon_settings[mastodon_host]" style="min-width: 33%;" value="<?php echo esc_attr( ! empty( $options['mastodon_host'] ) ? $options['mastodon_host'] : '' ); ?>" />
-						<?php /* translators: %s: example URL. */ ?>
-						<p class="description"><?php printf( esc_html__( 'Your Mastodon instance&rsquo;s URL. E.g., %s.', 'share-on-mastodon' ), '<code>https://mastodon.online</code>' ); ?></p></td>
-					</tr>
-				</table>
-
-				<?php
-				if ( ! empty( $options['mastodon_host'] ) ) {
-					// A valid instance URL was set.
-					if ( empty( $options['mastodon_client_id'] ) || empty( $options['mastodon_client_secret'] ) ) {
-						// No app is currently registered. Let's try to fix that!
-						$this->register_app( $user->ID );
-					}
-
-					if ( ! empty( $options['mastodon_client_id'] ) && ! empty( $options['mastodon_client_secret'] ) ) {
-						// An app was successfully registered.
-						if ( ! empty( $_GET['code'] ) && '' === $this->options['mastodon_access_token'] ) {
-							// Access token request.
-							if ( $this->request_access_token( wp_unslash( $_GET['code'] ), $user->ID ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-								?>
-								<div class="notice notice-success is-dismissible">
-									<p><?php esc_html_e( 'Access granted!', 'share-on-mastodon' ); ?></p>
-								</div>
-								<?php
-							}
-						}
-
-						if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'share-on-mastodon-reset' ) ) {
-							// Revoke access. Forget access token regardless of the
-							// outcome.
-							$this->revoke_access( $user->ID );
-						}
-
-						if ( empty( $options['mastodon_access_token'] ) ) {
-							// No access token exists. Echo authorization link.
-							$url = $options['mastodon_host'] . '/oauth/authorize?' . http_build_query(
-								array(
-									'response_type' => 'code',
-									'client_id'     => $options['mastodon_client_id'],
-									'client_secret' => $options['mastodon_client_secret'],
-									'redirect_uri'  => esc_url_raw(
-										'show_user_profile' === current_action()
-											? admin_url( 'profile.php' )
-											: admin_url( 'user-edit.php' )
-									), // Redirect here after authorization.
-									'scope'         => 'write:media write:statuses read:accounts read:statuses',
-								)
-							);
-							?>
-							<p><?php esc_html_e( 'Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication.', 'share-on-mastodon' ); ?></p>
-							<p style="margin-bottom: 2rem;"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
-							<?php
-						} else {
-							// An access token exists.
-							?>
-							<p><?php esc_html_e( 'You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline.', 'share-on-mastodon' ); ?></p>
-							<p style="margin-bottom: 2rem;">
-								<?php
-								printf(
-									'<a href="%1$s" class="button">%2$s</a>',
-									esc_url(
-										add_query_arg(
-											array(
-												'action'   => 'revoke', // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow
-												'_wpnonce' => wp_create_nonce( 'share-on-mastodon-reset' ),
-											),
-											esc_url_raw(
-												'show_user_profile' === current_action()
-													? admin_url( 'profile.php' )
-													: admin_url( 'user-edit.php' )
-											)
-										)
-									),
-									esc_html__( 'Revoke Access', 'share-on-mastodon' )
-								);
-								?>
-							</p>
-							<?php
-						}
-					} else {
-						// Still couldn't register our app.
-						?>
-						<p><?php esc_html_e( 'Something went wrong contacting your Mastodon instance. Please reload this page to try again.', 'share-on-mastodon' ); ?></p>
-						<?php
-					}
-				} else {
-					// We can't do much without an instance URL.
-					?>
-					<p><?php esc_html_e( 'Please fill out and save your Mastodon instance&rsquo;s URL first.', 'share-on-mastodon' ); ?></p>
-					<?php
-				}
-				?>
-		</div>
-		<?php
-	}
-
-	public function save_profile_fields( $user_id ) {
-		if ( ! current_user_can( 'edit_user', $user_id ) ) {
-			// Unauthorized.
-			return;
-		}
-
-		if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['_wpnonce'] ), "update-user_{$user_id}" ) ) {
-			// Invalid nonce.
-			return;
-		}
-
-		if ( ! user_can( $user_id, 'edit_posts' ) ) {
-			// Unsupported role.
-			return;
-		}
-
-		$options = get_user_meta( $user_id, 'share_on_mastodon_settings', true );
-
-		$settings = ! empty( $_POST['share_on_mastodon_settings'] )
-			? wp_unslash( $_POST['share_on_mastodon_settings'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			: array();
-
-		if ( isset( $settings['mastodon_host'] ) ) {
-			// Clean up and sanitize the user-submitted URL.
-			$mastodon_host = $this->clean_url( $settings['mastodon_host'] );
-
-			if ( '' === $mastodon_host ) {
-				// Removing the instance URL. Might be done to temporarily
-				// disable crossposting. Let's not revoke access just yet.
-				$options['mastodon_host'] = '';
-			} elseif ( wp_http_validate_url( $mastodon_host ) ) {
-				if ( empty( $options['mastodon_host'] ) || $mastodon_host !== $options['mastodon_host'] ) {
-					// Updated URL. (Try to) revoke access. Forget token
-					// regardless of the outcome.
-					$this->revoke_access( $user_id );
-
-					// Then, save the new URL.
-					$options['mastodon_host'] = esc_url_raw( $mastodon_host );
-
-					// Forget client ID and secret. A new client ID and
-					// secret will be requested next time the page loads.
-					$options['mastodon_client_id']     = '';
-					$options['mastodon_client_secret'] = '';
-				}
-			} else {
-				// Not a valid URL. Display error message.
-				add_settings_error(
-					'share-on-mastodon-mastodon-host',
-					'invalid-url',
-					esc_html__( 'Please provide a valid URL.', 'share-on-mastodon' )
-				);
-			}
-		}
-
-		update_user_meta( $user_id, 'share_on_mastodon_settings', $options );
-	}
-
 	/**
 	 * Loads (admin) scripts.
 	 *
@@ -797,24 +620,31 @@ class Options_Handler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $user_id User ID.
+	 * @param \User_Options|null $user_options Current user's instance settings.
 	 */
-	private function register_app( $user_id = 0 ) {
-		if ( empty( $user_id ) ) {
+	public function register_app( $user_options = null ) {
+		if ( null === $user_options ) {
+			$options      = $this->options;
 			$redirect_url = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
-		} elseif ( get_current_user_id() === $user_id ) {
-			$redirect_url = admin_url( 'profile.php' );
 		} else {
-			$redirect_url = admin_url( 'edit-user.php' );
+			$options      = $user_options->get_options();
+			$redirect_url = add_query_arg(
+				array(
+					'page' => 'share-on-mastodon',
+				),
+				user_can( $user_options->get_user_id(), 'list_users' )
+					? admin_url( 'users.php' )
+					: admin_url( 'profile.php' )
+			);
 		}
 
 		// Register a new app. Should probably only run once (per host).
 		$response = wp_safe_remote_post(
-			esc_url_raw( $this->options['mastodon_host'] ) . '/api/v1/apps',
+			esc_url_raw( $options['mastodon_host'] ) . '/api/v1/apps',
 			array(
 				'body'                => array(
 					'client_name'   => apply_filters( 'share_on_mastodon_client_name', __( 'Share on Mastodon', 'share-on-mastodon' ) ),
-					'redirect_uris' => $redirect_url,
+					'redirect_uris' => esc_url_raw( $redirect_url ),
 					'scopes'        => 'write:media write:statuses read:accounts read:statuses',
 					'website'       => home_url(),
 				),
@@ -831,17 +661,22 @@ class Options_Handler {
 		$app = json_decode( $response['body'] );
 
 		if ( isset( $app->client_id ) && isset( $app->client_secret ) ) {
-			// After successfully registering the App, store its keys.
-			if ( ! empty( $user_id ) ) {
-				$options = get_user_meta( $user_id, 'share_on_mastodon_settings', true );
-
-				$options['mastodon_client_id']     = $app->client_id;
-				$options['mastodon_client_secret'] = $app->client_secret;
-				update_user_meta( $user_id, 'share_on_mastodon_settings', $options );
-			} else {
+			// After successfully registering our app, store its keys.
+			if ( null === $user_options ) {
+				// Update object.
 				$this->options['mastodon_client_id']     = $app->client_id;
 				$this->options['mastodon_client_secret'] = $app->client_secret;
+
+				// Update in database.
 				update_option( 'share_on_mastodon_settings', $this->options );
+			} else {
+				// Update object.
+				$options['mastodon_client_id']     = $app->client_id;
+				$options['mastodon_client_secret'] = $app->client_secret;
+				$user_options->set_options( $options ); // If we didn't do this, the (rest of the) page would be rendered using the old data.
+
+				// Update in database.
+				update_user_meta( $user_options->get_user_id(), 'share_on_mastodon_settings', $options );
 			}
 		} else {
 			debug_log( $response );
@@ -853,22 +688,23 @@ class Options_Handler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $code    Authorization code.
-	 * @param int    $user_id (Optional) User ID.
+	 * @param string        $code         Authorization code.
+	 * @param \User_Options $user_options Current user's instance settings.
 	 */
-	private function request_access_token( $code, $user_id = 0 ) {
-		if ( empty( $user_id ) ) {
+	public function request_access_token( $code, $user_options = null ) {
+		if ( null === $user_options ) {
+			$options      = $this->options;
 			$redirect_url = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
-		} elseif ( get_current_user_id() === $user_id ) {
-			$redirect_url = admin_url( 'profile.php' );
 		} else {
-			$redirect_url = admin_url( 'edit-user.php' );
-		}
-
-		if ( ! empty( $user_id ) ) {
-			$options = get_user_meta( $user_id, 'share_on_mastodon_settings', true );
-		} else {
-			$options = $this->options;
+			$options      = $user_options->get_options();
+			$redirect_url = add_query_arg(
+				array(
+					'page' => 'share-on-mastodon',
+				),
+				user_can( $user_options->get_user_id(), 'list_users' )
+					? admin_url( 'users.php' )
+					: admin_url( 'profile.php' )
+			);
 		}
 
 		// Request an access token.
@@ -880,7 +716,7 @@ class Options_Handler {
 					'client_secret' => $options['mastodon_client_secret'],
 					'grant_type'    => 'authorization_code',
 					'code'          => $code,
-					'redirect_uri'  => $redirect_url,
+					'redirect_uri'  => esc_url_raw( $redirect_url ),
 				),
 				'timeout'             => 15,
 				'limit_response_size' => 1048576,
@@ -896,15 +732,22 @@ class Options_Handler {
 
 		if ( isset( $token->access_token ) ) {
 			// Success. Store access token.
-			if ( ! empty( $user_id ) ) {
-				$options['mastodon_access_token'] = $token->access_token;
-				update_user_meta( $user_id, 'share_on_mastodon_settings', $options );
-			} else {
+			if ( null === $user_options ) {
+				// Update object.
 				$this->options['mastodon_access_token'] = $token->access_token;
+
+				// Update in database.
 				update_option( 'share_on_mastodon_settings', $this->options );
+			} else {
+				// Update object.
+				$options['mastodon_access_token'] = $token->access_token;
+				$user_options->set_options( $options ); // If we didn't do this, the (rest of the) page would be rendered using the old data.
+
+				// Update in database.
+				update_user_meta( $user_options->get_user_id(), 'share_on_mastodon_settings', $options );
 			}
 
-			$this->cron_verify_token( $user_id ); // In order to get and store a username.
+			$this->cron_verify_token( $user_options ); // In order to get and store a username.
 			// @todo: This function **might** delete our token, we should take that into account somehow.
 
 			return true;
@@ -920,14 +763,16 @@ class Options_Handler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param  int $user_id (Optional) user ID.
-	 * @return bool         Whether access was revoked.
+	 * @param \User_Options $user_options Current user's instance settings.
+	 * @return bool                       Whether access was revoked.
 	 */
-	private function revoke_access( $user_id = 0 ) {
-		if ( ! empty( $user_id ) ) {
-			$options = get_user_meta( $user_id, 'share_on_mastodon_settings', true );
-		} else {
+	public function revoke_access( $user_options = null ) {
+		if ( null === $user_options ) {
+			// Plugin options.
 			$options = $this->options;
+		} else {
+			// User options.
+			$options = $user_options->get_options();
 		}
 
 		if ( empty( $options['mastodon_host'] ) ) {
@@ -961,16 +806,21 @@ class Options_Handler {
 		);
 
 		// Delete access token and username, regardless of the outcome.
-		if ( ! empty( $user_id ) ) {
-			// Update user's auth details.
-			$options['mastodon_access_token'] = '';
-			$options['mastodon_username']     = '';
-			update_user_meta( $user_id, 'share_on_mastodon_settings', $options );
-		} else {
-			// Update global auth details.
+		if ( null === $user_options ) {
+			// Update object.
 			$this->options['mastodon_access_token'] = '';
 			$this->options['mastodon_username']     = '';
+
+			// Update in database.
 			update_option( 'share_on_mastodon_settings', $this->options );
+		} else {
+			// Update object.
+			$options['mastodon_access_token'] = '';
+			$options['mastodon_username']     = '';
+			$user_options->set_options( $options ); // If we didn't do this, the (rest of the) page would be rendered using the old data.
+
+			// Update in database.
+			update_user_meta( $user_options->get_user_id(), 'share_on_mastodon_settings', $options );
 		}
 
 		if ( is_wp_error( $response ) ) {
@@ -994,7 +844,7 @@ class Options_Handler {
 	 *
 	 * @since 0.3.1
 	 */
-	private function reset_options() {
+	public function reset_options() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return false;
 		}
@@ -1034,12 +884,14 @@ class Options_Handler {
 	 * Normally runs once a day.
 	 *
 	 * @since 0.4.0
+	 *
+	 * @param \User_Options $user_options Current user's instance settings.
 	 */
-	public function cron_verify_token( $user_id = 0 ) {
-		if ( ! empty( $user_id ) ) {
-			$options = get_user_meta( $user_id, 'share_on_mastodon_settings', true );
-		} else {
+	public function cron_verify_token( $user_options = null ) {
+		if ( null === $user_options ) {
 			$options = $this->options;
+		} else {
+			$options = $user_options->get_options();
 		}
 
 		if ( empty( $options['mastodon_host'] ) ) {
@@ -1088,14 +940,19 @@ class Options_Handler {
 
 		if ( isset( $account->username ) ) {
 			if ( empty( $this->options['mastodon_username'] ) || $account->username !== $this->options['mastodon_username'] ) {
-				if ( ! empty( $user_id ) ) {
-					// Update user's auth details.
-					$options['mastodon_username'] = $account->username;
-					update_user_meta( $user_id, 'share_on_mastodon_settings', $options );
-				} else {
-					// Update global auth details.
+				if ( null === $user_options ) {
+					// Update object.
 					$this->options['mastodon_username'] = $account->username;
+
+					// Update in database.
 					update_option( 'share_on_mastodon_settings', $this->options );
+				} else {
+					// Update object.
+					$options['mastodon_username'] = $account->username;
+					$user_options->set_options( $options ); // If we didn't do this, the (rest of the) page would be rendered using the old data.
+
+					// Update in database.
+					update_user_meta( $user_options->get_user_id(), 'share_on_mastodon_settings', $options );
 				}
 			}
 		} else {

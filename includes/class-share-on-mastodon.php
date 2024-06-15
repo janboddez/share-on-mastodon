@@ -32,6 +32,15 @@ class Share_On_Mastodon {
 	private $options_handler;
 
 	/**
+	 * `User_Options` instance.
+	 *
+	 * @since 0.19.0
+	 *
+	 * @var User_Options $instance `User_Options` instance.
+	 */
+	private $user_options;
+
+	/**
 	 * `Post_Handler` instance.
 	 *
 	 * @since 0.5.0
@@ -64,7 +73,14 @@ class Share_On_Mastodon {
 		$this->options_handler = new Options_Handler();
 		$this->options_handler->register();
 
-		$this->post_handler = new Post_Handler( $this->options_handler->get_options() );
+		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
+			$this->user_options = new User_Options();
+			$this->user_options->register();
+		}
+
+		$this->post_handler = new Post_Handler(
+			$this->options_handler->get_options()
+		);
 		$this->post_handler->register();
 	}
 

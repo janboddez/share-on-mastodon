@@ -31,6 +31,7 @@ require __DIR__ . '/includes/class-options-handler.php';
 require __DIR__ . '/includes/class-post-handler.php';
 require __DIR__ . '/includes/class-share-on-mastodon.php';
 require __DIR__ . '/includes/class-syn-links-compat.php';
+require __DIR__ . '/includes/class-user-options.php';
 require __DIR__ . '/includes/functions.php';
 
 Share_On_Mastodon::get_instance()
