@@ -226,6 +226,8 @@ class Post_Handler {
 
 		// Get the applicable (i.e., blog-wide or per-user) API settings.
 		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
+			// Note that we need to get the post author's instance details, and
+			// not those of the currently logged-in user.
 			$options = get_user_meta( $post->post_author, 'share_on_mastodon_settings', true );
 		} else {
 			$options = $this->options;
@@ -235,7 +237,10 @@ class Post_Handler {
 		$media = Image_Handler::get_images( $post );
 
 		if ( ! empty( $media ) ) {
-			$max   = isset( $this->options['max_images'] ) ? $this->options['max_images'] : 4;
+			$max = isset( $this->options['max_images'] )
+				? $this->options['max_images']
+				: 4;
+
 			$max   = (int) apply_filters( 'share_on_mastodon_num_images', $max, $post );
 			$count = min( count( $media ), $max );
 

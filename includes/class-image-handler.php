@@ -135,11 +135,11 @@ class Image_Handler {
 	 * @since 0.10.0
 	 *
 	 * @param  int    $image_id Attachment ID.
-	 * @param  string $alt      (Optional) alt text.
+	 * @param  string $alt      Alt text.
 	 * @param  array  $options  Mastodon API settings.
 	 * @return string|null      Unique media ID, or nothing on failure.
 	 */
-	public static function upload_image( $image_id, $alt = '', $options ) {
+	public static function upload_image( $image_id, $alt, $options ) {
 		if ( wp_attachment_is_image( $image_id ) ) {
 			// Grab the image's "large" thumbnail.
 			$image = wp_get_attachment_image_src( $image_id, apply_filters( 'share_on_mastodon_image_size', 'large', $image_id ) );
