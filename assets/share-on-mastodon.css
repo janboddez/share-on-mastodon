@@ -31,3 +31,13 @@
 .share-on-mastodon-unlink:focus {
 	color: #cc1818;
 }
+
+.settings_page_share-on-mastodon fieldset,
+.users_page_share-on-mastodon-profile fieldset {
+	border: 1px solid #ccc;
+	box-sizing: border-box;
+	font-size: 14px;
+	margin: 2em 0 1em;
+	max-width: 67%;
+	padding: 1.25em;
+}

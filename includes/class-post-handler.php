@@ -24,11 +24,11 @@ class Post_Handler {
 	 * Constructor.
 	 *
 	 * @since 0.1.0
-	 *
-	 * @param array $options Plugin options.
 	 */
-	public function __construct( $options = array() ) {
-		$this->options = $options;
+	public function __construct() {
+		// Allows us to just use `$this->options` rather than have to define
+		// `$options = get_options()` all the time.
+		$this->options = get_options();
 	}
 
 	/**

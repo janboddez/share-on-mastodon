@@ -23,13 +23,13 @@ class Share_On_Mastodon {
 	private static $instance;
 
 	/**
-	 * `Options_Handler` instance.
+	 * `Plugin_Options` instance.
 	 *
-	 * @since 0.5.0
+	 * @since 0.19.0
 	 *
-	 * @var Options_Handler $instance `Options_Handler` instance.
+	 * @var Plugin_Options $instance `Plugin_Options` instance.
 	 */
-	private $options_handler;
+	private $plugin_options;
 
 	/**
 	 * `User_Options` instance.
@@ -65,36 +65,28 @@ class Share_On_Mastodon {
 	}
 
 	/**
-	 * Constructor.
-	 *
-	 * @since 0.1.0
-	 */
-	private function __construct() {
-		$this->options_handler = new Options_Handler();
-		$this->options_handler->register();
-
-		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
-			$this->user_options = new User_Options();
-			$this->user_options->register();
-		}
-
-		$this->post_handler = new Post_Handler(
-			$this->options_handler->get_options()
-		);
-		$this->post_handler->register();
-	}
-
-	/**
 	 * Interacts with WordPress's Plugin API.
 	 *
 	 * @since 0.5.0
 	 */
 	public function register() {
+		$this->plugin_options = new Plugin_Options();
+		$this->plugin_options->register();
+
+		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
+			// Enable per-user client registration.
+			$this->user_options = new User_Options();
+			$this->user_options->register();
+		}
+
+		$this->post_handler = new Post_Handler();
+		$this->post_handler->register();
+
+		// Main plugin hooks.
 		register_deactivation_hook( dirname( __DIR__ ) . '/share-on-mastodon.php', array( $this, 'deactivate' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		add_action( 'init', array( $this, 'register_cron' ) );
-		add_action( 'share_on_mastodon_verify_token', array( $this->options_handler, 'cron_verify_token' ) );
 
 		$options = get_options();
 
@@ -140,17 +132,6 @@ class Share_On_Mastodon {
 	}
 
 	/**
-	 * Returns `Options_Handler` instance.
-	 *
-	 * @since 0.5.0
-	 *
-	 * @return Options_Handler This plugin's `Options_Handler` instance.
-	 */
-	public function get_options_handler() {
-		return $this->options_handler;
-	}
-
-	/**
 	 * Returns `Post_Handler` instance.
 	 *
 	 * @since 0.5.0
@@ -159,5 +140,16 @@ class Share_On_Mastodon {
 	 */
 	public function get_post_handler() {
 		return $this->post_handler;
+	}
+
+	/**
+	 * Returns `Plugin_Options` instance.
+	 *
+	 * @since 0.19.0
+	 *
+	 * @return Plugin_Options This plugin's `Plugin_Options` instance.
+	 */
+	public function get_plugin_options() {
+		return $this->plugin_options;
 	}
 }

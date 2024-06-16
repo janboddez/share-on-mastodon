@@ -32,7 +32,7 @@ function debug_log( $item ) {
  */
 function get_options() {
 	return Share_On_Mastodon::get_instance()
-		->get_options_handler()
+		->get_plugin_options()
 		->get_options();
 }
 
