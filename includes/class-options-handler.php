@@ -109,13 +109,21 @@ class Options_Handler {
 	 * @since 0.1.0
 	 */
 	protected function register_app() {
-		// Register a new app. Should probably only run once (per host).
 		// @todo: Ensure this runs only once per host? Like, if we've previously
 		// registered with one instance, we should probably reuse those details.
-
 		if ( 'Plugin_Options' === $this->get_class_name() ) {
+			// It doesn't make sense to look for existing client details in user
+			// meta, as those clients will have a different redirect URI.
+			// Update: Looks like Mastodon may now support multiple redirect
+			// URIs (https://github.com/mastodon/mastodon/pull/29192).
 			$redirect_url = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
 		} else {
+			// Here we *could* opt to, rather than always register a new client,
+			// reuse known client details, but only if the host *and* redirect
+			// URI match. Except they *might* be outdated! If so, what are we
+			// going to do? Have user reset their settings, and then? How can we
+			// tell the plugin to "force" registration and ignore existing known
+			// hosts?
 			$redirect_url = add_query_arg(
 				array(
 					'page' => 'share-on-mastodon-profile',
@@ -124,9 +132,13 @@ class Options_Handler {
 					? admin_url( 'users.php' )
 					: admin_url( 'profile.php' )
 			);
-			// We should probably store this URL, as a user may change roles and
-			// that could break requesting a new token if the redirect URL has
-			// changed.
+			// We *could* store this URL so that if a user gains (or loses) the
+			// `list_users` capability, it is still possible to request a new
+			// token. Although ... if they *lost* access to the `users.php` page
+			// and it happened to be their previous redirect URI, that wouldn't
+			// work ... Maybe we should just keep things as is and, should we
+			// ever end up in this scenario, simply have them reset all settings
+			// and start over.
 		}
 
 		$response = wp_safe_remote_post(
