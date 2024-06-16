@@ -35,6 +35,10 @@ class User_Options extends Options_Handler {
 			'type'    => 'string',
 			'default' => '',
 		),
+		'mastodon_client_token'  => array(
+			'type'    => 'string',
+			'default' => '',
+		),
 	);
 
 	/**
@@ -121,7 +125,7 @@ class User_Options extends Options_Handler {
 					// An app was successfully registered.
 					if ( ! empty( $_GET['code'] ) && '' === $this->options['mastodon_access_token'] ) {
 						// Access token request.
-						if ( $this->request_access_token( wp_unslash( $_GET['code'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+						if ( $this->request_user_token( wp_unslash( $_GET['code'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 							?>
 							<div class="notice notice-success is-dismissible">
 								<p><?php esc_html_e( 'Access granted!', 'share-on-mastodon' ); ?></p>

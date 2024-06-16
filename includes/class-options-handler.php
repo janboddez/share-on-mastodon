@@ -92,6 +92,10 @@ class Options_Handler {
 			'type'    => 'boolean',
 			'default' => false,
 		),
+		'mastodon_client_token'  => array(
+			'type'    => 'string',
+			'default' => '',
+		),
 	);
 
 	/**
@@ -109,45 +113,20 @@ class Options_Handler {
 	 * @since 0.1.0
 	 */
 	protected function register_app() {
-		// @todo: Ensure this runs only once per host? Like, if we've previously
-		// registered with one instance, we should probably reuse those details.
-		if ( 'Plugin_Options' === $this->get_class_name() ) {
-			// It doesn't make sense to look for existing client details in user
-			// meta, as those clients will have a different redirect URI.
-			// Update: Looks like Mastodon may now support multiple redirect
-			// URIs (https://github.com/mastodon/mastodon/pull/29192).
-			$redirect_url = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
-		} else {
-			// Here we *could* opt to, rather than always register a new client,
-			// reuse known client details, but only if the host *and* redirect
-			// URI match. Except they *might* be outdated! If so, what are we
-			// going to do? Have user reset their settings, and then? How can we
-			// tell the plugin to "force" registration and ignore existing known
-			// hosts?
-			$redirect_url = add_query_arg(
-				array(
-					'page' => 'share-on-mastodon-profile',
-				),
-				current_user_can( 'list_users' )
-					? admin_url( 'users.php' )
-					: admin_url( 'profile.php' )
-			);
-			// We *could* store this URL so that if a user gains (or loses) the
-			// `list_users` capability, it is still possible to request a new
-			// token. Although ... if they *lost* access to the `users.php` page
-			// and it happened to be their previous redirect URI, that wouldn't
-			// work ... Maybe we should just keep things as is and, should we
-			// ever end up in this scenario, simply have them reset all settings
-			// and start over.
-		}
+		// @link https://github.com/mastodon/mastodon/pull/29192
+		$redirect_urls = array(
+			add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) ),
+			add_query_arg( array( 'page' => 'share-on-mastodon-profile' ), admin_url( 'users.php' ) ),
+			add_query_arg( array( 'page' => 'share-on-mastodon-profile' ), admin_url( 'profile.php' ) ),
+		);
 
 		$response = wp_safe_remote_post(
-			esc_url_raw( $this->options['mastodon_host'] ) . '/api/v1/apps',
+			esc_url_raw( $this->options['mastodon_host'] . '/api/v1/apps' ),
 			array(
 				'body'                => array(
 					'client_name'   => apply_filters( 'share_on_mastodon_client_name', __( 'Share on Mastodon', 'share-on-mastodon' ) ),
-					'redirect_uris' => esc_url_raw( $redirect_url ),
-					'scopes'        => 'write:media write:statuses read:accounts read:statuses',
+					'scopes'        => 'write:media write:statuses read:accounts read:statuses read',
+					'redirect_uris' => implode( ' ', array_map( 'esc_url_raw', $redirect_urls ) ),
 					'website'       => home_url(),
 				),
 				'timeout'             => 15,
@@ -169,19 +148,79 @@ class Options_Handler {
 
 			// Update in database.
 			$this->save();
+
+			// Fetch client token.
+			$this->request_client_token();
 		} else {
 			debug_log( $response );
 		}
 	}
 
 	/**
-	 * Requests a new access token.
+	 * Requests a new app token.
+	 *
+	 * @since 0.19.0
+	 */
+	protected function request_client_token() {
+		// Doesn't really matter what redirect URI we use here.
+		if ( 'Plugin_Options' === $this->get_class_name() ) {
+			$redirect_url = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
+		} else {
+			$redirect_url = add_query_arg(
+				array(
+					'page' => 'share-on-mastodon-profile',
+				),
+				current_user_can( 'list_users' )
+					? admin_url( 'users.php' )
+					: admin_url( 'profile.php' )
+			);
+		}
+
+		// Request an access token.
+		$response = wp_safe_remote_post(
+			esc_url_raw( $this->options['mastodon_host'] . '/oauth/token' ),
+			array(
+				'body'                => array(
+					'client_id'     => $this->options['mastodon_client_id'],
+					'client_secret' => $this->options['mastodon_client_secret'],
+					'grant_type'    => 'client_credentials',
+					'redirect_uri'  => esc_url_raw( $redirect_url ),
+				),
+				'timeout'             => 15,
+				'limit_response_size' => 1048576,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			debug_log( $response );
+			return false;
+		}
+
+		$token = json_decode( $response['body'] );
+
+		if ( isset( $token->access_token ) ) {
+			// Success. Store access token.
+			$this->options['mastodon_client_token'] = $token->access_token;
+
+			// Update in database.
+			$this->save();
+
+			return true;
+		} else {
+			debug_log( $response );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Requests a new user token.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param string $code Authorization code.
 	 */
-	protected function request_access_token( $code ) {
+	protected function request_user_token( $code ) {
 		if ( 'Plugin_Options' === $this->get_class_name() ) {
 			$redirect_url = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
 		} else {
