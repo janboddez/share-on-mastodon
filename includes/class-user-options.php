@@ -158,13 +158,13 @@ class User_Options extends Options_Handler {
 						);
 						?>
 						<p><?php esc_html_e( 'Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication.', 'share-on-mastodon' ); ?></p>
-						<p style="margin-bottom: 2rem;"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
+						<p class="submit"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
 						<?php
 					} else {
 						// An access token exists.
 						?>
 						<p><?php esc_html_e( 'You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline.', 'share-on-mastodon' ); ?></p>
-						<p style="margin-bottom: 2rem;">
+						<p class="submit">
 							<?php
 							printf(
 								'<a href="%1$s" class="button">%2$s</a>',
@@ -205,8 +205,8 @@ class User_Options extends Options_Handler {
 				?>
 				<fieldset>
 					<legend><?php esc_html_e( 'Danger Zone', 'feed-reader' ); ?></legend>
-					<p><?php esc_html_e( 'Just in case, below button lets you delete your Share on Mastodon settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
-					<p>
+					<div class="form-group">
+						<p><?php esc_html_e( 'Just in case, this button lets you delete your Share on Mastodon settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
 						<?php
 						printf(
 							'<a href="%1$s" class="button button-reset-settings" style="color: #a00; border-color: #a00;">%2$s</a>',
@@ -222,7 +222,7 @@ class User_Options extends Options_Handler {
 							esc_html__( 'Reset Settings', 'share-on-mastodon' )
 						);
 						?>
-					</p>
+					</div>
 				</fieldset>
 				<?php
 			endif;
@@ -239,7 +239,7 @@ class User_Options extends Options_Handler {
 	 * @param string $hook_suffix Current WP-Admin page.
 	 */
 	public function enqueue_scripts( $hook_suffix ) {
-		if ( 'users_page_share-on-mastodon-profile' !== $hook_suffix ) {
+		if ( ! in_array( $hook_suffix, array( 'users_page_share-on-mastodon-profile', 'profile_page_share-on-mastodon-profile' ), true ) ) {
 			// Not our "Profile" screen.
 			return;
 		}

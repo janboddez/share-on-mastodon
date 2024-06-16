@@ -33,11 +33,21 @@
 }
 
 .settings_page_share-on-mastodon fieldset,
-.users_page_share-on-mastodon-profile fieldset {
+.users_page_share-on-mastodon-profile fieldset,
+.profile_page_share-on-mastodon-profile fieldset {
 	border: 1px solid #ccc;
 	box-sizing: border-box;
 	font-size: 14px;
 	margin: 2em 0 1em;
 	max-width: 67%;
 	padding: 1.25em;
+}
+
+.settings_page_share-on-mastodon .form-group,
+.users_page_share-on-mastodon-profile .form-group,
+.profile_page_share-on-mastodon-profile .form-group {
+	align-items: center;
+	display: flex;
+	gap: 1.25em;
+	justify-content: space-between;
 }

@@ -330,13 +330,13 @@ class Plugin_Options extends Options_Handler {
 								);
 								?>
 								<p><?php esc_html_e( 'Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication.', 'share-on-mastodon' ); ?></p>
-								<p style="margin-bottom: 2rem;"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
+								<p class="submit"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
 								<?php
 							} else {
 								// An access token exists.
 								?>
 								<p><?php esc_html_e( 'You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline.', 'share-on-mastodon' ); ?></p>
-								<p style="margin-bottom: 2rem;">
+								<p class="submit">
 									<?php
 									printf(
 										'<a href="%1$s" class="button">%2$s</a>',
@@ -478,7 +478,7 @@ class Plugin_Options extends Options_Handler {
 					?>
 					<table class="form-table">
 						<tr valign="top">
-							<th scope="row"><label for="share_on_mastodon_settings[debug_logging]"><?php esc_html_e( 'Logging', 'share-on-mastodon' ); ?></label></th>
+							<th scope="row"><?php esc_html_e( 'Logging', 'share-on-mastodon' ); ?></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[debug_logging]" value="1" <?php checked( ! empty( $this->options['debug_logging'] ) ); ?> /> <?php esc_html_e( 'Enable debug logging', 'share-on-mastodon' ); ?></label>
 							<?php /* translators: %s: link to the official WordPress documentation */ ?>
 							<p class="description"><?php printf( esc_html__( 'You&rsquo;ll also need to set WordPress&rsquo; %s.', 'share-on-mastodon' ), sprintf( '<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>', 'https://wordpress.org/documentation/article/debugging-in-wordpress/#example-wp-config-php-for-debugging', esc_html__( 'debug logging constants', 'share-on-mastodon' ) ) ); ?></p></td>
@@ -489,8 +489,8 @@ class Plugin_Options extends Options_Handler {
 
 				<fieldset>
 					<legend><?php esc_html_e( 'Danger Zone', 'feed-reader' ); ?></legend>
-					<p><?php esc_html_e( 'Just in case, below button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
-					<p>
+					<div class="form-group">
+						<p><?php esc_html_e( 'Just in case, this button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
 						<?php
 						printf(
 							'<a href="%1$s" class="button button-reset-settings" style="color: #a00; border-color: #a00;">%2$s</a>',
@@ -507,18 +507,16 @@ class Plugin_Options extends Options_Handler {
 							esc_html__( 'Reset Settings', 'share-on-mastodon' )
 						);
 						?>
-					</p>
-					<?php
-					if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) :
-						?>
-							<p style="margin-top: 2em;"><?php esc_html_e( 'Below information is not meant to be shared with anyone but may help when troubleshooting issues.', 'share-on-mastodon' ); ?></p>
-							<p><textarea class="widefat" rows="5"><?php var_export( $this->options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export ?>
-							<?php
-					endif;
-					?>
+					</div>
 				</fieldset>
 
 				<?php
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) :
+					?>
+					<p style="margin-top: 2em;"><?php esc_html_e( 'Below information is not meant to be shared with anyone but may help when troubleshooting issues.', 'share-on-mastodon' ); ?></p>
+					<p><textarea class="widefat" rows="5" style="max-width: 67%;"><?php var_export( $this->options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export ?>
+					<?php
+				endif;
 			endif;
 			?>
 		</div>
