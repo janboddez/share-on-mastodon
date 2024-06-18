@@ -32,6 +32,15 @@
 	color: #cc1818;
 }
 
+.settings_page_share-on-mastodon label,
+.users_page_share-on-mastodon-profile label,
+.profile_page_share-on-mastodon-profile label,
+.settings_page_share-on-mastodon .label,
+.users_page_share-on-mastodon-profile .label,
+.profile_page_share-on-mastodon-profile .label {
+	vertical-align: baseline;
+}
+
 .settings_page_share-on-mastodon fieldset,
 .users_page_share-on-mastodon-profile fieldset,
 .profile_page_share-on-mastodon-profile fieldset {

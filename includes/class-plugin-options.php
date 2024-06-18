@@ -238,7 +238,7 @@ class Plugin_Options extends Options_Handler {
 						<?php endif; ?>
 
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Supported Post Types', 'share-on-mastodon' ); ?></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'Supported Post Types', 'share-on-mastodon' ); ?></span></th>
 							<td><ul style="list-style: none; margin-top: 0;">
 								<?php
 								// Post types considered valid.
@@ -387,17 +387,17 @@ class Plugin_Options extends Options_Handler {
 							<p class="description"><?php esc_html_e( 'The maximum number of images that will be uploaded. (Mastodon supports up to 4 images.)', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Featured Images', 'share-on-mastodon' ); ?></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'Featured Images', 'share-on-mastodon' ); ?></span></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[featured_images]" value="1" <?php checked( ! isset( $this->options['featured_images'] ) || $this->options['featured_images'] ); ?> /> <?php esc_html_e( 'Include featured images', 'share-on-mastodon' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Upload featured images.', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'In-Post Images', 'share-on-mastodon' ); ?></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'In-Post Images', 'share-on-mastodon' ); ?></span></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[referenced_images]" value="1" <?php checked( ! empty( $this->options['referenced_images'] ) ); ?> /> <?php esc_html_e( 'Include &ldquo;in-post&rdquo; images', 'share-on-mastodon' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Upload &ldquo;in-content&rdquo; images. (Limited to images in the Media Library.)', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Attached Images', 'share-on-mastodon' ); ?></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'Attached Images', 'share-on-mastodon' ); ?></span></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[attached_images]" value="1" <?php checked( ! isset( $this->options['attached_images'] ) || $this->options['attached_images'] ); ?> /> <?php esc_html_e( 'Include attached images', 'share-on-mastodon' ); ?></label>
 							<?php /* translators: %s: link to official WordPress documentation.  */ ?>
 							<p class="description"><?php printf( esc_html__( 'Upload %s.', 'share-on-mastodon' ), sprintf( '<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>', 'https://wordpress.org/documentation/article/use-image-and-file-attachments/#attachment-to-a-post', esc_html__( 'attached images', 'share-on-mastodon' ) ) ); ?></p></td>
@@ -422,12 +422,12 @@ class Plugin_Options extends Options_Handler {
 							<p class="description"><?php esc_html_e( 'The number of seconds (0&ndash;3600) WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;that&rsquo;s 5 minutes&mdash;may resolve issues with image uploads.)', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Opt-In', 'share-on-mastodon' ); ?></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'Opt-In', 'share-on-mastodon' ); ?></span></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[optin]" value="1" <?php checked( ! empty( $this->options['optin'] ) ); ?> /> <?php esc_html_e( 'Make sharing opt-in rather than opt-out', 'share-on-mastodon' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Have the &ldquo;Share on Mastodon&rdquo; checkbox unchecked by default.', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Share Always', 'share-on-mastodon' ); ?></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'Share Always', 'share-on-mastodon' ); ?></span></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[share_always]" value="1" <?php checked( ! empty( $this->options['share_always'] ) ); ?> /> <?php esc_html_e( 'Always share on Mastodon', 'share-on-mastodon' ); ?></label>
 							<p class="description"><?php esc_html_e( '&ldquo;Force&rdquo; sharing (regardless of the &ldquo;Share on Mastodon&rdquo; checkbox&rsquo;s state), like when posting from a mobile app.', 'share-on-mastodon' ); ?></p></td>
 						</tr>
@@ -438,21 +438,21 @@ class Plugin_Options extends Options_Handler {
 							<p class="description"><?php printf( esc_html__( 'Customize the default status template. Supported &ldquo;template tags&rdquo;: %s.', 'share-on-mastodon' ), '<code>%title%</code>, <code>%excerpt%</code>, <code>%tags%</code>, <code>%permalink%</code>' ); ?></p></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Customize Status', 'share-on-mastodon' ); ?></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'Customize Status', 'share-on-mastodon' ); ?></span></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[custom_status_field]" value="1" <?php checked( ! empty( $this->options['custom_status_field'] ) ); ?> /> <?php esc_html_e( 'Allow customizing Mastodon statuses', 'share-on-mastodon' ); ?></label>
 								<?php /* translators: %s: link to the `share_on_mastodon_status` documentation */ ?>
 							<p class="description"><?php printf( esc_html__( 'Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)', 'share-on-mastodon' ), '<a href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_status" target="_blank" rel="noopener noreferrer"><code>share_on_mastodon_status</code></a>' ); ?></p></td>
 						</tr>
 
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Meta Box', 'share-on-mastodon' ); ?></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'Meta Box', 'share-on-mastodon' ); ?></span></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[meta_box]" value="1" <?php checked( ! empty( $this->options['meta_box'] ) ); ?> /> <?php esc_html_e( 'Use &ldquo;classic&rdquo; meta box', 'share-on-mastodon' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Replace Share on Mastodon&rsquo;s &ldquo;block editor sidebar panel&rdquo; with a &ldquo;classic&rdquo; meta box (even for post types that use the block editor).', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 
 						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
 							<tr valign="top">
-								<th scope="row"><?php esc_html_e( 'Micropub', 'share-on-mastodon' ); ?></th>
+								<th scope="row"><span class="label"><?php esc_html_e( 'Micropub', 'share-on-mastodon' ); ?></span></th>
 								<td><label><input type="checkbox" name="share_on_mastodon_settings[micropub_compat]" value="1" <?php checked( ! empty( $this->options['micropub_compat'] ) ); ?> /> <?php esc_html_e( 'Add syndication target', 'share-on-mastodon' ); ?></label>
 								<p class="description"><?php esc_html_e( 'Add &ldquo;Mastodon&rdquo; as a Micropub syndication target.', 'share-on-mastodon' ); ?></p></td>
 							</tr>
@@ -460,7 +460,7 @@ class Plugin_Options extends Options_Handler {
 
 						<?php if ( function_exists( 'get_syndication_links' ) ) : ?>
 							<tr valign="top">
-								<th scope="row"><?php esc_html_e( 'Syndication Links', 'share-on-mastodon' ); ?></th>
+								<th scope="row"><span class="label"><?php esc_html_e( 'Syndication Links', 'share-on-mastodon' ); ?></span></th>
 								<td><label><input type="checkbox" name="share_on_mastodon_settings[syn_links_compat]" value="1" <?php checked( ! empty( $this->options['syn_links_compat'] ) ); ?> /> <?php esc_html_e( 'Add Mastodon URLs to syndication links', 'share-on-mastodon' ); ?></label>
 								<p class="description"><?php esc_html_e( '(Experimental) Add Mastodon URLs to Syndication Links&rsquo; list of syndication links.', 'share-on-mastodon' ); ?></p></td>
 							</tr>
@@ -480,7 +480,7 @@ class Plugin_Options extends Options_Handler {
 					?>
 					<table class="form-table">
 						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Logging', 'share-on-mastodon' ); ?></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'Logging', 'share-on-mastodon' ); ?></span></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[debug_logging]" value="1" <?php checked( ! empty( $this->options['debug_logging'] ) ); ?> /> <?php esc_html_e( 'Enable debug logging', 'share-on-mastodon' ); ?></label>
 							<?php /* translators: %s: link to the official WordPress documentation */ ?>
 							<p class="description"><?php printf( esc_html__( 'You&rsquo;ll also need to set WordPress&rsquo; %s.', 'share-on-mastodon' ), sprintf( '<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>', 'https://wordpress.org/documentation/article/debugging-in-wordpress/#example-wp-config-php-for-debugging', esc_html__( 'debug logging constants', 'share-on-mastodon' ) ) ); ?></p></td>

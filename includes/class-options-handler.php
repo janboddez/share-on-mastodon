@@ -496,7 +496,7 @@ class Options_Handler {
 	 *
 	 * @return array Default options.
 	 */
-	protected static function get_default_options() {
+	public static function get_default_options() {
 		return array_combine( array_keys( static::SCHEMA ), array_column( static::SCHEMA, 'default' ) );
 	}
 
