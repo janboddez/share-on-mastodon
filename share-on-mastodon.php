@@ -10,6 +10,7 @@
  * Text Domain:       share-on-mastodon
  * Version:           0.18.0
  * Requires at least: 5.9
+ * Requires PHP:      7.2
  *
  * @author  Jan Boddez <jan@janboddez.be>
  * @license http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
