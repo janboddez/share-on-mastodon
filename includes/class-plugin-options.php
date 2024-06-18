@@ -325,7 +325,9 @@ class Plugin_Options extends Options_Handler {
 												admin_url( 'options-general.php' )
 											)
 										), // Redirect here after authorization.
-										'scope'         => 'write:media write:statuses read:accounts read:statuses',
+										'scope'         => ! empty( $this->options['mastodon_app_id'] )
+											? 'write:media write:statuses read' // "New" scopes.
+											: 'write:media write:statuses read:accounts read:statuses', // For "legacy" apps.
 									)
 								);
 								?>

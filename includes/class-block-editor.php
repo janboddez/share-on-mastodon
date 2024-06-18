@@ -1,14 +1,9 @@
 <?php
-/**
- * All things Gutenberg.
- *
- * @package Share_On_Mastodon
- */
 
 namespace Share_On_Mastodon;
 
 /**
- * Block editor goodness.
+ * All things Gutenberg.
  */
 class Block_Editor {
 	/**
@@ -65,7 +60,7 @@ class Block_Editor {
 	}
 
 	/**
-	 * Registers (block-related) REST API endpoints.
+	 * Registers block-related REST API endpoints.
 	 *
 	 * @since 0.17.0
 	 */
@@ -145,18 +140,20 @@ class Block_Editor {
 		$post_types = (array) $options['post_types'];
 
 		foreach ( $post_types as $post_type ) {
-			// Expose Share on Mastodon's custom fields to the REST API.
+			// Expose Share on Mastodon's custom fields to the REST API. Will
+			// appear as a separate `share_on_mastodon` property.
 			register_rest_field(
 				$post_type,
 				'share_on_mastodon',
 				array(
 					'get_callback'    => array( __CLASS__, 'get_meta' ),
-					'update_callback' => null,
+					'update_callback' => null, // These are updated solely in the background.
 				)
 			);
 
 			if ( use_block_editor_for_post_type( $post_type ) && empty( $options['meta_box'] ) ) {
-				// Allow these fields to be *set* by the block editor.
+				// Allow these fields to be *set* by the block editor. These
+				// will appear as properties of the post's `meta` property.
 				register_post_meta(
 					$post_type,
 					'_share_on_mastodon',

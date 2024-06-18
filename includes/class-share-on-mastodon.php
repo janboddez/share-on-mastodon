@@ -12,6 +12,7 @@ namespace Share_On_Mastodon;
  */
 class Share_On_Mastodon {
 	const PLUGIN_VERSION = '0.18.0';
+	const DB_VERSION     = '1';
 
 	/**
 	 * This plugin's single instance.
@@ -86,7 +87,7 @@ class Share_On_Mastodon {
 		register_deactivation_hook( dirname( __DIR__ ) . '/share-on-mastodon.php', array( $this, 'deactivate' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-		add_action( 'init', array( $this, 'register_cron' ) );
+		add_action( 'init', array( $this, 'init' ) );
 
 		$options = get_options();
 
@@ -102,14 +103,19 @@ class Share_On_Mastodon {
 	}
 
 	/**
-	 * Ensures cron job is scheduled.
+	 * Ensures cron job is scheduled, and, if needed, kicks off database
+	 * migrations.
 	 *
-	 * @since 0.13.0
+	 * @since 0.19.0
 	 */
-	public function register_cron() {
+	public function init() {
 		// Schedule a daily cron job.
 		if ( false === wp_next_scheduled( 'share_on_mastodon_verify_token' ) ) {
 			wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'share_on_mastodon_verify_token' );
+		}
+
+		if ( get_option( 'share_on_mastodon_db_version' ) !== self::DB_VERSION ) {
+			$this->migrate();
 		}
 	}
 
@@ -151,5 +157,24 @@ class Share_On_Mastodon {
 	 */
 	public function get_plugin_options() {
 		return $this->plugin_options;
+	}
+
+	/**
+	 * Performs the necessary database migrations, if applicable.
+	 *
+	 * @since 0.19.0
+	 */
+	protected function migrate() {
+		if ( ! function_exists( '\\dbDelta' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		}
+
+		ob_start();
+		include __DIR__ . '/database/schema.php';
+		$sql = ob_get_clean();
+
+		dbDelta( $sql );
+
+		update_option( 'share_on_mastodon_db_version', self::DB_VERSION, 'no' );
 	}
 }

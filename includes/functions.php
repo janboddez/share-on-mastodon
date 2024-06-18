@@ -24,7 +24,7 @@ function debug_log( $item ) {
 }
 
 /**
- * Returns this plugin's options.
+ * Returns the current plugin options.
  *
  * Roughly equal to `get_option( 'share_on_mastodon_settings' )`.
  *

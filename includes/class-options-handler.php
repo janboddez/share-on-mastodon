@@ -1,18 +1,16 @@
 <?php
 /**
- * Handles WP Admin settings pages and the like.
+ * Almost like a wrapper for API client functions. The `Plugin_Options` and
+ * `User_Options` classes inherit from this (parent) class.
  *
  * @package Share_On_Mastodon
  */
 
 namespace Share_On_Mastodon;
 
-/**
- * Options handler class.
- */
 class Options_Handler {
 	/**
-	 * Plugin option schema.
+	 * All possible plugin options and their defaults.
 	 */
 	const SCHEMA = array(
 		'mastodon_host'          => array(
@@ -92,16 +90,14 @@ class Options_Handler {
 			'type'    => 'boolean',
 			'default' => false,
 		),
-		'mastodon_client_token'  => array(
-			'type'    => 'string',
-			'default' => '',
+		'mastodon_app_id'        => array(
+			'type'    => 'integer',
+			'default' => 0,
 		),
 	);
 
 	/**
 	 * Plugin or user options.
-	 *
-	 * @since 0.1.0
 	 *
 	 * @var array $options Plugin or user options.
 	 */
@@ -109,11 +105,43 @@ class Options_Handler {
 
 	/**
 	 * Registers a new Mastodon app (client).
-	 *
-	 * @since 0.1.0
 	 */
 	protected function register_app() {
-		// @link https://github.com/mastodon/mastodon/pull/29192
+		// As of v0.19.0, we keep track of known instances, and reuse client IDs
+		// and secrets, rather then register as a "new" client for each and
+		// every user. Caveat: To ensure "old" registrations' validity, we use
+		// an "app token." *Should* an app token ever get revoked, we'll have to
+		// re-register after all.
+		$apps = Mastodon_Client::find( array( 'host' => $this->options['mastodon_host'] ) );
+
+		if ( ! empty( $apps ) ) {
+			foreach ( $apps as $app ) {
+				if ( empty( $app->client_id ) || empty( $app->client_secret ) ) {
+					// Don't bother.
+					continue;
+				}
+
+				// @todo: Aren't we being overly cautious here? Does Mastodon "scrap" old registrations?
+				if ( $this->verify_client_token( $app ) || $this->request_client_token( $app->id ) ) {
+					debug_log( "[Share On Mastodon] Found an existing app (ID: {$app->id}) for host {$this->options['mastodon_host']}." );
+
+					// @todo: Should we store *only* a reference to the clients table?
+					$this->options['mastodon_app_id']        = $app->id;
+					$this->options['mastodon_client_id']     = $app->client_id;
+					$this->options['mastodon_client_secret'] = $app->client_secret;
+
+					$this->save();
+
+					// All done!
+					return;
+				}
+			}
+		}
+
+		debug_log( "[Share On Mastodon] Registering a new app for host {$this->options['mastodon_host']}." );
+
+		// It's possible to register multiple redirect URIs. Which one we'll use depends on the plugin settings and,
+		// possibly, user role.
 		$redirect_urls = array(
 			add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) ),
 			add_query_arg( array( 'page' => 'share-on-mastodon-profile' ), admin_url( 'users.php' ) ),
@@ -125,8 +153,8 @@ class Options_Handler {
 			array(
 				'body'                => array(
 					'client_name'   => apply_filters( 'share_on_mastodon_client_name', __( 'Share on Mastodon', 'share-on-mastodon' ) ),
-					'scopes'        => 'write:media write:statuses read:accounts read:statuses read',
-					'redirect_uris' => implode( ' ', array_map( 'esc_url_raw', $redirect_urls ) ),
+					'scopes'        => 'read write:media write:statuses',
+					'redirect_uris' => implode( ' ', $redirect_urls ),
 					'website'       => home_url(),
 				),
 				'timeout'             => 15,
@@ -142,41 +170,42 @@ class Options_Handler {
 		$app = json_decode( $response['body'] );
 
 		if ( isset( $app->client_id ) && isset( $app->client_secret ) ) {
-			// After successfully registering our app, store its keys.
+			// After successfully registering our app, store its details.
+			$app_id = Mastodon_Client::insert(
+				array_filter(
+					array(
+						'host'          => $this->options['mastodon_host'],
+						'client_name'   => apply_filters( 'share_on_mastodon_client_name', __( 'Share on Mastodon', 'share-on-mastodon' ) ),
+						'website'       => home_url(),
+						'scopes'        => 'read write:media write:statuses',
+						'redirect_uris' => implode( ' ', $redirect_urls ),
+						'client_id'     => $app->client_id,
+						'client_secret' => $app->client_secret,
+						'vapid_key'     => isset( $app->vapid_key ) ? $app->vapid_key : null,
+					)
+				)
+			);
+
+			// Store in either plugin or user options, too.
+			$this->options['mastodon_app_id']        = $app->id;
 			$this->options['mastodon_client_id']     = $app->client_id;
 			$this->options['mastodon_client_secret'] = $app->client_secret;
 
 			// Update in database.
 			$this->save();
 
-			// Fetch client token.
-			$this->request_client_token();
-		} else {
-			debug_log( $response );
+			// Fetch client token. This we'll only use in case someone were to use this same instance in the future.
+			$this->request_client_token( $app_id );
+
+			return;
 		}
+
+		debug_log( $response );
 	}
 
-	/**
-	 * Requests a new app token.
-	 *
-	 * @since 0.19.0
-	 */
-	protected function request_client_token() {
-		// Doesn't really matter what redirect URI we use here.
-		if ( 'Plugin_Options' === $this->get_class_name() ) {
-			$redirect_url = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
-		} else {
-			$redirect_url = add_query_arg(
-				array(
-					'page' => 'share-on-mastodon-profile',
-				),
-				current_user_can( 'list_users' )
-					? admin_url( 'users.php' )
-					: admin_url( 'profile.php' )
-			);
-		}
+	protected function request_client_token( $app_id ) {
+		debug_log( "[Share On Mastodon] Requesting app (ID: {$app_id}) token (for host {$this->options['mastodon_host']})." );
 
-		// Request an access token.
 		$response = wp_safe_remote_post(
 			esc_url_raw( $this->options['mastodon_host'] . '/oauth/token' ),
 			array(
@@ -184,7 +213,7 @@ class Options_Handler {
 					'client_id'     => $this->options['mastodon_client_id'],
 					'client_secret' => $this->options['mastodon_client_secret'],
 					'grant_type'    => 'client_credentials',
-					'redirect_uri'  => esc_url_raw( $redirect_url ),
+					'redirect_uri'  => 'urn:ietf:wg:oauth:2.0:oob', // This seems to work. I.e., one doesn't *have* to use a redirect URI for requesting app tokens.
 				),
 				'timeout'             => 15,
 				'limit_response_size' => 1048576,
@@ -199,16 +228,63 @@ class Options_Handler {
 		$token = json_decode( $response['body'] );
 
 		if ( isset( $token->access_token ) ) {
-			// Success. Store access token.
-			$this->options['mastodon_client_token'] = $token->access_token;
-
-			// Update in database.
-			$this->save();
+			// Note: It surely looks like only one app token is given out, ever. Failing to save it here won't lead to
+			// an unusable app; it'll only lead to a new registration for the next user that enters this instance, which
+			// in itself does not invalidate other registrations, so we should be okay here.
+			Mastodon_Client::update(
+				array( 'client_token' => $token->access_token ),
+				array( 'id' => $app_id )
+			);
 
 			return true;
-		} else {
-			debug_log( $response );
 		}
+
+		debug_log( $response );
+
+		return false;
+	}
+
+	public function verify_client_token( $app ) {
+		debug_log( "[Share On Mastodon] Verifying app (ID: {$app->id}) token (for host {$this->options['mastodon_host']})." );
+
+		if ( empty( $app->host ) ) {
+			return false;
+		}
+
+		if ( empty( $app->client_token ) ) {
+			return false;
+		}
+
+		// Verify the current client token.
+		$response = wp_safe_remote_get(
+			esc_url_raw( $app->host . '/api/v1/apps/verify_credentials' ),
+			array(
+				'headers'             => array(
+					'Authorization' => 'Bearer ' . $app->client_token,
+				),
+				'timeout'             => 15,
+				'limit_response_size' => 1048576,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			debug_log( $response );
+			return false;
+		}
+
+		if ( in_array( wp_remote_retrieve_response_code( $response ), array( 401, 403 ), true ) ) {
+			// The current client token has somehow become invalid.
+			return false;
+		}
+
+		$client = json_decode( $response['body'] );
+
+		if ( isset( $client->name ) ) {
+			return true;
+		}
+
+		// Something went wrong.
+		debug_log( $response );
 
 		return false;
 	}
@@ -222,8 +298,10 @@ class Options_Handler {
 	 */
 	protected function request_user_token( $code ) {
 		if ( 'Plugin_Options' === $this->get_class_name() ) {
+			// Site-wide crossposting.
 			$redirect_url = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
 		} else {
+			// Per-user crossposting.
 			$redirect_url = add_query_arg(
 				array(
 					'page' => 'share-on-mastodon-profile',
@@ -236,7 +314,7 @@ class Options_Handler {
 
 		// Request an access token.
 		$response = wp_safe_remote_post(
-			esc_url_raw( $this->options['mastodon_host'] ) . '/oauth/token',
+			esc_url_raw( $this->options['mastodon_host'] . '/oauth/token' ),
 			array(
 				'body'                => array(
 					'client_id'     => $this->options['mastodon_client_id'],
@@ -272,15 +350,15 @@ class Options_Handler {
 			}
 
 			return true;
-		} else {
-			debug_log( $response );
 		}
+
+		debug_log( $response );
 
 		return false;
 	}
 
 	/**
-	 * Revokes WordPress's access to Mastodon.
+	 * Revokes WordPress's (or a single user's) access to Mastodon.
 	 *
 	 * @since 0.1.0
 	 *
@@ -305,7 +383,7 @@ class Options_Handler {
 
 		// Revoke access.
 		$response = wp_safe_remote_post(
-			esc_url_raw( $this->options['mastodon_host'] ) . '/oauth/revoke',
+			esc_url_raw( $this->options['mastodon_host'] . '/oauth/revoke' ),
 			array(
 				'body'                => array(
 					'client_id'     => $this->options['mastodon_client_id'],
@@ -332,11 +410,11 @@ class Options_Handler {
 		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 			// If we were actually successful.
 			return true;
-		} else {
-			debug_log( $response );
 		}
 
 		// Something went wrong.
+		debug_log( $response );
+
 		return false;
 	}
 
@@ -360,7 +438,7 @@ class Options_Handler {
 
 		// Verify the current access token.
 		$response = wp_safe_remote_get(
-			esc_url_raw( $this->options['mastodon_host'] ) . '/api/v1/accounts/verify_credentials',
+			esc_url_raw( $this->options['mastodon_host'] . '/api/v1/accounts/verify_credentials' ),
 			array(
 				'headers'             => array(
 					'Authorization' => 'Bearer ' . $this->options['mastodon_access_token'],
@@ -385,8 +463,7 @@ class Options_Handler {
 			return;
 		}
 
-		// Store username. Isn't actually used, yet, but may very well be in the
-		// near future.
+		// Store username. Isn't actually used, yet, but may very well be in the near future.
 		$account = json_decode( $response['body'] );
 
 		if ( isset( $account->username ) ) {

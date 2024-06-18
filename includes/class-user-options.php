@@ -35,9 +35,9 @@ class User_Options extends Options_Handler {
 			'type'    => 'string',
 			'default' => '',
 		),
-		'mastodon_client_token'  => array(
-			'type'    => 'string',
-			'default' => '',
+		'mastodon_app_id'        => array(
+			'type'    => 'integer',
+			'default' => 0,
 		),
 	);
 
@@ -157,7 +157,9 @@ class User_Options extends Options_Handler {
 								'client_id'     => $this->options['mastodon_client_id'],
 								'client_secret' => $this->options['mastodon_client_secret'],
 								'redirect_uri'  => esc_url_raw( $redirect_url ), // Redirect here after authorization.
-								'scope'         => 'write:media write:statuses read:accounts read:statuses',
+								'scope'         => ! empty( $this->options['mastodon_app_id'] )
+									? 'write:media write:statuses read' // "New" scopes.
+									: 'write:media write:statuses read:accounts read:statuses', // For "legacy" apps.
 							)
 						);
 						?>
