@@ -62,7 +62,7 @@ class User_Options extends Options_Handler {
 	 */
 	public function create_menu() {
 		// Can't put this in a constructor because `get_current_user_id()` would
-		// return `0` there.
+		// return `0` there. Well, because of how we instantiate things.
 		$options = get_user_meta( get_current_user_id(), 'share_on_mastodon_settings', true );
 
 		$this->options = array_merge(

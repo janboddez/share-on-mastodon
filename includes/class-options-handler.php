@@ -122,7 +122,7 @@ class Options_Handler {
 				}
 
 				// @todo: Aren't we being overly cautious here? Does Mastodon "scrap" old registrations?
-				if ( $this->verify_client_token( $app ) || $this->request_client_token( $app->id ) ) {
+				if ( $this->verify_client_token( $app ) || $this->request_client_token( $app ) ) {
 					debug_log( "[Share On Mastodon] Found an existing app (ID: {$app->id}) for host {$this->options['mastodon_host']}." );
 
 					// @todo: Should we store *only* a reference to the clients table?
@@ -195,7 +195,7 @@ class Options_Handler {
 			$this->save();
 
 			// Fetch client token. This we'll only use in case someone were to use this same instance in the future.
-			$this->request_client_token( $app_id );
+			$this->request_client_token( $app );
 
 			return;
 		}
@@ -203,15 +203,15 @@ class Options_Handler {
 		debug_log( $response );
 	}
 
-	protected function request_client_token( $app_id ) {
-		debug_log( "[Share On Mastodon] Requesting app (ID: {$app_id}) token (for host {$this->options['mastodon_host']})." );
+	protected function request_client_token( $app ) {
+		debug_log( "[Share On Mastodon] Requesting app (ID: {$app->id}) token (for host {$app->host})." );
 
 		$response = wp_safe_remote_post(
 			esc_url_raw( $this->options['mastodon_host'] . '/oauth/token' ),
 			array(
 				'body'                => array(
-					'client_id'     => $this->options['mastodon_client_id'],
-					'client_secret' => $this->options['mastodon_client_secret'],
+					'client_id'     => $app->client_id,
+					'client_secret' => $app->client_secret,
 					'grant_type'    => 'client_credentials',
 					'redirect_uri'  => 'urn:ietf:wg:oauth:2.0:oob', // This seems to work. I.e., one doesn't *have* to use a redirect URI for requesting app tokens.
 				),
@@ -233,7 +233,7 @@ class Options_Handler {
 			// in itself does not invalidate other registrations, so we should be okay here.
 			Mastodon_Client::update(
 				array( 'client_token' => $token->access_token ),
-				array( 'id' => $app_id )
+				array( 'id' => $app->id )
 			);
 
 			return true;
@@ -245,7 +245,7 @@ class Options_Handler {
 	}
 
 	public function verify_client_token( $app ) {
-		debug_log( "[Share On Mastodon] Verifying app (ID: {$app->id}) token (for host {$this->options['mastodon_host']})." );
+		debug_log( "[Share On Mastodon] Verifying app (ID: {$app->id}) token (for host {$app->host})." );
 
 		if ( empty( $app->host ) ) {
 			return false;
