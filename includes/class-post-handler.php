@@ -225,15 +225,7 @@ class Post_Handler {
 		$query_string = http_build_query( $args );
 
 		// Get the applicable (i.e., blog-wide or per-user) API settings.
-		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
-			// Note that we need to get the post author's instance details, and
-			// not those of the currently logged-in user.
-			$options = get_user_meta( $post->post_author, 'share_on_mastodon_settings', true );
-		} else {
-			$options = $this->options;
-		}
-
-		$options = apply_filter( 'share_on_mastodon_post_options', $options, $post );
+		$options = apply_filters( 'share_on_mastodon_post_options', $this->options, $post );
 
 		// And now, images.
 		$media = Image_Handler::get_images( $post );
@@ -667,27 +659,17 @@ class Post_Handler {
 	 * @return bool           Whether auth access was set up okay.
 	 */
 	protected function setup_completed( $post = null ) {
-		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
-			if ( empty( $post->post_author ) ) {
-				return false;
-			}
+		$options = apply_filters( 'share_on_mastodon_post_options', $this->options, $post );
 
-			$options = get_user_meta( $post->post_author, 'share_on_mastodon_settings', true );
-		} else {
-			$options = $this->options;
-		}
-
-		$options = apply_filter( 'share_on_mastodon_post_options', $options, $post );
-
-		if ( empty( $this->options['mastodon_host'] ) ) {
+		if ( empty( $options['mastodon_host'] ) ) {
 			return false;
 		}
 
-		if ( ! wp_http_validate_url( $this->options['mastodon_host'] ) ) {
+		if ( ! wp_http_validate_url( $options['mastodon_host'] ) ) {
 			return false;
 		}
 
-		if ( empty( $this->options['mastodon_access_token'] ) ) {
+		if ( empty( $options['mastodon_access_token'] ) ) {
 			return false;
 		}
 

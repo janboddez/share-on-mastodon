@@ -53,6 +53,8 @@ class User_Options extends Options_Handler {
 		add_action( 'admin_post_share_on_mastodon_reset_user_meta', array( $this, 'reset_user_meta' ) );
 		// @todo: Somehow regularly verify all users' tokens.
 		// add_action( 'share_on_mastodon_verify_token', array( $this, 'cron_verify_token' ) );
+
+		add_filter( 'share_on_mastodon_post_options', array( $this, 'post_options' ), 10, 2 );
 	}
 
 	/**
@@ -355,5 +357,29 @@ class User_Options extends Options_Handler {
 			)
 		);
 		exit;
+	}
+
+	/**
+	 * Filters post options.
+	 *
+	 * @since 0.19.0
+	 *
+	 * @param  array    $options Default options.
+	 * @param  \WP_Post $post    Post object.
+	 * @return array             Filtered options.
+	 */
+	public function post_options( $options, $post ) {
+		if ( ! empty( $post->post_author ) ) {
+			$user_options = get_user_meta( $post->post_author, 'share_on_mastodon_settings', true );
+
+			return array_merge(
+				$options,
+				is_array( $user_options )
+					? $user_options
+					: array()
+			);
+		}
+
+		return $options;
 	}
 }
