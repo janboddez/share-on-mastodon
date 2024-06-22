@@ -288,17 +288,10 @@ class Plugin_Options extends Options_Handler {
 							$url = $this->options['mastodon_host'] . '/oauth/authorize?' . http_build_query(
 								array(
 									'response_type' => 'code',
-									'client_id'     => $this->options['mastodon_client_id'], // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+									'client_id'     => $this->options['mastodon_client_id'],
 									'client_secret' => $this->options['mastodon_client_secret'],
-									'redirect_uri'  => esc_url_raw( // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-										add_query_arg(
-											array(
-												'page' => 'share-on-mastodon',
-											),
-											admin_url( 'options-general.php' )
-										)
-									), // Redirect here after authorization.
-									'scope'         => ! empty( $this->options['mastodon_app_id'] ) // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+									'redirect_uri'  => esc_url_raw( add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) ) ),
+									'scope'         => ! empty( $this->options['mastodon_app_id'] )
 										? 'write:media write:statuses read' // "New" scopes.
 										: 'write:media write:statuses read:accounts read:statuses', // For "legacy" apps.
 								)

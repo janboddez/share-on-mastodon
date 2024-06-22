@@ -140,12 +140,11 @@ abstract class Options_Handler {
 
 		debug_log( "[Share On Mastodon] Registering a new app for host {$this->options['mastodon_host']}." );
 
-		// It's possible to register multiple redirect URIs. Which one we'll use depends on the plugin settings and,
-		// possibly, user role.
+		// It's possible to register multiple redirect URIs.
 		$redirect_urls = array(
 			add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) ),
-			add_query_arg( array( 'page' => 'share-on-mastodon-profile' ), admin_url( 'users.php' ) ),
-			add_query_arg( array( 'page' => 'share-on-mastodon-profile' ), admin_url( 'profile.php' ) ),
+			add_query_arg( array( 'page' => 'share-on-mastodon-pro' ), admin_url( 'users.php' ) ),
+			add_query_arg( array( 'page' => 'share-on-mastodon-pro' ), admin_url( 'profile.php' ) ),
 		);
 
 		$response = wp_safe_remote_post(
@@ -297,20 +296,9 @@ abstract class Options_Handler {
 	 * @param string $code Authorization code.
 	 */
 	protected function request_user_token( $code ) {
-		if ( 'Plugin_Options' === $this->get_class_name() ) {
-			// Site-wide crossposting.
-			$redirect_url = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
-		} else {
-			// Per-user crossposting.
-			$redirect_url = add_query_arg(
-				array(
-					'page' => 'share-on-mastodon-profile',
-				),
-				current_user_can( 'list_users' )
-					? admin_url( 'users.php' )
-					: admin_url( 'profile.php' )
-			);
-		}
+		// Redirect here after authorization.
+		$redirect_uri = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
+		$redirect_uri = apply_filters( 'share_on_mastodon_redirect_uri', $redirect_uri );
 
 		// Request an access token.
 		$response = wp_safe_remote_post(
@@ -321,7 +309,7 @@ abstract class Options_Handler {
 					'client_secret' => $this->options['mastodon_client_secret'],
 					'grant_type'    => 'authorization_code',
 					'code'          => $code,
-					'redirect_uri'  => esc_url_raw( $redirect_url ),
+					'redirect_uri'  => esc_url_raw( $redirect_uri ),
 				),
 				'timeout'             => 15,
 				'limit_response_size' => 1048576,

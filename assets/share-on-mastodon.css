@@ -32,18 +32,11 @@
 	color: #cc1818;
 }
 
-.settings_page_share-on-mastodon label,
-.users_page_share-on-mastodon-profile label,
-.profile_page_share-on-mastodon-profile label,
-.settings_page_share-on-mastodon .label,
-.users_page_share-on-mastodon-profile .label,
-.profile_page_share-on-mastodon-profile .label {
+.settings_page_share-on-mastodon label {
 	vertical-align: baseline;
 }
 
-.settings_page_share-on-mastodon fieldset,
-.users_page_share-on-mastodon-profile fieldset,
-.profile_page_share-on-mastodon-profile fieldset {
+.settings_page_share-on-mastodon fieldset {
 	border: 1px solid #ccc;
 	box-sizing: border-box;
 	font-size: 14px;
@@ -52,9 +45,7 @@
 	padding: 1.25em;
 }
 
-.settings_page_share-on-mastodon .form-group,
-.users_page_share-on-mastodon-profile .form-group,
-.profile_page_share-on-mastodon-profile .form-group {
+.settings_page_share-on-mastodon .form-group {
 	align-items: center;
 	display: flex;
 	gap: 1.25em;
