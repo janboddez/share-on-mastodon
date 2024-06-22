@@ -225,7 +225,7 @@ class Post_Handler {
 		$query_string = http_build_query( $args );
 
 		// Get the applicable (i.e., blog-wide or per-user) API settings.
-		$options = apply_filters( 'share_on_mastodon_post_options', $this->options, $post );
+		$options = apply_filters( 'share_on_mastodon_options', $this->options, $post->post_author );
 
 		// And now, images.
 		$media = Image_Handler::get_images( $post );
@@ -659,7 +659,7 @@ class Post_Handler {
 	 * @return bool           Whether auth access was set up okay.
 	 */
 	protected function setup_completed( $post = null ) {
-		$options = apply_filters( 'share_on_mastodon_post_options', $this->options, $post );
+		$options = apply_filters( 'share_on_mastodon_options', $this->options, $post->author );
 
 		if ( empty( $options['mastodon_host'] ) ) {
 			return false;

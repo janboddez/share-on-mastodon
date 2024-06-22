@@ -8,7 +8,7 @@
 
 namespace Share_On_Mastodon;
 
-class Options_Handler {
+abstract class Options_Handler {
 	/**
 	 * All possible plugin options and their defaults.
 	 */

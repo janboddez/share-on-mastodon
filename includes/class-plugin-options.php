@@ -546,9 +546,10 @@ class Plugin_Options extends Options_Handler {
 
 				<?php
 				if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) :
+					$options = apply_filters( 'share_on_mastodon_options', $this->options, get_current_user_id() );
 					?>
 					<p style="margin-top: 2em;"><?php esc_html_e( 'Below information is not meant to be shared with anyone but may help when troubleshooting issues.', 'share-on-mastodon' ); ?></p>
-					<p><textarea class="widefat" rows="5" style="max-width: 67%;"><?php var_export( $this->options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export ?>
+					<p><textarea class="widefat" rows="5" style="max-width: 67%;"><?php var_export( $options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export ?>
 					<?php
 				endif;
 			endif;
