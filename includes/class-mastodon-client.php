@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package Share_On_Mastodon
+ */
 
 namespace Share_On_Mastodon;
 

@@ -1,13 +1,13 @@
 <?php
 /**
- * Almost like a wrapper for API client functions. The `Plugin_Options` and
- * `User_Options` classes inherit from this (parent) class.
- *
  * @package Share_On_Mastodon
  */
 
 namespace Share_On_Mastodon;
 
+/**
+ * Like a wrapper for Mastodon's API. The `Plugin_Options` inherits from this class.
+ */
 abstract class Options_Handler {
 	/**
 	 * All possible plugin options and their defaults.
@@ -97,9 +97,9 @@ abstract class Options_Handler {
 	);
 
 	/**
-	 * Plugin or user options.
+	 * Current options.
 	 *
-	 * @var array $options Plugin or user options.
+	 * @var array $options Current options.
 	 */
 	protected $options = array();
 
