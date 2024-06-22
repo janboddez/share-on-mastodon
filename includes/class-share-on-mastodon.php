@@ -74,7 +74,7 @@ class Share_On_Mastodon {
 		$this->plugin_options = new Plugin_Options();
 		$this->plugin_options->register();
 
-		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
+		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT && class_exists( '\\Share_On_Mastodon\\User_Options' ) ) {
 			// Enable per-user client registration.
 			$this->user_options = new User_Options();
 			$this->user_options->register();
@@ -100,6 +100,8 @@ class Share_On_Mastodon {
 		}
 
 		Block_Editor::register();
+
+		// do_action_ref_array( 'share_on_mastodon_register', array( &$this ) );
 	}
 
 	/**

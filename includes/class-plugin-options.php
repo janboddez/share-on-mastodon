@@ -82,21 +82,6 @@ class Plugin_Options extends Options_Handler {
 	 * @return array           Options to be stored.
 	 */
 	public function sanitize_setup_settings( $settings ) {
-		$this->options['post_types'] = array();
-
-		if ( isset( $settings['post_types'] ) && is_array( $settings['post_types'] ) ) {
-			// Post types considered valid.
-			$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
-			$supported_post_types = array_diff( $supported_post_types, array( 'attachment' ) );
-
-			foreach ( $settings['post_types'] as $post_type ) {
-				if ( in_array( $post_type, $supported_post_types, true ) ) {
-					// Valid post type. Add to array.
-					$this->options['post_types'][] = $post_type;
-				}
-			}
-		}
-
 		if ( isset( $settings['mastodon_host'] ) ) {
 			// Clean up and sanitize the user-submitted URL.
 			$mastodon_host = $this->clean_url( $settings['mastodon_host'] );
@@ -126,6 +111,34 @@ class Plugin_Options extends Options_Handler {
 					'invalid-url',
 					esc_html__( 'Please provide a valid URL.', 'share-on-mastodon' )
 				);
+			}
+		}
+
+		// Updated settings.
+		return $this->options;
+	}
+
+	/**
+	 * Handles submitted "post type" options.
+	 *
+	 * @since 0.11.0
+	 *
+	 * @param  array $settings Settings as submitted through WP Admin.
+	 * @return array           Options to be stored.
+	 */
+	public function sanitize_post_types_settings( $settings ) {
+		$this->options['post_types'] = array();
+
+		if ( isset( $settings['post_types'] ) && is_array( $settings['post_types'] ) ) {
+			// Post types considered valid.
+			$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
+			$supported_post_types = array_diff( $supported_post_types, array( 'attachment' ) );
+
+			foreach ( $settings['post_types'] as $post_type ) {
+				if ( in_array( $post_type, $supported_post_types, true ) ) {
+					// Valid post type. Add to array.
+					$this->options['post_types'][] = $post_type;
+				}
 			}
 		}
 
@@ -216,72 +229,59 @@ class Plugin_Options extends Options_Handler {
 
 			<h2 class="nav-tab-wrapper">
 				<a href="<?php echo esc_url( $this->get_options_url( 'setup' ) ); ?>" class="nav-tab <?php echo esc_attr( 'setup' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Setup', 'share-on-mastodon' ); ?></a>
+				<a href="<?php echo esc_url( $this->get_options_url( 'post_types' ) ); ?>" class="nav-tab <?php echo esc_attr( 'post_types' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Post Types', 'share-on-mastodon' ); ?></a>
 				<a href="<?php echo esc_url( $this->get_options_url( 'images' ) ); ?>" class="nav-tab <?php echo esc_attr( 'images' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Images', 'share-on-mastodon' ); ?></a>
 				<a href="<?php echo esc_url( $this->get_options_url( 'advanced' ) ); ?>" class="nav-tab <?php echo esc_attr( 'advanced' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Advanced', 'share-on-mastodon' ); ?></a>
 				<a href="<?php echo esc_url( $this->get_options_url( 'debug' ) ); ?>" class="nav-tab <?php echo esc_attr( 'debug' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></a>
 			</h2>
 
 			<?php if ( 'setup' === $active_tab ) : ?>
-				<form method="post" action="options.php" novalidate="novalidate">
-					<?php
-					// Print nonces and such.
-					settings_fields( 'share-on-mastodon-settings-group' );
-					?>
-					<table class="form-table">
-						<?php if ( ! defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) || ! SHARE_ON_MASTODON_MULTI_ACCOUNT ) : ?>
+				<?php if ( ! defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) || ! SHARE_ON_MASTODON_MULTI_ACCOUNT || ! class_exists( '\\Share_On_Mastodon\\User_Options' ) ) : ?>
+					<form method="post" action="options.php" novalidate="novalidate">
+						<?php
+						// Print nonces and such.
+						settings_fields( 'share-on-mastodon-settings-group' );
+						?>
+						<table class="form-table">
 							<tr valign="top">
 								<th scope="row"><label for="share_on_mastodon_settings[mastodon_host]"><?php esc_html_e( 'Instance', 'share-on-mastodon' ); ?></label></th>
 								<td><input type="url" id="share_on_mastodon_settings[mastodon_host]" name="share_on_mastodon_settings[mastodon_host]" style="min-width: 33%;" value="<?php echo esc_attr( $this->options['mastodon_host'] ); ?>" />
 								<?php /* translators: %s: example URL. */ ?>
 								<p class="description"><?php printf( esc_html__( 'Your Mastodon instance&rsquo;s URL. E.g., %s.', 'share-on-mastodon' ), '<code>https://mastodon.online</code>' ); ?></p></td>
 							</tr>
-						<?php endif; ?>
+						</table>
+						<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+					</form>
 
+					<h3><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h3>
+				<?php endif; ?>
+
+				<?php if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT && class_exists( '\\Share_On_Mastodon\\User_Options' ) ) : ?>
+					<table class="form-table">
 						<tr valign="top">
-							<th scope="row"><span class="label"><?php esc_html_e( 'Supported Post Types', 'share-on-mastodon' ); ?></span></th>
-							<td><ul style="list-style: none; margin-top: 0;">
+							<td style="padding-inline-start: 0;"><p>
 								<?php
-								// Post types considered valid.
-								$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
-								$supported_post_types = array_diff( $supported_post_types, array( 'attachment' ) );
+								// Users with the `manage_options` capability (the only
+								// ones who get to see this page) will almost always be
+								// able to `list_users`, too, but let's add the check
+								// just in case.
+								if ( current_user_can( 'list_users' ) ) {
+									$link_name   = __( 'Users &gt; Share on Mastodon', 'share-on-mastodon' );
+									$profile_url = add_query_arg( array( 'page' => 'share-on-mastodon-profile' ), admin_url( 'users.php' ) );
+								} else {
+									$link_name   = __( 'Profile &gt; Share on Mastodon', 'share-on-mastodon' );
+									$profile_url = add_query_arg( array( 'page' => 'share-on-mastodon-profile' ), admin_url( 'profile.php' ) );
+								}
 
-								foreach ( $supported_post_types as $post_type ) :
-									$post_type = get_post_type_object( $post_type );
-									?>
-									<li><label><input type="checkbox" name="share_on_mastodon_settings[post_types][]" value="<?php echo esc_attr( $post_type->name ); ?>" <?php checked( in_array( $post_type->name, $this->options['post_types'], true ) ); ?> /> <?php echo esc_html( $post_type->labels->singular_name ); ?></label></li>
-									<?php
-								endforeach;
+								printf(
+									/* translators: 1: settings link, 2: link text */
+									esc_html__( 'Multi-account support detected. Add or edit your instance details at %s.', 'share-on-mastodon' ),
+									sprintf( '<a href="%1$s">%2$s</a>', esc_url( $profile_url ), esc_html( $link_name ) )
+								);
 								?>
-							</ul>
-							<p class="description"><?php esc_html_e( 'Post types for which sharing to Mastodon is possible. (Sharing can still be disabled on a per-post basis.)', 'share-on-mastodon' ); ?></p></td>
+							</p></td>
 						</tr>
 					</table>
-					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
-				</form>
-
-				<h3><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h3>
-				<?php if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) : ?>
-					<p>
-						<?php
-						// Users with the `manage_options` capability (the only
-						// ones who get to see this page) will almost always be
-						// able to `list_users`, too, but let's add the check
-						// just in case.
-						if ( current_user_can( 'list_users' ) ) {
-							$link_name   = __( 'Users &gt; Share on Mastodon', 'share-on-mastodon' );
-							$profile_url = add_query_arg( array( 'page' => 'share-on-mastodon-profile' ), admin_url( 'users.php' ) );
-						} else {
-							$link_name   = __( 'Profile &gt; Share on Mastodon', 'share-on-mastodon' );
-							$profile_url = add_query_arg( array( 'page' => 'share-on-mastodon-profile' ), admin_url( 'profile.php' ) );
-						}
-
-						printf(
-							/* translators: 1: settings link, 2: link text */
-							esc_html__( 'Multi-account support detected. Edit your instance details at %s.', 'share-on-mastodon' ),
-							sprintf( '<a href="%1$s">%2$s</a>', esc_url( $profile_url ), esc_html( $link_name ) )
-						);
-						?>
-					</p>
 				<?php else : ?>
 					<?php
 					if ( ! empty( $this->options['mastodon_host'] ) ) {
@@ -315,9 +315,9 @@ class Plugin_Options extends Options_Handler {
 								$url = $this->options['mastodon_host'] . '/oauth/authorize?' . http_build_query(
 									array(
 										'response_type' => 'code',
-										'client_id'     => $this->options['mastodon_client_id'],
+										'client_id'     => $this->options['mastodon_client_id'], // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 										'client_secret' => $this->options['mastodon_client_secret'],
-										'redirect_uri'  => esc_url_raw(
+										'redirect_uri'  => esc_url_raw( // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 											add_query_arg(
 												array(
 													'page' => 'share-on-mastodon',
@@ -325,7 +325,7 @@ class Plugin_Options extends Options_Handler {
 												admin_url( 'options-general.php' )
 											)
 										), // Redirect here after authorization.
-										'scope'         => ! empty( $this->options['mastodon_app_id'] )
+										'scope'         => ! empty( $this->options['mastodon_app_id'] ) // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 											? 'write:media write:statuses read' // "New" scopes.
 											: 'write:media write:statuses read:accounts read:statuses', // For "legacy" apps.
 									)
@@ -371,6 +371,38 @@ class Plugin_Options extends Options_Handler {
 						<?php
 					}
 				endif;
+			endif;
+
+			if ( 'post_types' === $active_tab ) :
+				?>
+				<form method="post" action="options.php">
+					<?php
+					// Print nonces and such.
+					settings_fields( 'share-on-mastodon-settings-group' );
+					?>
+					<table class="form-table">
+						<tr valign="top">
+							<th scope="row"><span class="label"><?php esc_html_e( 'Supported Post Types', 'share-on-mastodon' ); ?></span></th>
+							<td><ul style="list-style: none; margin-top: 0;">
+								<?php
+								// Post types considered valid.
+								$supported_post_types = (array) apply_filters( 'share_on_mastodon_post_types', get_post_types( array( 'public' => true ) ) );
+								$supported_post_types = array_diff( $supported_post_types, array( 'attachment' ) );
+
+								foreach ( $supported_post_types as $post_type ) :
+									$post_type = get_post_type_object( $post_type );
+									?>
+									<li><label><input type="checkbox" name="share_on_mastodon_settings[post_types][]" value="<?php echo esc_attr( $post_type->name ); ?>" <?php checked( in_array( $post_type->name, $this->options['post_types'], true ) ); ?> /> <?php echo esc_html( $post_type->labels->singular_name ); ?></label></li>
+									<?php
+								endforeach;
+								?>
+							</ul>
+							<p class="description"><?php esc_html_e( 'Post types for which sharing to Mastodon is possible. (Sharing can still be disabled on a per-post basis.)', 'share-on-mastodon' ); ?></p></td>
+						</tr>
+					</table>
+					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+				</form>
+				<?php
 			endif;
 
 			if ( 'images' === $active_tab ) :
@@ -595,6 +627,7 @@ class Plugin_Options extends Options_Handler {
 	 */
 	protected function get_active_tab() {
 		if ( ! empty( $_POST['submit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			// @todo: Add a "_wp_http_referer" form field rather than rely on an HTTP header?
 			$query_string = wp_parse_url( wp_get_referer(), PHP_URL_QUERY );
 
 			if ( empty( $query_string ) ) {
@@ -603,7 +636,7 @@ class Plugin_Options extends Options_Handler {
 
 			parse_str( $query_string, $query_vars );
 
-			if ( isset( $query_vars['tab'] ) && in_array( $query_vars['tab'], array( 'images', 'advanced', 'debug' ), true ) ) {
+			if ( isset( $query_vars['tab'] ) && in_array( $query_vars['tab'], array( 'setup', 'post_types', 'images', 'advanced', 'debug' ), true ) ) {
 				return $query_vars['tab'];
 			}
 
@@ -611,7 +644,7 @@ class Plugin_Options extends Options_Handler {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['tab'] ) && in_array( $_GET['tab'], array( 'images', 'advanced', 'debug' ), true ) ) {
+		if ( isset( $_GET['tab'] ) && in_array( $_GET['tab'], array( 'setup', 'post_types', 'images', 'advanced', 'debug' ), true ) ) {
 			return $_GET['tab']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 

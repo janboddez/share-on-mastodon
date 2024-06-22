@@ -24,8 +24,6 @@ class Post_Handler {
 	 * Constructor.
 	 *
 	 * @since 0.1.
-	 *
-	 * @param array $options Plugin options.
 	 */
 	public function __construct() {
 		// Allows us to just use `$this->options` rather than have to define
@@ -139,7 +137,7 @@ class Post_Handler {
 			return;
 		}
 
-		if ( ! $this->setup_completed( $post->post_author ) ) {
+		if ( ! $this->setup_completed( $post ) ) {
 			return;
 		}
 
@@ -174,7 +172,7 @@ class Post_Handler {
 	public function post_to_mastodon( $post ) {
 		$post = get_post( $post );
 
-		if ( ! $this->setup_completed( $post->post_author ) ) {
+		if ( ! $this->setup_completed( $post ) ) {
 			return;
 		}
 
@@ -234,6 +232,8 @@ class Post_Handler {
 		} else {
 			$options = $this->options;
 		}
+
+		$options = apply_filter( 'share_on_mastodon_post_options', $options, $post );
 
 		// And now, images.
 		$media = Image_Handler::get_images( $post );
@@ -663,31 +663,21 @@ class Post_Handler {
 	 *
 	 * @since 0.17.1
 	 *
-	 * @param  int $post_author ID of the current post's author.
-	 * @return bool             Whether auth access was set up okay.
+	 * @param  \WP_Post $post Post object.
+	 * @return bool           Whether auth access was set up okay.
 	 */
-	protected function setup_completed( $post_author = 0 ) {
+	protected function setup_completed( $post = null ) {
 		if ( defined( 'SHARE_ON_MASTODON_MULTI_ACCOUNT' ) && SHARE_ON_MASTODON_MULTI_ACCOUNT ) {
-			if ( empty( $post_author ) ) {
+			if ( empty( $post->post_author ) ) {
 				return false;
 			}
 
-			$user_options = get_user_meta( $post_author, 'share_on_mastodon_settings', true );
-
-			if ( empty( $user_options['mastodon_host'] ) ) {
-				return false;
-			}
-
-			if ( ! wp_http_validate_url( $user_options['mastodon_host'] ) ) {
-				return false;
-			}
-
-			if ( empty( $user_options['mastodon_access_token'] ) ) {
-				return false;
-			}
-
-			return true;
+			$options = get_user_meta( $post->post_author, 'share_on_mastodon_settings', true );
+		} else {
+			$options = $this->options;
 		}
+
+		$options = apply_filter( 'share_on_mastodon_post_options', $options, $post );
 
 		if ( empty( $this->options['mastodon_host'] ) ) {
 			return false;

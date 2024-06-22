@@ -112,101 +112,109 @@ class User_Options extends Options_Handler {
 				<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
 			</form>
 
-			<h2><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h2>
-			<?php
-			if ( ! empty( $this->options['mastodon_host'] ) ) {
-				// A valid instance URL was set.
-				if ( empty( $this->options['mastodon_client_id'] ) || empty( $this->options['mastodon_client_secret'] ) ) {
-					// No app is currently registered. Let's try to fix that!
-					$this->register_app();
-				}
+			<table class="form-table">
+				<tr valign="top">
+					<td style="padding-inline-start: 0;">
+						<h2><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h2>
+						<?php
+						if ( ! empty( $this->options['mastodon_host'] ) ) {
+							// A valid instance URL was set.
+							if ( empty( $this->options['mastodon_client_id'] ) || empty( $this->options['mastodon_client_secret'] ) ) {
+								// No app is currently registered. Let's try to fix that!
+								$this->register_app();
+							}
 
-				if ( ! empty( $this->options['mastodon_client_id'] ) && ! empty( $this->options['mastodon_client_secret'] ) ) {
-					// An app was successfully registered.
-					if ( ! empty( $_GET['code'] ) && '' === $this->options['mastodon_access_token'] ) {
-						// Access token request.
-						if ( $this->request_user_token( wp_unslash( $_GET['code'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+							if ( ! empty( $this->options['mastodon_client_id'] ) && ! empty( $this->options['mastodon_client_secret'] ) ) {
+								// An app was successfully registered.
+								if ( ! empty( $_GET['code'] ) && '' === $this->options['mastodon_access_token'] ) {
+									// Access token request.
+									if ( $this->request_user_token( wp_unslash( $_GET['code'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+										?>
+										<div class="notice notice-success is-dismissible">
+											<p><?php esc_html_e( 'Access granted!', 'share-on-mastodon' ); ?></p>
+										</div>
+										<?php
+									}
+								}
+
+								if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'share-on-mastodon:token:revoke' ) ) {
+									// Revoke access. Forget access token regardless of the
+									// outcome.
+									$this->revoke_access();
+								}
+
+								if ( empty( $this->options['mastodon_access_token'] ) ) {
+									$redirect_url = add_query_arg(
+										array(
+											'page' => 'share-on-mastodon-profile',
+										),
+										current_user_can( 'list_users' )
+											? admin_url( 'users.php' )
+											: admin_url( 'profile.php' )
+									);
+
+									// No access token exists. Echo authorization link.
+									$url = $this->options['mastodon_host'] . '/oauth/authorize?' . http_build_query(
+										array(
+											'response_type' => 'code',
+											'client_id'     => $this->options['mastodon_client_id'], // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+											'client_secret' => $this->options['mastodon_client_secret'],
+											'redirect_uri'  => esc_url_raw( $redirect_url ), // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+											'scope'         => ! empty( $this->options['mastodon_app_id'] ) // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+												? 'write:media write:statuses read' // "New" scopes.
+												: 'write:media write:statuses read:accounts read:statuses', // For "legacy" apps.
+										)
+									);
+									?>
+									<p><?php esc_html_e( 'Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication.', 'share-on-mastodon' ); ?></p>
+									<p class="submit"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
+									<?php
+								} else {
+									// An access token exists.
+									?>
+									<p><?php esc_html_e( 'You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline.', 'share-on-mastodon' ); ?></p>
+									<p class="submit">
+										<?php
+										printf(
+											'<a href="%1$s" class="button">%2$s</a>',
+											esc_url(
+												add_query_arg(
+													array(
+														'page'     => 'share-on-mastodon-profile',
+														'action'   => 'revoke', // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow
+														'_wpnonce' => wp_create_nonce( 'share-on-mastodon:token:revoke' ),
+													),
+													esc_url_raw(
+														current_user_can( 'list_users' )
+															? admin_url( 'users.php' )
+															: admin_url( 'profile.php' )
+													)
+												)
+											),
+											esc_html__( 'Revoke Access', 'share-on-mastodon' )
+										);
+										?>
+									</p>
+									<?php
+								}
+							} else {
+								// Still couldn't register our app.
+								?>
+								<p><?php esc_html_e( 'Something went wrong contacting your Mastodon instance. Please reload this page to try again.', 'share-on-mastodon' ); ?></p>
+								<?php
+							}
+						} else {
+							// We can't do much without an instance URL.
 							?>
-							<div class="notice notice-success is-dismissible">
-								<p><?php esc_html_e( 'Access granted!', 'share-on-mastodon' ); ?></p>
-							</div>
+							<p><?php esc_html_e( 'Please fill out and save your Mastodon instance&rsquo;s URL first.', 'share-on-mastodon' ); ?></p>
 							<?php
 						}
-					}
-
-					if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'share-on-mastodon:token:revoke' ) ) {
-						// Revoke access. Forget access token regardless of the
-						// outcome.
-						$this->revoke_access();
-					}
-
-					if ( empty( $this->options['mastodon_access_token'] ) ) {
-						$redirect_url = add_query_arg(
-							array(
-								'page' => 'share-on-mastodon-profile',
-							),
-							current_user_can( 'list_users' )
-								? admin_url( 'users.php' )
-								: admin_url( 'profile.php' )
-						);
-
-						// No access token exists. Echo authorization link.
-						$url = $this->options['mastodon_host'] . '/oauth/authorize?' . http_build_query(
-							array(
-								'response_type' => 'code',
-								'client_id'     => $this->options['mastodon_client_id'],
-								'client_secret' => $this->options['mastodon_client_secret'],
-								'redirect_uri'  => esc_url_raw( $redirect_url ), // Redirect here after authorization.
-								'scope'         => ! empty( $this->options['mastodon_app_id'] )
-									? 'write:media write:statuses read' // "New" scopes.
-									: 'write:media write:statuses read:accounts read:statuses', // For "legacy" apps.
-							)
-						);
 						?>
-						<p><?php esc_html_e( 'Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication.', 'share-on-mastodon' ); ?></p>
-						<p class="submit"><?php printf( '<a href="%1$s" class="button">%2$s</a>', esc_url( $url ), esc_html__( 'Authorize Access', 'share-on-mastodon' ) ); ?>
-						<?php
-					} else {
-						// An access token exists.
-						?>
-						<p><?php esc_html_e( 'You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline.', 'share-on-mastodon' ); ?></p>
-						<p class="submit">
-							<?php
-							printf(
-								'<a href="%1$s" class="button">%2$s</a>',
-								esc_url(
-									add_query_arg(
-										array(
-											'page'     => 'share-on-mastodon-profile',
-											'action'   => 'revoke', // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow
-											'_wpnonce' => wp_create_nonce( 'share-on-mastodon:token:revoke' ),
-										),
-										esc_url_raw(
-											current_user_can( 'list_users' )
-												? admin_url( 'users.php' )
-												: admin_url( 'profile.php' )
-										)
-									)
-								),
-								esc_html__( 'Revoke Access', 'share-on-mastodon' )
-							);
-							?>
-						</p>
-						<?php
-					}
-				} else {
-					// Still couldn't register our app.
-					?>
-					<p><?php esc_html_e( 'Something went wrong contacting your Mastodon instance. Please reload this page to try again.', 'share-on-mastodon' ); ?></p>
-					<?php
-				}
-			} else {
-				// We can't do much without an instance URL.
-				?>
-				<p><?php esc_html_e( 'Please fill out and save your Mastodon instance&rsquo;s URL first.', 'share-on-mastodon' ); ?></p>
-				<?php
-			}
+					</td>
+				</tr>
+			</table>
 
+			<?php
 			if ( ! empty( $this->options['mastodon_host'] ) ) :
 				?>
 				<fieldset>
@@ -233,7 +241,7 @@ class User_Options extends Options_Handler {
 				<?php
 			endif;
 			?>
-		</div>
+			</div>
 		<?php
 	}
 
