@@ -125,8 +125,7 @@ abstract class Options_Handler {
 				if ( $this->verify_client_token( $app ) || $this->request_client_token( $app ) ) {
 					debug_log( "[Share On Mastodon] Found an existing app (ID: {$app->id}) for host {$this->options['mastodon_host']}." );
 
-					// @todo: Should we store *only* a reference to the clients table?
-					$this->options['mastodon_app_id']        = $app->id;
+					$this->options['mastodon_app_id']        = (int) $app->id;
 					$this->options['mastodon_client_id']     = $app->client_id;
 					$this->options['mastodon_client_secret'] = $app->client_secret;
 
@@ -186,7 +185,7 @@ abstract class Options_Handler {
 			);
 
 			// Store in either plugin or user options, too.
-			$this->options['mastodon_app_id']        = $app->id;
+			$this->options['mastodon_app_id']        = (int) $app->id;
 			$this->options['mastodon_client_id']     = $app->client_id;
 			$this->options['mastodon_client_secret'] = $app->client_secret;
 
@@ -535,21 +534,14 @@ abstract class Options_Handler {
 	/**
 	 * Writes the current settings to the database.
 	 *
-	 * Depending on the caller, will save to `wp_options` or (under either the
-	 * specified user, or the one currently logged in) `wp_usermeta`.
+	 * Depending on the caller, will save to `wp_options` or, e.g., `wp_usermeta`.
 	 *
 	 * @since 0.19.0
 	 *
 	 * @param int $user_id (Optional) user ID.
 	 */
 	protected function save( $user_id = 0 ) {
-		if ( 'Plugin_Options' === $this->get_class_name() ) {
-			update_option( 'share_on_mastodon_settings', $this->options );
-		} elseif ( 0 !== $user_id ) {
-			update_user_meta( $user_id, 'share_on_mastodon_settings', $this->options );
-		} else {
-			update_user_meta( get_current_user_id(), 'share_on_mastodon_settings', $this->options );
-		}
+		update_option( 'share_on_mastodon_settings', $this->options );
 	}
 
 	/**
