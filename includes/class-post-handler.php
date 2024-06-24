@@ -659,7 +659,7 @@ class Post_Handler {
 	 * @return bool           Whether auth access was set up okay.
 	 */
 	protected function setup_completed( $post = null ) {
-		$options = apply_filters( 'share_on_mastodon_options', $this->options, $post->author );
+		$options = apply_filters( 'share_on_mastodon_options', $this->options, ! empty( $post->post_author ) ? $post->post_author : 0 );
 
 		if ( empty( $options['mastodon_host'] ) ) {
 			return false;
