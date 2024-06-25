@@ -13,8 +13,6 @@ namespace Share_On_Mastodon;
 class Plugin_Options extends Options_Handler {
 	/**
 	 * Constructor.
-	 *
-	 * @since 0.1.0
 	 */
 	public function __construct() {
 		$options = get_option( 'share_on_mastodon_settings' );
@@ -28,9 +26,7 @@ class Plugin_Options extends Options_Handler {
 	}
 
 	/**
-	 * Interacts with WordPress's Plugin API.
-	 *
-	 * @since 0.5.0
+	 * Registers hook callbacks.
 	 */
 	public function register() {
 		add_action( 'admin_menu', array( $this, 'create_menu' ) );
@@ -41,8 +37,6 @@ class Plugin_Options extends Options_Handler {
 
 	/**
 	 * Registers the plugin settings page.
-	 *
-	 * @since 0.1.0
 	 */
 	public function create_menu() {
 		add_options_page(
@@ -57,8 +51,6 @@ class Plugin_Options extends Options_Handler {
 
 	/**
 	 * Registers the actual options.
-	 *
-	 * @since 0.1.0
 	 */
 	public function add_settings() {
 		add_option( 'share_on_mastodon_settings', $this->options );
@@ -76,10 +68,8 @@ class Plugin_Options extends Options_Handler {
 	/**
 	 * Handles submitted "setup" options.
 	 *
-	 * @since 0.11.0
-	 *
-	 * @param  array $settings Settings as submitted through WP Admin.
-	 * @return array           Options to be stored.
+	 * @param  array $settings Submitted settings.
+	 * @return array           (Sanitized) options to be stored.
 	 */
 	public function sanitize_setup_settings( $settings ) {
 		if ( isset( $settings['mastodon_host'] ) ) {
@@ -121,10 +111,8 @@ class Plugin_Options extends Options_Handler {
 	/**
 	 * Handles submitted "post type" options.
 	 *
-	 * @since 0.11.0
-	 *
-	 * @param  array $settings Settings as submitted through WP Admin.
-	 * @return array           Options to be stored.
+	 * @param  array $settings Submitted settings.
+	 * @return array           (Sanitized) options to be stored.
 	 */
 	public function sanitize_post_types_settings( $settings ) {
 		$this->options['post_types'] = array();
@@ -149,10 +137,8 @@ class Plugin_Options extends Options_Handler {
 	/**
 	 * Handles submitted "images" options.
 	 *
-	 * @since 0.11.0
-	 *
-	 * @param  array $settings Settings as submitted through WP Admin.
-	 * @return array Options to be stored.
+	 * @param  array $settings Submitted settings.
+	 * @return array           (Sanitized) options to be stored.
 	 */
 	public function sanitize_images_settings( $settings ) {
 		$options = array(
@@ -171,10 +157,8 @@ class Plugin_Options extends Options_Handler {
 	/**
 	 * Handles submitted "advanced" options.
 	 *
-	 * @since 0.11.0
-	 *
-	 * @param  array $settings Settings as submitted through WP Admin.
-	 * @return array Options to be stored.
+	 * @param  array $settings Submitted settings.
+	 * @return array           (Sanitized) options to be stored.
 	 */
 	public function sanitize_advanced_settings( $settings ) {
 		$delay = isset( $settings['delay_sharing'] ) && ctype_digit( $settings['delay_sharing'] )
@@ -202,10 +186,8 @@ class Plugin_Options extends Options_Handler {
 	/**
 	 * Handles submitted "debugging" options.
 	 *
-	 * @since 0.12.0
-	 *
-	 * @param  array $settings Settings as submitted through WP Admin.
-	 * @return array Options to be stored.
+	 * @param  array $settings Submitted settings.
+	 * @return array           (Sanitized) options to be stored.
 	 */
 	public function sanitize_debug_settings( $settings ) {
 		$options = array(
@@ -218,8 +200,6 @@ class Plugin_Options extends Options_Handler {
 
 	/**
 	 * Echoes the plugin options form. Handles the OAuth flow, too, for now.
-	 *
-	 * @since 0.1.0
 	 */
 	public function settings_page() {
 		$active_tab = $this->get_active_tab();
@@ -527,9 +507,7 @@ class Plugin_Options extends Options_Handler {
 	}
 
 	/**
-	 * Loads (admin) scripts.
-	 *
-	 * @since 0.1.0
+	 * Loads (admin) scripts and styles.
 	 *
 	 * @param string $hook_suffix Current WP-Admin page.
 	 */
@@ -551,8 +529,6 @@ class Plugin_Options extends Options_Handler {
 
 	/**
 	 * Resets all plugin settings.
-	 *
-	 * @since 0.3.1
 	 */
 	public function reset_settings() {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -572,12 +548,10 @@ class Plugin_Options extends Options_Handler {
 	/**
 	 * Returns this plugin's options URL with a `tab` query parameter.
 	 *
-	 * @since 0.11.0
-	 *
 	 * @param  string $tab Target tab.
 	 * @return string      Options page URL.
 	 */
-	public function get_options_url( $tab = 'setup' ) {
+	protected function get_options_url( $tab = 'setup' ) {
 		return add_query_arg(
 			array(
 				'page' => 'share-on-mastodon',
@@ -589,8 +563,6 @@ class Plugin_Options extends Options_Handler {
 
 	/**
 	 * Returns the active tab.
-	 *
-	 * @since 0.11.0
 	 *
 	 * @return string Active tab.
 	 */
@@ -618,5 +590,64 @@ class Plugin_Options extends Options_Handler {
 		}
 
 		return 'setup';
+	}
+
+	/**
+	 * Requests a new user token.
+	 *
+	 * @param string $code Authorization code.
+	 */
+	protected function request_user_token( $code ) {
+		// Redirect here after authorization.
+		$redirect_uri = add_query_arg( array( 'page' => 'share-on-mastodon' ), admin_url( 'options-general.php' ) );
+
+		// Request an access token.
+		$response = wp_safe_remote_post(
+			esc_url_raw( $this->options['mastodon_host'] . '/oauth/token' ),
+			array(
+				'body'                => array(
+					'client_id'     => $this->options['mastodon_client_id'],
+					'client_secret' => $this->options['mastodon_client_secret'],
+					'grant_type'    => 'authorization_code',
+					'code'          => $code,
+					'redirect_uri'  => esc_url_raw( $redirect_uri ),
+				),
+				'timeout'             => 15,
+				'limit_response_size' => 1048576,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			debug_log( $response );
+			return false;
+		}
+
+		$token = json_decode( $response['body'] );
+
+		if ( isset( $token->access_token ) ) {
+			// Success. Store access token.
+			$this->options['mastodon_access_token'] = $token->access_token;
+
+			// Update in database.
+			$this->save();
+
+			// @todo: This function **might** delete our token, we should take that into account somehow.
+			$this->cron_verify_token(); // In order to get and store a username.
+
+			return true;
+		}
+
+		debug_log( $response );
+
+		return false;
+	}
+
+	/**
+	 * Writes the current settings to the database.
+	 *
+	 * @param int $user_id (Optional) user ID.
+	 */
+	protected function save( $user_id = 0 ) {
+		update_option( 'share_on_mastodon_settings', $this->options );
 	}
 }
