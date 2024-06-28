@@ -615,8 +615,8 @@ class Post_Handler {
 	 * @param  \WP_Post $post Post object.
 	 * @return bool           Whether auth access was set up okay.
 	 */
-	protected function setup_completed( $post = null ) {
-		$options = get_options( ! empty( $post ) ? $post->post_author : 0 );
+	protected function setup_completed( $post ) {
+		$options = get_options( $post->post_author );
 
 		if ( empty( $options['mastodon_host'] ) ) {
 			return false;
