@@ -128,7 +128,7 @@ class Image_Handler {
 	 *
 	 * @param  int    $image_id Attachment ID.
 	 * @param  string $alt      Alt text.
-	 * @param  array  $options  Mastodon API settings.
+	 * @param  array  $options  Mastodon (API) settings to use.
 	 * @return string|null      Unique media ID, or nothing on failure.
 	 */
 	public static function upload_image( $image_id, $alt, $options ) {
