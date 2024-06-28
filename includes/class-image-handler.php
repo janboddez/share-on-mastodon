@@ -85,8 +85,7 @@ class Image_Handler {
 	protected static function get_referenced_images( $post ) {
 		$images = array();
 
-		// Wrap post content in a dummy `div`, as there must (!) be a root-level
-		// element at all times.
+		// Wrap post content in a dummy `div`, as there must (!) be a root-level element at all times.
 		$html = '<div>' . mb_convert_encoding( $post->post_content, 'HTML-ENTITIES', get_bloginfo( 'charset' ) ) . '</div>';
 
 		libxml_use_internal_errors( true );
@@ -129,7 +128,7 @@ class Image_Handler {
 	 * @param  int    $image_id Attachment ID.
 	 * @param  string $alt      Alt text.
 	 * @param  array  $options  Mastodon (API) settings to use.
-	 * @return string|null      Unique media ID, or nothing on failure.
+	 * @return string|null      Unique media ID, or `null` on failure.
 	 */
 	public static function upload_image( $image_id, $alt, $options ) {
 		if ( wp_attachment_is_image( $image_id ) ) {
@@ -140,12 +139,11 @@ class Image_Handler {
 		$uploads = wp_upload_dir();
 
 		if ( ! empty( $image[0] ) && 0 === strpos( $image[0], $uploads['baseurl'] ) ) {
-			// Found a "large" thumbnail that lives on our own site (and not,
-			// e.g., a CDN).
+			// Found a "large" thumbnail that lives on our own site (and not, e.g., a CDN).
 			$url = $image[0];
 		} else {
-			// Get the original attachment URL. Note that Mastodon has an upload
-			// limit of 8 MB. Either way, this should return a _local_ URL.
+			// Get the original attachment URL. Note that Mastodon has an upload limit of 8 MB. Either way, this should
+			// return a *local* URL.
 			$url = wp_get_attachment_url( $image_id );
 		}
 
@@ -205,8 +203,7 @@ class Image_Handler {
 			return $media->id;
 		}
 
-		// Provided debugging's enabled, let's store the (somehow faulty)
-		// response.
+		// Provided debugging's enabled, let's store the (somehow faulty) response.
 		debug_log( $response );
 	}
 
