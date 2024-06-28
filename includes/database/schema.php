@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package Share_On_Mastodon
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

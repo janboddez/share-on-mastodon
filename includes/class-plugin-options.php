@@ -1,14 +1,12 @@
 <?php
 /**
- * Handles settings page.
- *
  * @package Share_On_Mastodon
  */
 
 namespace Share_On_Mastodon;
 
 /**
- * Options handler class.
+ * Handles settings page.
  */
 class Plugin_Options extends Options_Handler {
 	/**

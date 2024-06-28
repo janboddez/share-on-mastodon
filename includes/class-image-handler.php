@@ -1,20 +1,16 @@
 <?php
 /**
- * All things images.
- *
  * @package Share_On_Mastodon
  */
 
 namespace Share_On_Mastodon;
 
 /**
- * Image handler class.
+ * All things images.
  */
 class Image_Handler {
 	/**
 	 * Returns a post's associated images.
-	 *
-	 * @since 0.10.0
 	 *
 	 * @param  \WP_Post $post Post object.
 	 * @return array          Attachment array.
@@ -83,8 +79,6 @@ class Image_Handler {
 	/**
 	 * Attempts to find and return in-post images.
 	 *
-	 * @since 0.10.0
-	 *
 	 * @param  \WP_Post $post Post object.
 	 * @return array          Image array.
 	 */
@@ -131,8 +125,6 @@ class Image_Handler {
 
 	/**
 	 * Uploads an attachment and returns a (single) media ID.
-	 *
-	 * @since 0.10.0
 	 *
 	 * @param  int    $image_id Attachment ID.
 	 * @param  string $alt      Alt text.
@@ -223,8 +215,6 @@ class Image_Handler {
 	 *
 	 * Looks through `$images` first, and falls back on what's stored in the
 	 * `wp_postmeta` table.
-	 *
-	 * @since 0.10.0
 	 *
 	 * @param  array $image_ids         IDs of images we want to upload.
 	 * @param  array $referenced_images In-post images and their alt attributes, to look through first.

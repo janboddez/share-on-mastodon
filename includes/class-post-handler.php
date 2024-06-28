@@ -1,20 +1,16 @@
 <?php
 /**
- * Handles posting to Mastodon and the like.
- *
  * @package Share_On_Mastodon
  */
 
 namespace Share_On_Mastodon;
 
 /**
- * Post handler class.
+ * Handles post meta and the like, and posting to Mastodon.
  */
 class Post_Handler {
 	/**
 	 * Array that holds this plugin's settings.
-	 *
-	 * @since 0.1.0
 	 *
 	 * @var array $options Plugin options.
 	 */
@@ -33,8 +29,6 @@ class Post_Handler {
 
 	/**
 	 * Interacts with WordPress's Plugin API.
-	 *
-	 * @since 0.5.0
 	 */
 	public function register() {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
@@ -57,8 +51,6 @@ class Post_Handler {
 
 	/**
 	 * Handles metadata.
-	 *
-	 * @since 0.1.0
 	 *
 	 * @param int|\WP_Post $post Post ID or object.
 	 */
@@ -106,8 +98,6 @@ class Post_Handler {
 
 	/**
 	 * Schedules sharing to Mastodon.
-	 *
-	 * @since 0.1.0
 	 *
 	 * @param int|\WP_Post $post Post ID or object.
 	 */
@@ -164,8 +154,6 @@ class Post_Handler {
 	 *
 	 * Can be called directly or as a (scheduled) `share_on_mastodon_post`
 	 * callback.
-	 *
-	 * @since 0.7.0
 	 *
 	 * @param int|\WP_Post $post Post ID or object.
 	 */
@@ -297,8 +285,6 @@ class Post_Handler {
 
 	/**
 	 * Registers a new meta box.
-	 *
-	 * @since 0.1.0
 	 */
 	public function add_meta_box() {
 		if ( empty( $this->options['post_types'] ) ) {
@@ -329,8 +315,6 @@ class Post_Handler {
 
 	/**
 	 * Renders meta box.
-	 *
-	 * @since 0.1.0
 	 *
 	 * @param \WP_Post $post Post being edited.
 	 */
@@ -397,8 +381,6 @@ class Post_Handler {
 	 * Deletes a post's Mastodon URL.
 	 *
 	 * Should only ever be called through AJAX.
-	 *
-	 * @since 0.6.0
 	 */
 	public function unlink_url() {
 		if ( ! isset( $_POST['share_on_mastodon_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['share_on_mastodon_nonce'] ), basename( __FILE__ ) ) ) {
@@ -435,8 +417,6 @@ class Post_Handler {
 
 	/**
 	 * Adds admin scripts and styles.
-	 *
-	 * @since 0.6.0
 	 *
 	 * @param string $hook_suffix Current WP-Admin page.
 	 */
@@ -527,8 +507,6 @@ class Post_Handler {
 	/**
 	 * Determines whether a post is older than a certain number of seconds.
 	 *
-	 * @since 0.13.0
-	 *
 	 * @param  int      $seconds Minimum "age," in secondss.
 	 * @param  \WP_Post $post    Post object.
 	 * @return bool              True if the post exists and is older than `$seconds`, false otherwise.
@@ -549,8 +527,6 @@ class Post_Handler {
 
 	/**
 	 * Parses `%title%`, etc. template tags.
-	 *
-	 * @since 0.15.0
 	 *
 	 * @param  string $status  Mastodon status, or template.
 	 * @param  int    $post_id Post ID.
@@ -579,8 +555,6 @@ class Post_Handler {
 
 	/**
 	 * Returns a post's excerpt, but limited to approx. 125 characters.
-	 *
-	 * @since 0.15.0
 	 *
 	 * @param  int $post_id    Post ID.
 	 * @param  int $max_length Estimated maximum length.
@@ -623,8 +597,6 @@ class Post_Handler {
 	/**
 	 * Returns a post's tags as a string of space-separated hashtags.
 	 *
-	 * @since 0.15.0
-	 *
 	 * @param  int $post_id Post ID.
 	 * @return string       Hashtag string.
 	 */
@@ -652,8 +624,6 @@ class Post_Handler {
 
 	/**
 	 * Checks for a Mastodon instance and auth token.
-	 *
-	 * @since 0.17.1
 	 *
 	 * @param  \WP_Post $post Post object.
 	 * @return bool           Whether auth access was set up okay.

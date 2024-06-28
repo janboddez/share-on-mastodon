@@ -11,8 +11,6 @@ namespace Share_On_Mastodon;
 class Block_Editor {
 	/**
 	 * Registers hook callbacks.
-	 *
-	 * @since 0.17.0
 	 */
 	public static function register() {
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_scripts' ), 11 );
@@ -22,8 +20,6 @@ class Block_Editor {
 
 	/**
 	 * Enqueues block editor scripts.
-	 *
-	 * @since 0.17.0
 	 */
 	public static function enqueue_scripts() {
 		$options = get_options();
@@ -57,15 +53,13 @@ class Block_Editor {
 				'wp-url',
 				'share-on-mastodon',
 			),
-			\Share_On_Mastodon\Share_On_Mastodon::PLUGIN_VERSION,
+			Share_On_Mastodon::PLUGIN_VERSION,
 			false
 		);
 	}
 
 	/**
 	 * Registers block-related REST API endpoints.
-	 *
-	 * @since 0.17.0
 	 */
 	public static function register_api_endpoints() {
 		register_rest_route(
@@ -81,8 +75,6 @@ class Block_Editor {
 
 	/**
 	 * The one, for now, REST API permission callback.
-	 *
-	 * @since 0.17.0
 	 *
 	 * @param  \WP_REST_Request $request WP REST API request.
 	 * @return bool                      If the request's authorized.
@@ -100,10 +92,10 @@ class Block_Editor {
 	/**
 	 * Exposes Share on Mastodon's metadata to the REST API.
 	 *
-	 * @since 0.17.0
+	 * Can be called from either `register_rest_route()` or `register_rest_field()`.
 	 *
 	 * @param  \WP_REST_Request|array $request API request (parameters).
-	 * @return array|\WP_Error                 Response (or error).
+	 * @return array|\WP_Error                 Response, or error on failure.
 	 */
 	public static function get_meta( $request ) {
 		if ( is_array( $request ) ) {
@@ -130,8 +122,6 @@ class Block_Editor {
 
 	/**
 	 * Registers Share on Mastodon's custom fields for use with the REST API.
-	 *
-	 * @since 0.11.0
 	 */
 	public static function register_meta() {
 		$options = get_options();

@@ -88,6 +88,11 @@ class Mastodon_Client {
 		return $wpdb->query( $wpdb->prepare( $sql, $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 	}
 
+	/**
+	 * Returns (prefixed) table name.
+	 *
+	 * @return string Table name.
+	 */
 	public static function table() {
 		global $wpdb;
 

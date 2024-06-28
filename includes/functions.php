@@ -1,7 +1,5 @@
 <?php
 /**
- * Helper functions.
- *
  * @package Share_On_Mastodon
  */
 

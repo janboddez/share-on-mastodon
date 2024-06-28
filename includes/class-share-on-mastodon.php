@@ -15,16 +15,12 @@ class Share_On_Mastodon {
 	/**
 	 * This plugin's single instance.
 	 *
-	 * @since 0.5.0
-	 *
 	 * @var Share_On_Mastodon $instance Plugin instance.
 	 */
 	private static $instance;
 
 	/**
 	 * `Plugin_Options` instance.
-	 *
-	 * @since 0.19.0
 	 *
 	 * @var Plugin_Options $instance `Plugin_Options` instance.
 	 */
@@ -33,16 +29,12 @@ class Share_On_Mastodon {
 	/**
 	 * `Post_Handler` instance.
 	 *
-	 * @since 0.5.0
-	 *
 	 * @var Post_Handler $instance `Post_Handler` instance.
 	 */
 	private $post_handler;
 
 	/**
 	 * Returns the single instance of this class.
-	 *
-	 * @since 0.5.0
 	 *
 	 * @return Share_On_Mastodon Single class instance.
 	 */
@@ -56,8 +48,6 @@ class Share_On_Mastodon {
 
 	/**
 	 * Interacts with WordPress's Plugin API.
-	 *
-	 * @since 0.5.0
 	 */
 	public function register() {
 		$this->plugin_options = new Plugin_Options();
@@ -88,8 +78,6 @@ class Share_On_Mastodon {
 	/**
 	 * Ensures cron job is scheduled, and, if needed, kicks off database
 	 * migrations.
-	 *
-	 * @since 0.19.0
 	 */
 	public function init() {
 		// Schedule a daily cron job.
@@ -104,8 +92,6 @@ class Share_On_Mastodon {
 
 	/**
 	 * Runs on deactivation.
-	 *
-	 * @since 0.4.0
 	 */
 	public function deactivate() {
 		wp_clear_scheduled_hook( 'share_on_mastodon_verify_token' );
@@ -113,8 +99,6 @@ class Share_On_Mastodon {
 
 	/**
 	 * Enables localization.
-	 *
-	 * @since 0.1.0
 	 */
 	public function load_textdomain() {
 		load_plugin_textdomain( 'share-on-mastodon', false, basename( dirname( __DIR__ ) ) . '/languages' );
@@ -122,8 +106,6 @@ class Share_On_Mastodon {
 
 	/**
 	 * Returns `Post_Handler` instance.
-	 *
-	 * @since 0.5.0
 	 *
 	 * @return Post_Handler This plugin's `Post_Handler` instance.
 	 */
@@ -134,8 +116,6 @@ class Share_On_Mastodon {
 	/**
 	 * Returns `Plugin_Options` instance.
 	 *
-	 * @since 0.19.0
-	 *
 	 * @return Plugin_Options This plugin's `Plugin_Options` instance.
 	 */
 	public function get_plugin_options() {
@@ -144,8 +124,6 @@ class Share_On_Mastodon {
 
 	/**
 	 * Performs the necessary database migrations, if applicable.
-	 *
-	 * @since 0.19.0
 	 */
 	protected function migrate() {
 		if ( ! function_exists( '\\dbDelta' ) ) {

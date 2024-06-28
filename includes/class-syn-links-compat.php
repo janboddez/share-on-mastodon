@@ -1,20 +1,16 @@
 <?php
 /**
- * Syndication Links compatibility.
- *
  * @package Share_On_Mastodon
  */
 
 namespace Share_On_Mastodon;
 
 /**
- * All things Syndication Links.
+ * Syndication Links compatibility.
  */
 class Syn_Links_Compat {
 	/**
 	 * Register Syndication Links callbacks.
-	 *
-	 * @since 0.11.0
 	 */
 	public static function register() {
 		$options    = get_options();
@@ -27,8 +23,6 @@ class Syn_Links_Compat {
 
 	/**
 	 * Adds the Mastodon URL to Syndication Links' list of URLs.
-	 *
-	 * @since 0.11.0
 	 *
 	 * @param  array $urls      Syndication links.
 	 * @param  array $object_id The post we're gathering these links for.
