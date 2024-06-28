@@ -10,24 +10,6 @@ namespace Share_On_Mastodon;
  */
 class Post_Handler {
 	/**
-	 * Array that holds this plugin's settings.
-	 *
-	 * @var array $options Plugin options.
-	 */
-	private $options = array();
-
-	/**
-	 * Constructor.
-	 *
-	 * @since 0.1.
-	 */
-	public function __construct() {
-		// Allows us to just use `$this->options` rather than have to define
-		// `$options = get_options()` all the time.
-		$this->options = get_options();
-	}
-
-	/**
 	 * Interacts with WordPress's Plugin API.
 	 */
 	public function register() {
@@ -35,8 +17,9 @@ class Post_Handler {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_ajax_share_on_mastodon_unlink_url', array( $this, 'unlink_url' ) );
 
-		if ( ! empty( $this->options['post_types'] ) ) {
-			foreach ( (array) $this->options['post_types'] as $post_type ) {
+		$options = get_options();
+		if ( ! empty( $options['post_types'] ) ) {
+			foreach ( (array) $options['post_types'] as $post_type ) {
 				add_action( "save_post_{$post_type}", array( $this, 'update_meta' ), 11 );
 				add_action( "save_post_{$post_type}", array( $this, 'toot' ), 20 );
 			}
@@ -76,9 +59,10 @@ class Post_Handler {
 			$status = preg_replace( '~\R~u', "\r\n", $status );
 		}
 
+		$options = get_options();
 		if (
 			! empty( $status ) && '' !== preg_replace( '~\s~', '', $status ) &&
-			( empty( $this->options['status_template'] ) || $status !== $this->options['status_template'] )
+			( empty( $options['status_template'] ) || $status !== $options['status_template'] )
 		) {
 			// Save only if `$status` is non-empty and, if a template exists, different from said template.
 			update_post_meta( $post->ID, '_share_on_mastodon_status', $status );
@@ -105,24 +89,22 @@ class Post_Handler {
 		$post = get_post( $post );
 
 		if ( 0 === strpos( current_action(), 'save_' ) && defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			// For REST requests, we use a *later* hook, which runs *after*
-			// metadata, if any, has been saved.
+			// For REST requests, we use a *later* hook, which runs *after* metadata, if any, has been saved.
 			add_action( "rest_after_insert_{$post->post_type}", array( $this, 'toot' ), 20 );
 
 			// Don't do anything just yet.
 			return;
 		}
 
-		if ( $this->is_gutenberg() && empty( $_REQUEST['meta-box-loader'] ) && ! empty( $this->options['meta_box'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// This is the first of *two* "Gutenberg requests," and we should
-			// ignore it. Now, it could be that `$this->is_gutenberg()` always
-			// returns `false` whenever `$_REQUEST['meta-box-loader']` is
-			// present. Still, doesn't hurt to check.
+		$options = get_options();
+		if ( ! empty( $options['meta_box'] && $this->is_gutenberg() && empty( $_REQUEST['meta-box-loader'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// This has to be the first of *two* "Gutenberg requests," and we should ignore it. Note: It could be that
+			// `$this->is_gutenberg()` always returns `false` whenever `$_REQUEST['meta-box-loader']` is present.
+			// Still, doesn't hurt to check.
 			return;
 		}
 
-		// In all other cases (non-REST request, non-Gutenberg REST request, or
-		// *second* Gutenberg request), we move on.
+		// In all other cases, we move on.
 		if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
 			return;
 		}
@@ -135,11 +117,11 @@ class Post_Handler {
 			return;
 		}
 
-		if ( ! empty( $this->options['delay_sharing'] ) ) {
+		if ( ! empty( $options['delay_sharing'] ) ) {
 			// Since version 0.7.0, there's an option to "schedule" sharing
 			// rather than do everything inline.
 			wp_schedule_single_event(
-				time() + min( $this->options['delay_sharing'], 3600 ), // Limit to one hour.
+				time() + min( $options['delay_sharing'], 3600 ), // Limit to one hour.
 				'share_on_mastodon_post',
 				array( $post )
 			);
@@ -173,9 +155,11 @@ class Post_Handler {
 		// Parse template tags, and sanitize.
 		$status = $this->parse_status( $status, $post->ID );
 
-		if ( ( empty( $status ) || '' === preg_replace( '~\s~', '', $status ) ) && ! empty( $this->options['status_template'] ) ) {
+		$options = get_options( $post->post_author );
+
+		if ( ( empty( $status ) || '' === preg_replace( '~\s~', '', $status ) ) && ! empty( $options['status_template'] ) ) {
 			// Use template stored in settings.
-			$status = $this->parse_status( $this->options['status_template'], $post->ID );
+			$status = $this->parse_status( $options['status_template'], $post->ID );
 		}
 
 		if ( empty( $status ) || '' === preg_replace( '~\s~', '', $status ) ) {
@@ -212,15 +196,12 @@ class Post_Handler {
 		// Encode, build query string.
 		$query_string = http_build_query( $args );
 
-		// Get the applicable (i.e., blog-wide or per-user) API settings.
-		$options = apply_filters( 'share_on_mastodon_options', $this->options, $post->post_author );
-
 		// And now, images.
 		$media = Image_Handler::get_images( $post );
 
 		if ( ! empty( $media ) ) {
-			$max = isset( $this->options['max_images'] )
-				? $this->options['max_images']
+			$max = isset( $options['max_images'] )
+				? $options['max_images']
 				: 4;
 
 			$max   = (int) apply_filters( 'share_on_mastodon_num_images', $max, $post );
@@ -287,7 +268,9 @@ class Post_Handler {
 	 * Registers a new meta box.
 	 */
 	public function add_meta_box() {
-		if ( empty( $this->options['post_types'] ) ) {
+		$options = get_options();
+
+		if ( empty( $options['post_types'] ) ) {
 			// Sharing disabled for all post types.
 			return;
 		}
@@ -297,7 +280,7 @@ class Post_Handler {
 		$args = array(
 			'__back_compat_meta_box' => true,
 		);
-		if ( ! empty( $this->options['meta_box'] ) ) {
+		if ( ! empty( $options['meta_box'] ) ) {
 			// And this will bring it back.
 			$args = null;
 		}
@@ -306,7 +289,7 @@ class Post_Handler {
 			'share-on-mastodon',
 			__( 'Share on Mastodon', 'share-on-mastodon' ),
 			array( $this, 'render_meta_box' ),
-			(array) $this->options['post_types'],
+			(array) $options['post_types'],
 			'side',
 			'default',
 			$args
@@ -320,12 +303,14 @@ class Post_Handler {
 	 */
 	public function render_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'share_on_mastodon_nonce' );
+
+		$options = get_options();
 		$checked = get_post_meta( $post->ID, '_share_on_mastodon', true );
 
 		if ( '' === $checked ) {
 			// If sharing is "opt-in" or the post in question is older than 15
 			// minutes, do _not_ check the checkbox by default.
-			$checked = apply_filters( 'share_on_mastodon_optin', ! empty( $this->options['optin'] ) ) || $this->is_older_than( 900, $post ) ? '0' : '1';
+			$checked = apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) || $this->is_older_than( 900, $post ) ? '0' : '1';
 		}
 		?>
 		<label>
@@ -333,13 +318,13 @@ class Post_Handler {
 			<?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?>
 		</label>
 		<?php
-		if ( ! empty( $this->options['custom_status_field'] ) ) :
+		if ( ! empty( $options['custom_status_field'] ) ) :
 			// Custom message saved earlier, if any.
 			$custom_status = get_post_meta( $post->ID, '_share_on_mastodon_status', true );
 
-			if ( '' === $custom_status && ! empty( $this->options['status_template'] ) ) {
+			if ( '' === $custom_status && ! empty( $options['status_template'] ) ) {
 				// Default to the template as set on the options page.
-				$custom_status = $this->options['status_template'];
+				$custom_status = $options['status_template'];
 			}
 			?>
 			<div style="margin-top: 1em;">
@@ -426,12 +411,13 @@ class Post_Handler {
 			return;
 		}
 
-		if ( empty( $this->options['post_types'] ) ) {
+		$options = get_options();
+		if ( empty( $options['post_types'] ) ) {
 			return;
 		}
 
 		$current_screen = get_current_screen();
-		if ( ( isset( $current_screen->post_type ) && ! in_array( $current_screen->post_type, $this->options['post_types'], true ) ) ) {
+		if ( ( isset( $current_screen->post_type ) && ! in_array( $current_screen->post_type, $options['post_types'], true ) ) ) {
 			// Only load JS for actually supported post types.
 			return;
 		}
@@ -449,7 +435,7 @@ class Post_Handler {
 				'post_id'             => ! empty( $post->ID ) ? $post->ID : 0, // Pass current post ID to JS.
 				'nonce'               => wp_create_nonce( basename( __FILE__ ) ),
 				'ajaxurl'             => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
-				'custom_status_field' => ! empty( $this->options['custom_status_field'] ) ? '1' : '0',
+				'custom_status_field' => ! empty( $options['custom_status_field'] ) ? '1' : '0',
 			)
 		);
 	}
@@ -471,7 +457,8 @@ class Post_Handler {
 			return false;
 		}
 
-		if ( ! in_array( $post->post_type, (array) $this->options['post_types'], true ) ) {
+		$options = get_options( $post->post_author );
+		if ( ! in_array( $post->post_type, (array) $options['post_types'], true ) ) {
 			// Unsupported post type.
 			return false;
 		}
@@ -496,7 +483,7 @@ class Post_Handler {
 
 		// That's not it, though; we have a setting that enables posts to be
 		// shared nevertheless.
-		if ( ! empty( $this->options['share_always'] ) ) {
+		if ( ! empty( $options['share_always'] ) ) {
 			$is_enabled = true;
 		}
 
@@ -629,7 +616,7 @@ class Post_Handler {
 	 * @return bool           Whether auth access was set up okay.
 	 */
 	protected function setup_completed( $post = null ) {
-		$options = apply_filters( 'share_on_mastodon_options', $this->options, ! empty( $post->post_author ) ? $post->post_author : 0 );
+		$options = get_options( ! empty( $post ) ? $post->post_author : 0 );
 
 		if ( empty( $options['mastodon_host'] ) ) {
 			return false;

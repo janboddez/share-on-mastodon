@@ -77,7 +77,7 @@ class Block_Editor {
 	 * The one, for now, REST API permission callback.
 	 *
 	 * @param  \WP_REST_Request $request WP REST API request.
-	 * @return bool                      If the request's authorized.
+	 * @return bool                      Whether the request is authorized.
 	 */
 	public static function permission_callback( $request ) {
 		$post_id = $request->get_param( 'post_id' );
