@@ -123,6 +123,17 @@ class Share_On_Mastodon {
 	}
 
 	/**
+	 * Returns `Plugin_Options` instance.
+	 *
+	 * @return Plugin_Options This plugin's `Plugin_Options` instance.
+	 */
+	public function get_options_handler() {
+		_deprecated_function( __METHOD__, '0.19.0', '\Share_On_Mastodon\Share_On_Mastodon\Factory::get_plugin_options' );
+
+		return $this->plugin_options;
+	}
+
+	/**
 	 * Performs the necessary database migrations, if applicable.
 	 */
 	protected function migrate() {
