@@ -96,6 +96,6 @@ class Mastodon_Client {
 	public static function table() {
 		global $wpdb;
 
-		return $wpdb->prefix . self::TABLE;
+		return $wpdb->prefix . static::TABLE;
 	}
 }

@@ -88,7 +88,8 @@ class Image_Handler {
 		// Wrap post content in a dummy `div`, as there must (!) be a root-level element at all times.
 		$html = '<div>' . mb_convert_encoding( $post->post_content, 'HTML-ENTITIES', get_bloginfo( 'charset' ) ) . '</div>';
 
-		libxml_use_internal_errors( true );
+		$use_errors = libxml_use_internal_errors( true );
+
 		$doc = new \DOMDocument();
 		$doc->loadHTML( $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
 		$xpath = new \DOMXPath( $doc );
@@ -118,6 +119,8 @@ class Image_Handler {
 				$images[ $image_id ] = $node->hasAttribute( 'alt' ) ? $node->getAttribute( 'alt' ) : '';
 			}
 		}
+
+		libxml_use_internal_errors( $use_errors );
 
 		return $images;
 	}

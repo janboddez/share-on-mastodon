@@ -26,7 +26,7 @@ class Micropub_Compat {
 	 * @return array               Modified syndication targets.
 	 */
 	public static function syndicate_to( $syndicate_to, $user_id ) {
-		$options = apply_filters( 'share_on_mastodon_options', get_options(), $user_id );
+		$options = get_options( $user_id );
 
 		if ( empty( $options['mastodon_host'] ) ) {
 			return $syndicate_to;
