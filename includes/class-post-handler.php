@@ -150,12 +150,12 @@ class Post_Handler {
 			return;
 		}
 
+		$options = get_options( $post->post_author );
+
 		// Fetch custom status message, if any.
 		$status = get_post_meta( $post->ID, '_share_on_mastodon_status', true );
 		// Parse template tags, and sanitize.
 		$status = $this->parse_status( $status, $post->ID );
-
-		$options = get_options( $post->post_author );
 
 		if ( ( empty( $status ) || '' === preg_replace( '~\s~', '', $status ) ) && ! empty( $options['status_template'] ) ) {
 			// Use template stored in settings.
@@ -275,11 +275,8 @@ class Post_Handler {
 			return;
 		}
 
-		// This'll hide the meta box for Gutenberg users, who by default get the
-		// new sidebar panel.
-		$args = array(
-			'__back_compat_meta_box' => true,
-		);
+		// This'll hide the meta box for Gutenberg users, who by default get the new sidebar panel.
+		$args = array( '__back_compat_meta_box' => true );
 		if ( ! empty( $options['meta_box'] ) ) {
 			// And this will bring it back.
 			$args = null;
@@ -308,8 +305,8 @@ class Post_Handler {
 		$checked = get_post_meta( $post->ID, '_share_on_mastodon', true );
 
 		if ( '' === $checked ) {
-			// If sharing is "opt-in" or the post in question is older than 15
-			// minutes, do _not_ check the checkbox by default.
+			// If sharing is "opt-in" or the post in question is older than 15 minutes, do _not_ check the checkbox by
+			// default.
 			$checked = apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) || $this->is_older_than( 900, $post ) ? '0' : '1';
 		}
 		?>
@@ -392,8 +389,8 @@ class Post_Handler {
 		delete_post_meta( $post_id, '_share_on_mastodon_url' );
 
 		if ( ! empty( $_POST['is_gutenberg'] ) ) {
-			// Delete the checkbox value, too, to prevent Gutenberg's' odd meta
-			// box behavior from triggering an immediate re-share.
+			// Delete the checkbox value, too, to prevent Gutenberg's' odd meta box behavior from triggering an
+			// immediate re-share.
 			delete_post_meta( $post_id, '_share_on_mastodon' );
 		}
 
@@ -458,6 +455,7 @@ class Post_Handler {
 		}
 
 		$options = get_options( $post->post_author );
+
 		if ( ! in_array( $post->post_type, (array) $options['post_types'], true ) ) {
 			// Unsupported post type.
 			return false;
@@ -469,8 +467,8 @@ class Post_Handler {
 		}
 
 		if ( $this->is_older_than( DAY_IN_SECONDS / 2, $post ) && '1' !== get_post_meta( $post->ID, '_share_on_mastodon', true ) ) {
-			// Unless the box was ticked explicitly, we won't share "older"
-			// posts. Since v0.13.0, sharing "older" posts is "opt-in," always.
+			// Unless the box was ticked explicitly, we won't share "older" posts. Since v0.13.0, sharing "older" posts
+			// is "opt-in," always.
 			return false;
 		}
 
@@ -481,8 +479,7 @@ class Post_Handler {
 			$is_enabled = true;
 		}
 
-		// That's not it, though; we have a setting that enables posts to be
-		// shared nevertheless.
+		// That's not it, though; we have a setting that enables posts to be shared nevertheless.
 		if ( ! empty( $options['share_always'] ) ) {
 			$is_enabled = true;
 		}
@@ -533,8 +530,8 @@ class Post_Handler {
 		$status = preg_replace( '~(\r\n){2,}~', "\r\n\r\n", $status ); // We should have normalized line endings by now.
 		$status = sanitize_textarea_field( $status ); // Strips HTML and whatnot.
 
-		// Add the (escaped) URL after the everything else has been sanitized,
-		// so as not to garble permalinks with multi-byte characters in them.
+		// Add the (escaped) URL after the everything else has been sanitized, so as not to garble permalinks with
+		// multi-byte characters in them.
 		$status = str_replace( '%permalink%', esc_url_raw( get_permalink( $post_id ) ), $status );
 
 		return $status;
