@@ -107,11 +107,9 @@ abstract class Options_Handler {
 	 * Registers a new Mastodon app (client).
 	 */
 	protected function register_app() {
-		// As of v0.19.0, we keep track of known instances, and reuse client IDs
-		// and secrets, rather then register as a "new" client each and every
-		// time. Caveat: To ensure "old" registrations' validity, we use an "app
-		// token." *Should* an app token ever get revoked, we will re-register
-		// after all.
+		// As of v0.19.0, we keep track of known instances, and reuse client IDs and secrets, rather then register as a
+		// "new" client each and every time. Caveat: To ensure "old" registrations' validity, we use an "app token."
+		// *Should* an app token ever get revoked, we will re-register after all.
 		$apps = Mastodon_Client::find( array( 'host' => $this->options['mastodon_host'] ) );
 
 		if ( ! empty( $apps ) ) {

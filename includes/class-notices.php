@@ -105,8 +105,7 @@ class Notices {
 	}
 
 	/**
-	 * Adds our query arguments to WordPress' so-called removable query
-	 * arguments.
+	 * Adds our query arguments to WordPress' so-called removable query arguments.
 	 *
 	 * @param  array $args Array of query variables to remove from a URL.
 	 * @return array       Filtered array.

@@ -40,8 +40,8 @@ function get_options( $user_id = 0 ) {
 /**
  * Tries to convert an attachment URL into a post ID.
  *
- * Mostly lifted from core. The main difference is this function will also
- * match URLs whose filename part probably should include `-scaled`.
+ * Mostly lifted from core. The main difference is this function will also match URLs whose filename part probably
+ * should include `-scaled`.
  *
  * @param  string $url The URL to resolve.
  * @return int         The found post ID, or 0 on failure.

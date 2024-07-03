@@ -118,8 +118,7 @@ class Post_Handler {
 		}
 
 		if ( ! empty( $options['delay_sharing'] ) ) {
-			// Since version 0.7.0, there's an option to "schedule" sharing
-			// rather than do everything inline.
+			// Since version 0.7.0, there's an option to "schedule" sharing rather than do everything inline.
 			wp_schedule_single_event(
 				time() + min( $options['delay_sharing'], 3600 ), // Limit to one hour.
 				'share_on_mastodon_post',
@@ -188,8 +187,7 @@ class Post_Handler {
 		$args   = apply_filters( 'share_on_mastodon_toot_args', array( 'status' => $status ), $post );
 
 		if ( apply_filters_deprecated( 'share_on_mastodon_cutoff', array( false ), '0.16.1' ) ) {
-			// May render hashtags or URLs, or unfiltered HTML, at the very end
-			// of a toot unusable.
+			// May render hashtags or URLs, or unfiltered HTML, at the very end of a toot unusable.
 			$args['status'] = mb_substr( $args['status'], 0, 499, get_bloginfo( 'charset' ) ) . '…';
 		}
 
@@ -258,8 +256,7 @@ class Post_Handler {
 				add_filter( 'redirect_post_location', array( Notices::class, 'add_error_query_var' ) );
 			}
 
-			// Provided debugging's enabled, let's store the (somehow faulty)
-			// response.
+			// Provided debugging's enabled, let's store the (somehow faulty) response.
 			debug_log( $response );
 		}
 	}

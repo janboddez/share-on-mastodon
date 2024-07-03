@@ -132,8 +132,8 @@ class Block_Editor {
 		$post_types = (array) $options['post_types'];
 
 		foreach ( $post_types as $post_type ) {
-			// Expose Share on Mastodon's custom fields to the REST API. Will
-			// appear as a separate `share_on_mastodon` property.
+			// Expose Share on Mastodon's custom fields to the REST API. Will appear as a separate `share_on_mastodon`
+			// property.
 			register_rest_field(
 				$post_type,
 				'share_on_mastodon',
@@ -144,8 +144,8 @@ class Block_Editor {
 			);
 
 			if ( use_block_editor_for_post_type( $post_type ) && empty( $options['meta_box'] ) ) {
-				// Allow these fields to be *set* by the block editor. These
-				// will appear as properties of the post's `meta` property.
+				// Allow these fields to be *set* by the block editor. These will appear as properties of the post's
+				// `meta` property.
 				register_post_meta(
 					$post_type,
 					'_share_on_mastodon',
@@ -164,8 +164,7 @@ class Block_Editor {
 				);
 
 				if ( ! empty( $options['custom_status_field'] ) ) {
-					// No need to register (and thus save) anything we won't be
-					// using.
+					// No need to register (and thus save) anything we won't be using.
 					register_post_meta(
 						$post_type,
 						'_share_on_mastodon_status',

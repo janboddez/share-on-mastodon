@@ -76,8 +76,7 @@ class Share_On_Mastodon {
 	}
 
 	/**
-	 * Ensures cron job is scheduled, and, if needed, kicks off database
-	 * migrations.
+	 * Ensures cron job is scheduled, and, if needed, kicks off database migrations.
 	 */
 	public function init() {
 		// Schedule a daily cron job.

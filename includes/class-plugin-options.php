@@ -75,20 +75,19 @@ class Plugin_Options extends Options_Handler {
 			$mastodon_host = $this->clean_url( $settings['mastodon_host'] );
 
 			if ( '' === $mastodon_host ) {
-				// Removing the instance URL. Might be done to temporarily
-				// disable crossposting. Let's not revoke access just yet.
+				// Removing the instance URL. Might be done to temporarily disable crossposting. Let's not revoke access
+				// just yet.
 				$this->options['mastodon_host'] = '';
 			} elseif ( wp_http_validate_url( $mastodon_host ) ) {
 				if ( $mastodon_host !== $this->options['mastodon_host'] ) {
-					// Updated URL. (Try to) revoke access. Forget token
-					// regardless of the outcome.
+					// Updated URL. (Try to) revoke access. Forget token regardless of the outcome.
 					$this->revoke_access();
 
 					// Then, save the new URL.
 					$this->options['mastodon_host'] = esc_url_raw( $mastodon_host );
 
-					// Forget client ID and secret. A new client ID and
-					// secret will be requested next time the page loads.
+					// Forget client ID and secret. A new client ID and secret will be requested next time the page
+					// loads.
 					$this->options['mastodon_client_id']     = '';
 					$this->options['mastodon_client_secret'] = '';
 				}
@@ -256,8 +255,7 @@ class Plugin_Options extends Options_Handler {
 						}
 
 						if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'share-on-mastodon:token:revoke' ) ) {
-							// Revoke access. Forget access token regardless of the
-							// outcome.
+							// Revoke access. Forget access token regardless of the outcome.
 							$this->revoke_access();
 						}
 
