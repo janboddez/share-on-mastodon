@@ -32,7 +32,8 @@
 	color: #cc1818;
 }
 
-.settings_page_share-on-mastodon label {
+.settings_page_share-on-mastodon th label,
+.settings_page_share-on-mastodon th .label {
 	vertical-align: baseline;
 }
 
