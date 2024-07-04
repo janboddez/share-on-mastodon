@@ -67,25 +67,17 @@ class Block_Editor {
 			array(
 				'methods'             => array( 'GET' ),
 				'callback'            => array( __CLASS__, 'get_meta' ),
-				'permission_callback' => array( __CLASS__, 'permission_callback' ),
+				'permission_callback' => function ( $request ) {
+					$post_id = $request->get_param( 'post_id' );
+
+					if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
+						return false;
+					}
+
+					return current_user_can( 'edit_post', $post_id );
+				},
 			)
 		);
-	}
-
-	/**
-	 * The one, for now, REST API permission callback.
-	 *
-	 * @param  \WP_REST_Request $request WP REST API request.
-	 * @return bool                      Whether the request is authorized.
-	 */
-	public static function permission_callback( $request ) {
-		$post_id = $request->get_param( 'post_id' );
-
-		if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
-			return false;
-		}
-
-		return current_user_can( 'edit_post', $post_id );
 	}
 
 	/**
@@ -154,8 +146,12 @@ class Block_Editor {
 						'show_in_rest'      => true,
 						'type'              => 'string',
 						'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) ? '0' : '1',
-						'auth_callback'     => function () {
-							return current_user_can( 'edit_posts' );
+						'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+							if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
+								return false;
+							}
+
+							return current_user_can( 'edit_post', $post_id );
 						},
 						'sanitize_callback' => function ( $meta_value ) {
 							return '1' === $meta_value ? '1' : '0';
@@ -173,8 +169,12 @@ class Block_Editor {
 							'show_in_rest'      => true,
 							'type'              => 'string',
 							'default'           => ! empty( $options['status_template'] ) ? $options['status_template'] : '',
-							'auth_callback'     => function () {
-								return current_user_can( 'edit_posts' );
+							'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+								if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
+									return false;
+								}
+
+								return current_user_can( 'edit_post', $post_id );
 							},
 							'sanitize_callback' => function ( $status ) {
 								$status = sanitize_textarea_field( $status );
