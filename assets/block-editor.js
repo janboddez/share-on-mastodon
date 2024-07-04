@@ -143,11 +143,9 @@
 				}, 1500 );
 
 				setTimeout( () => {
-					// Just in case. I thought of `setInterval()`, but if after
-					// 15 seconds it's still not there, it's likely not going to
-					// happen. Unless of course the "Delay" option is set to
-					// something larger, but then there's no point in displaying
-					// this type of feedback anyway.
+					// Just in case. I thought of `setInterval()`, but if after 15 seconds it's still not there, it's
+					// likely not going to happen. Unless of course the "Delay" option is set to something larger, but
+					// then there's no point in displaying this type of feedback anyway.
 					updateUrl( postId, setMastoUrl, setError );
 				}, 15000 );
 			}
