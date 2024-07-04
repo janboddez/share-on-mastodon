@@ -1,20 +1,16 @@
 <?php
 /**
- * Handles (only) "classic editor" notices.
- *
  * @package Share_On_Mastodon
  */
 
 namespace Share_On_Mastodon;
 
 /**
- * Notices class.
+ * Handles (only) "classic editor" notices.
  */
 class Notices {
 	/**
 	 * Registers hook callbacks.
-	 *
-	 * @since 0.10.0
 	 */
 	public static function register() {
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notice' ) );
@@ -23,8 +19,6 @@ class Notices {
 
 	/**
 	 * Renders an admin notice upon success.
-	 *
-	 * @since 0.10.0
 	 */
 	public static function admin_notice() {
 		if ( ! apply_filters( 'share_on_mastodon_admin_notices', false ) ) {
@@ -83,8 +77,6 @@ class Notices {
 	/**
 	 * Tells WordPress to display the "success" notice.
 	 *
-	 * @since 0.10.0
-	 *
 	 * @param  string $location The destination URL.
 	 * @return string           Updated destination URL.
 	 */
@@ -100,8 +92,6 @@ class Notices {
 	/**
 	 * Tells WordPress to display the "error" notice.
 	 *
-	 * @since 0.10.0
-	 *
 	 * @param  string $location The destination URL.
 	 * @return string           Updated destination URL.
 	 */
@@ -115,10 +105,7 @@ class Notices {
 	}
 
 	/**
-	 * Adds our query arguments to WordPress' so-called removable query
-	 * arguments.
-	 *
-	 * @since 0.10.0
+	 * Adds our query arguments to WordPress' so-called removable query arguments.
 	 *
 	 * @param  array $args Array of query variables to remove from a URL.
 	 * @return array       Filtered array.

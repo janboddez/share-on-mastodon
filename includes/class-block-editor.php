@@ -1,20 +1,16 @@
 <?php
 /**
- * All things Gutenberg.
- *
  * @package Share_On_Mastodon
  */
 
 namespace Share_On_Mastodon;
 
 /**
- * Block editor goodness.
+ * All things Gutenberg.
  */
 class Block_Editor {
 	/**
 	 * Registers hook callbacks.
-	 *
-	 * @since 0.17.0
 	 */
 	public static function register() {
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_scripts' ), 11 );
@@ -24,8 +20,6 @@ class Block_Editor {
 
 	/**
 	 * Enqueues block editor scripts.
-	 *
-	 * @since 0.17.0
 	 */
 	public static function enqueue_scripts() {
 		$options = get_options();
@@ -40,7 +34,6 @@ class Block_Editor {
 
 		$current_screen = get_current_screen();
 		if ( ( isset( $current_screen->post_type ) && ! in_array( $current_screen->post_type, $options['post_types'], true ) ) ) {
-			// Only load JS for actually supported post types.
 			return;
 		}
 
@@ -59,15 +52,13 @@ class Block_Editor {
 				'wp-url',
 				'share-on-mastodon',
 			),
-			\Share_On_Mastodon\Share_On_Mastodon::PLUGIN_VERSION,
+			Share_On_Mastodon::PLUGIN_VERSION,
 			false
 		);
 	}
 
 	/**
-	 * Registers (block-related) REST API endpoints.
-	 *
-	 * @since 0.17.0
+	 * Registers block-related REST API endpoints.
 	 */
 	public static function register_api_endpoints() {
 		register_rest_route(
@@ -76,36 +67,26 @@ class Block_Editor {
 			array(
 				'methods'             => array( 'GET' ),
 				'callback'            => array( __CLASS__, 'get_meta' ),
-				'permission_callback' => array( __CLASS__, 'permission_callback' ),
+				'permission_callback' => function ( $request ) {
+					$post_id = $request->get_param( 'post_id' );
+
+					if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
+						return false;
+					}
+
+					return current_user_can( 'edit_post', $post_id );
+				},
 			)
 		);
 	}
 
 	/**
-	 * The one, for now, REST API permission callback.
-	 *
-	 * @since 0.17.0
-	 *
-	 * @param  \WP_REST_Request $request WP REST API request.
-	 * @return bool                      If the request's authorized.
-	 */
-	public static function permission_callback( $request ) {
-		$post_id = $request->get_param( 'post_id' );
-
-		if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
-			return false;
-		}
-
-		return current_user_can( 'edit_post', $post_id );
-	}
-
-	/**
 	 * Exposes Share on Mastodon's metadata to the REST API.
 	 *
-	 * @since 0.17.0
+	 * Can be called from either `register_rest_route()` or `register_rest_field()`.
 	 *
 	 * @param  \WP_REST_Request|array $request API request (parameters).
-	 * @return array|\WP_Error                 Response (or error).
+	 * @return array|\WP_Error                 Response, or error on failure.
 	 */
 	public static function get_meta( $request ) {
 		if ( is_array( $request ) ) {
@@ -132,8 +113,6 @@ class Block_Editor {
 
 	/**
 	 * Registers Share on Mastodon's custom fields for use with the REST API.
-	 *
-	 * @since 0.11.0
 	 */
 	public static function register_meta() {
 		$options = get_options();
@@ -145,18 +124,20 @@ class Block_Editor {
 		$post_types = (array) $options['post_types'];
 
 		foreach ( $post_types as $post_type ) {
-			// Expose Share on Mastodon's custom fields to the REST API.
+			// Expose Share on Mastodon's custom fields to the REST API. Will appear as a separate `share_on_mastodon`
+			// property.
 			register_rest_field(
 				$post_type,
 				'share_on_mastodon',
 				array(
 					'get_callback'    => array( __CLASS__, 'get_meta' ),
-					'update_callback' => null,
+					'update_callback' => null, // These are updated solely in the background.
 				)
 			);
 
 			if ( use_block_editor_for_post_type( $post_type ) && empty( $options['meta_box'] ) ) {
-				// Allow these fields to be *set* by the block editor.
+				// Allow these fields to be *set* by the block editor. These will appear as properties of the post's
+				// `meta` property.
 				register_post_meta(
 					$post_type,
 					'_share_on_mastodon',
@@ -165,8 +146,12 @@ class Block_Editor {
 						'show_in_rest'      => true,
 						'type'              => 'string',
 						'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) ? '0' : '1',
-						'auth_callback'     => function () {
-							return current_user_can( 'edit_posts' );
+						'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+							if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
+								return false;
+							}
+
+							return current_user_can( 'edit_post', $post_id );
 						},
 						'sanitize_callback' => function ( $meta_value ) {
 							return '1' === $meta_value ? '1' : '0';
@@ -175,8 +160,7 @@ class Block_Editor {
 				);
 
 				if ( ! empty( $options['custom_status_field'] ) ) {
-					// No need to register (and thus save) anything we won't be
-					// using.
+					// No need to register (and thus save) anything we won't be using.
 					register_post_meta(
 						$post_type,
 						'_share_on_mastodon_status',
@@ -185,8 +169,12 @@ class Block_Editor {
 							'show_in_rest'      => true,
 							'type'              => 'string',
 							'default'           => ! empty( $options['status_template'] ) ? $options['status_template'] : '',
-							'auth_callback'     => function () {
-								return current_user_can( 'edit_posts' );
+							'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+								if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
+									return false;
+								}
+
+								return current_user_can( 'edit_post', $post_id );
 							},
 							'sanitize_callback' => function ( $status ) {
 								$status = sanitize_textarea_field( $status );

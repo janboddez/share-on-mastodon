@@ -1,20 +1,16 @@
 <?php
 /**
- * All things images.
- *
  * @package Share_On_Mastodon
  */
 
 namespace Share_On_Mastodon;
 
 /**
- * Image handler class.
+ * All things images.
  */
 class Image_Handler {
 	/**
 	 * Returns a post's associated images.
-	 *
-	 * @since 0.10.0
 	 *
 	 * @param  \WP_Post $post Post object.
 	 * @return array          Attachment array.
@@ -83,19 +79,17 @@ class Image_Handler {
 	/**
 	 * Attempts to find and return in-post images.
 	 *
-	 * @since 0.10.0
-	 *
 	 * @param  \WP_Post $post Post object.
 	 * @return array          Image array.
 	 */
 	protected static function get_referenced_images( $post ) {
 		$images = array();
 
-		// Wrap post content in a dummy `div`, as there must (!) be a root-level
-		// element at all times.
+		// Wrap post content in a dummy `div`, as there must (!) be a root-level element at all times.
 		$html = '<div>' . mb_convert_encoding( $post->post_content, 'HTML-ENTITIES', get_bloginfo( 'charset' ) ) . '</div>';
 
-		libxml_use_internal_errors( true );
+		$use_errors = libxml_use_internal_errors( true );
+
 		$doc = new \DOMDocument();
 		$doc->loadHTML( $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
 		$xpath = new \DOMXPath( $doc );
@@ -126,19 +120,20 @@ class Image_Handler {
 			}
 		}
 
+		libxml_use_internal_errors( $use_errors );
+
 		return $images;
 	}
 
 	/**
 	 * Uploads an attachment and returns a (single) media ID.
 	 *
-	 * @since 0.10.0
-	 *
 	 * @param  int    $image_id Attachment ID.
-	 * @param  string $alt      (Optional) alt text.
-	 * @return string|null      Unique media ID, or nothing on failure.
+	 * @param  string $alt      Alt text.
+	 * @param  array  $options  Mastodon (API) settings to use.
+	 * @return string|null      Unique media ID, or `null` on failure.
 	 */
-	public static function upload_image( $image_id, $alt = '' ) {
+	public static function upload_image( $image_id, $alt, $options ) {
 		if ( wp_attachment_is_image( $image_id ) ) {
 			// Grab the image's "large" thumbnail.
 			$image = wp_get_attachment_image_src( $image_id, apply_filters( 'share_on_mastodon_image_size', 'large', $image_id ) );
@@ -147,12 +142,11 @@ class Image_Handler {
 		$uploads = wp_upload_dir();
 
 		if ( ! empty( $image[0] ) && 0 === strpos( $image[0], $uploads['baseurl'] ) ) {
-			// Found a "large" thumbnail that lives on our own site (and not,
-			// e.g., a CDN).
+			// Found a "large" thumbnail that lives on our own site (and not, e.g., a CDN).
 			$url = $image[0];
 		} else {
-			// Get the original attachment URL. Note that Mastodon has an upload
-			// limit of 8 MB. Either way, this should return a _local_ URL.
+			// Get the original attachment URL. Note that Mastodon has an upload limit of 8 MB. Either way, this should
+			// return a *local* URL.
 			$url = wp_get_attachment_url( $image_id );
 		}
 
@@ -186,8 +180,6 @@ class Image_Handler {
 		$body .= file_get_contents( $file_path ) . $eol; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$body .= '--' . $boundary . '--'; // Note the extra two hyphens at the end.
 
-		$options = get_options();
-
 		$response = wp_safe_remote_post(
 			esc_url_raw( $options['mastodon_host'] . '/api/v1/media' ),
 			array(
@@ -214,8 +206,7 @@ class Image_Handler {
 			return $media->id;
 		}
 
-		// Provided debugging's enabled, let's store the (somehow faulty)
-		// response.
+		// Provided debugging's enabled, let's store the (somehow faulty) response.
 		debug_log( $response );
 	}
 
@@ -224,8 +215,6 @@ class Image_Handler {
 	 *
 	 * Looks through `$images` first, and falls back on what's stored in the
 	 * `wp_postmeta` table.
-	 *
-	 * @since 0.10.0
 	 *
 	 * @param  array $image_ids         IDs of images we want to upload.
 	 * @param  array $referenced_images In-post images and their alt attributes, to look through first.

@@ -1,7 +1,5 @@
 <?php
 /**
- * Main plugin class.
- *
  * @package Share_On_Mastodon
  */
 
@@ -11,30 +9,25 @@ namespace Share_On_Mastodon;
  * Main plugin class.
  */
 class Share_On_Mastodon {
-	const PLUGIN_VERSION = '0.18.0';
+	const PLUGIN_VERSION = '0.19.0';
+	const DB_VERSION     = '1';
 
 	/**
 	 * This plugin's single instance.
-	 *
-	 * @since 0.5.0
 	 *
 	 * @var Share_On_Mastodon $instance Plugin instance.
 	 */
 	private static $instance;
 
 	/**
-	 * `Options_Handler` instance.
+	 * `Plugin_Options` instance.
 	 *
-	 * @since 0.5.0
-	 *
-	 * @var Options_Handler $instance `Options_Handler` instance.
+	 * @var Plugin_Options $instance `Plugin_Options` instance.
 	 */
-	private $options_handler;
+	private $plugin_options;
 
 	/**
 	 * `Post_Handler` instance.
-	 *
-	 * @since 0.5.0
 	 *
 	 * @var Post_Handler $instance `Post_Handler` instance.
 	 */
@@ -42,8 +35,6 @@ class Share_On_Mastodon {
 
 	/**
 	 * Returns the single instance of this class.
-	 *
-	 * @since 0.5.0
 	 *
 	 * @return Share_On_Mastodon Single class instance.
 	 */
@@ -56,29 +47,20 @@ class Share_On_Mastodon {
 	}
 
 	/**
-	 * Constructor.
-	 *
-	 * @since 0.1.0
-	 */
-	private function __construct() {
-		$this->options_handler = new Options_Handler();
-		$this->options_handler->register();
-
-		$this->post_handler = new Post_Handler( $this->options_handler->get_options() );
-		$this->post_handler->register();
-	}
-
-	/**
 	 * Interacts with WordPress's Plugin API.
-	 *
-	 * @since 0.5.0
 	 */
 	public function register() {
+		$this->plugin_options = new Plugin_Options();
+		$this->plugin_options->register();
+
+		$this->post_handler = new Post_Handler();
+		$this->post_handler->register();
+
+		// Main plugin hooks.
 		register_deactivation_hook( dirname( __DIR__ ) . '/share-on-mastodon.php', array( $this, 'deactivate' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-		add_action( 'init', array( $this, 'register_cron' ) );
-		add_action( 'share_on_mastodon_verify_token', array( $this->options_handler, 'cron_verify_token' ) );
+		add_action( 'init', array( $this, 'init' ) );
 
 		$options = get_options();
 
@@ -94,21 +76,21 @@ class Share_On_Mastodon {
 	}
 
 	/**
-	 * Ensures cron job is scheduled.
-	 *
-	 * @since 0.13.0
+	 * Ensures cron job is scheduled, and, if needed, kicks off database migrations.
 	 */
-	public function register_cron() {
+	public function init() {
 		// Schedule a daily cron job.
 		if ( false === wp_next_scheduled( 'share_on_mastodon_verify_token' ) ) {
 			wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'share_on_mastodon_verify_token' );
+		}
+
+		if ( get_option( 'share_on_mastodon_db_version' ) !== self::DB_VERSION ) {
+			$this->migrate();
 		}
 	}
 
 	/**
 	 * Runs on deactivation.
-	 *
-	 * @since 0.4.0
 	 */
 	public function deactivate() {
 		wp_clear_scheduled_hook( 'share_on_mastodon_verify_token' );
@@ -116,32 +98,54 @@ class Share_On_Mastodon {
 
 	/**
 	 * Enables localization.
-	 *
-	 * @since 0.1.0
 	 */
 	public function load_textdomain() {
 		load_plugin_textdomain( 'share-on-mastodon', false, basename( dirname( __DIR__ ) ) . '/languages' );
 	}
 
 	/**
-	 * Returns `Options_Handler` instance.
-	 *
-	 * @since 0.5.0
-	 *
-	 * @return Options_Handler This plugin's `Options_Handler` instance.
-	 */
-	public function get_options_handler() {
-		return $this->options_handler;
-	}
-
-	/**
 	 * Returns `Post_Handler` instance.
-	 *
-	 * @since 0.5.0
 	 *
 	 * @return Post_Handler This plugin's `Post_Handler` instance.
 	 */
 	public function get_post_handler() {
 		return $this->post_handler;
+	}
+
+	/**
+	 * Returns `Plugin_Options` instance.
+	 *
+	 * @return Plugin_Options This plugin's `Plugin_Options` instance.
+	 */
+	public function get_plugin_options() {
+		return $this->plugin_options;
+	}
+
+	/**
+	 * Returns `Plugin_Options` instance.
+	 *
+	 * @return Plugin_Options This plugin's `Plugin_Options` instance.
+	 */
+	public function get_options_handler() {
+		_deprecated_function( __METHOD__, '0.19.0', '\Share_On_Mastodon\Share_On_Mastodon\Factory::get_plugin_options' );
+
+		return $this->plugin_options;
+	}
+
+	/**
+	 * Performs the necessary database migrations, if applicable.
+	 */
+	protected function migrate() {
+		if ( ! function_exists( '\\dbDelta' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		}
+
+		ob_start();
+		include __DIR__ . '/database/schema.php';
+		$sql = ob_get_clean();
+
+		dbDelta( $sql );
+
+		update_option( 'share_on_mastodon_db_version', self::DB_VERSION, 'no' );
 	}
 }

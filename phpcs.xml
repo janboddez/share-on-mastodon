@@ -3,14 +3,17 @@
 	<ini name="error_reporting" value="E_ALL &#38; ~E_DEPRECATED" />
 
 	<rule ref="WordPress">
+		<exclude name="Generic.Commenting.DocComment.MissingShort" />
 		<exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
 		<exclude name="WordPress.WP.DeprecatedFunctions.sanitize_urlFound" />
+		<exclude name="Squiz.Commenting.ClassComment.Missing" />
+		<exclude name="Squiz.Commenting.FunctionComment.Missing" />
 	</rule>
 
 	<exclude-pattern>tests/*</exclude-pattern>
 	<exclude-pattern>bootstrap\.php$</exclude-pattern>
 
-	<config name="testVersion" value="5.6-"/>
+	<config name="testVersion" value="7.2-"/>
 	<rule ref="PHPCompatibilityWP">
 		<include-pattern>*\.php$</include-pattern>
 	</rule>

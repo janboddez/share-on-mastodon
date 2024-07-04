@@ -1,7 +1,5 @@
 <?php
 /**
- * Helper functions.
- *
  * @package Share_On_Mastodon
  */
 
@@ -24,23 +22,26 @@ function debug_log( $item ) {
 }
 
 /**
- * Returns this plugin's options.
+ * Returns the current plugin options.
  *
  * Roughly equal to `get_option( 'share_on_mastodon_settings' )`.
  *
- * @return array Current plugin settings.
+ * @param  int $user_id (Optional) user ID.
+ * @return array        Current plugin settings.
  */
-function get_options() {
-	return Share_On_Mastodon::get_instance()
-		->get_options_handler()
+function get_options( $user_id = 0 ) {
+	$options = Share_On_Mastodon::get_instance()
+		->get_plugin_options()
 		->get_options();
+
+	return apply_filters( 'share_on_mastodon_options', $options, $user_id );
 }
 
 /**
  * Tries to convert an attachment URL into a post ID.
  *
- * Mostly lifted from core. The main difference is this function will also
- * match URLs whose filename part probably should include `-scaled`.
+ * Mostly lifted from core. The main difference is this function will also match URLs whose filename part probably
+ * should include `-scaled`.
  *
  * @param  string $url The URL to resolve.
  * @return int         The found post ID, or 0 on failure.
