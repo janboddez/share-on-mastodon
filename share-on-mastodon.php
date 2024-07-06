@@ -26,9 +26,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require __DIR__ . '/includes/class-block-editor.php';
 require __DIR__ . '/includes/class-image-handler.php';
+require __DIR__ . '/includes/class-mastodon-client.php';
 require __DIR__ . '/includes/class-micropub-compat.php';
 require __DIR__ . '/includes/class-notices.php';
-require __DIR__ . '/includes/class-mastodon-client.php';
 require __DIR__ . '/includes/class-options-handler.php';
 require __DIR__ . '/includes/class-plugin-options.php';
 require __DIR__ . '/includes/class-post-handler.php';
