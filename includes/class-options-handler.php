@@ -405,6 +405,8 @@ abstract class Options_Handler {
 		$account = json_decode( $response['body'] );
 
 		if ( isset( $account->username ) ) {
+			debug_log( "[Share on Mastodon] Valid token. Got username `{$account->username}`." );
+
 			if ( empty( $this->options['mastodon_username'] ) || $account->username !== $this->options['mastodon_username'] ) {
 				$this->options['mastodon_username'] = $account->username;
 
