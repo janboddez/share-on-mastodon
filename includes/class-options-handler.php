@@ -178,7 +178,7 @@ abstract class Options_Handler {
 			);
 
 			// Store in options table, too.
-			$this->options['mastodon_app_id']        = $app_id;
+			$this->options['mastodon_app_id']        = (int) $app_id;
 			$this->options['mastodon_client_id']     = $app->client_id;
 			$this->options['mastodon_client_secret'] = $app->client_secret;
 
