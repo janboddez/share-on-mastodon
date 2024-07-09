@@ -176,7 +176,7 @@ class Image_Handler {
 
 		// The actual (binary) image data.
 		$body .= 'Content-Disposition: form-data; name="file"; filename="' . basename( $file_path ) . '"' . $eol;
-		$body .= 'Content-Type: ' . mime_content_type( $file_path ) . $eol . $eol;
+		$body .= 'Content-Type: ' . static::get_content_type( $file_path ) . $eol . $eol;
 		$body .= file_get_contents( $file_path ) . $eol; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$body .= '--' . $boundary . '--'; // Note the extra two hyphens at the end.
 
@@ -242,5 +242,42 @@ class Image_Handler {
 		}
 
 		return $images;
+	}
+
+	/**
+	 * Returns a MIME content type for a certain file.
+	 *
+	 * @param  string $file_path File path.
+	 * @return string            MIME type.
+	 */
+	protected static function get_content_type( $file_path ) {
+		if ( function_exists( 'mime_content_type' ) ) {
+			$result = mime_content_type( $file_path );
+
+			if ( is_string( $result ) ) {
+				return $result;
+			}
+		}
+
+		if ( function_exists( 'finfo_open' ) && function_exists( 'finfo_file' ) ) {
+			$finfo  = finfo_open( FILEINFO_MIME_TYPE );
+			$result = finfo_file( $finfo, $file_path );
+
+			if ( is_string( $result ) ) {
+				return $result;
+			}
+		}
+
+		$ext = pathinfo( $file_path, PATHINFO_EXTENSION );
+		if ( ! empty( $ext ) ) {
+			$mime_types = wp_get_mime_types();
+			foreach ( $mime_types as $key => $value ) {
+				if ( in_array( $ext, explode( '|', $key ), true ) ) {
+					return $value;
+				}
+			}
+		}
+
+		return 'application/octet-stream';
 	}
 }
