@@ -304,7 +304,7 @@ class Post_Handler {
 		if ( '' === $checked ) {
 			// If sharing is "opt-in" or the post in question is older than 15 minutes, do _not_ check the checkbox by
 			// default.
-			$checked = apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) || $this->is_older_than( 900, $post ) ? '0' : '1';
+			$checked = apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) || is_older_than( 900, $post ) ? '0' : '1';
 		}
 		?>
 		<label>
@@ -463,7 +463,7 @@ class Post_Handler {
 			return false;
 		}
 
-		if ( $this->is_older_than( DAY_IN_SECONDS / 2, $post ) && '1' !== get_post_meta( $post->ID, '_share_on_mastodon', true ) ) {
+		if ( is_older_than( DAY_IN_SECONDS / 2, $post ) && '1' !== get_post_meta( $post->ID, '_share_on_mastodon', true ) ) {
 			// Unless the box was ticked explicitly, we won't share "older" posts. Since v0.13.0, sharing "older" posts
 			// is "opt-in," always.
 			return false;
@@ -483,27 +483,6 @@ class Post_Handler {
 
 		// We let developers override `$is_enabled` through a callback function.
 		return apply_filters( 'share_on_mastodon_enabled', $is_enabled, $post->ID );
-	}
-
-	/**
-	 * Determines whether a post is older than a certain number of seconds.
-	 *
-	 * @param  int      $seconds Minimum "age," in secondss.
-	 * @param  \WP_Post $post    Post object.
-	 * @return bool              True if the post exists and is older than `$seconds`, false otherwise.
-	 */
-	protected function is_older_than( $seconds, $post ) {
-		$post_time = get_post_time( 'U', true, $post );
-
-		if ( false === $post_time ) {
-			return false;
-		}
-
-		if ( $post_time >= time() - $seconds ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**

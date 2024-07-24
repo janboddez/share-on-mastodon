@@ -138,6 +138,17 @@ class Block_Editor {
 			if ( use_block_editor_for_post_type( $post_type ) && empty( $options['meta_box'] ) ) {
 				// Allow these fields to be *set* by the block editor. These will appear as properties of the post's
 				// `meta` property.
+				$default = apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) )
+					? '0'
+					: '1';
+
+				global $post;
+				if ( ! empty( $post ) ) {
+					$default = is_older_than( 900, $post )
+						? '0'
+						: $default;
+				}
+
 				register_post_meta(
 					$post_type,
 					'_share_on_mastodon',
@@ -145,7 +156,7 @@ class Block_Editor {
 						'single'            => true,
 						'show_in_rest'      => true,
 						'type'              => 'string',
-						'default'           => apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) ? '0' : '1',
+						'default'           => $default,
 						'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
 							if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
 								return false;
