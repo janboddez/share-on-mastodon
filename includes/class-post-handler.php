@@ -302,9 +302,9 @@ class Post_Handler {
 		$checked = get_post_meta( $post->ID, '_share_on_mastodon', true );
 
 		if ( '' === $checked ) {
-			// If sharing is "opt-in" or the post in question is older than 15 minutes, do _not_ check the checkbox by
+			// If sharing is "opt-in" or the post in question is older than 30 minutes, do _not_ check the checkbox by
 			// default.
-			$checked = apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) || is_older_than( 900, $post ) ? '0' : '1';
+			$checked = apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) || is_older_than( HOUR_IN_SECONDS / 2, $post ) ? '0' : '1';
 		}
 		?>
 		<label>

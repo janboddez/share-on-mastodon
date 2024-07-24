@@ -16,6 +16,7 @@ class Block_Editor {
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_scripts' ), 11 );
 		add_action( 'rest_api_init', array( __CLASS__, 'register_api_endpoints' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'register_meta' ) );
+		add_filter( 'default_post_metadata', array( __CLASS__, 'get_default_meta' ), 10, 4 );
 	}
 
 	/**
@@ -136,16 +137,6 @@ class Block_Editor {
 			);
 
 			if ( use_block_editor_for_post_type( $post_type ) && empty( $options['meta_box'] ) ) {
-				// Allow these fields to be *set* by the block editor. These will appear as properties of the post's
-				// `meta` property.
-				$default = apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) )
-					? '0'
-					: '1';
-
-				if ( is_older_than( 900 ) ) { // Defaults to global `$post`.
-					$default = '0';
-				}
-
 				register_post_meta(
 					$post_type,
 					'_share_on_mastodon',
@@ -153,7 +144,6 @@ class Block_Editor {
 						'single'            => true,
 						'show_in_rest'      => true,
 						'type'              => 'string',
-						'default'           => $default,
 						'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
 							if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
 								return false;
@@ -194,5 +184,36 @@ class Block_Editor {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns default meta for `_share_on_mastodon`.
+	 *
+	 * @param  mixed  $value     Default value.
+	 * @param  int    $object_id Object ID.
+	 * @param  string $meta_key  Meta key.
+	 * @param  bool   $single    Whether to return only the first value.
+	 * @return mixed             (Filtered) default value.
+	 */
+	public static function get_default_meta( $value, $object_id, $meta_key, $single ) {
+		if ( '_share_on_mastodon' !== $meta_key ) {
+			return $value;
+		}
+
+		$default = '1';
+
+		if ( is_older_than( HOUR_IN_SECONDS / 2, $object_id ) ) {
+			$default = '0';
+		}
+
+		$options = get_options();
+		if ( apply_filters( 'share_on_mastodon_optin', ! empty( $options['optin'] ) ) ) {
+			// Opt-in.
+			$default = '0';
+		}
+
+		return ! $single
+			? array( $default )
+			: $default;
 	}
 }

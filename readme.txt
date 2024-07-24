@@ -2,7 +2,7 @@
 Contributors: janboddez
 Tags: mastodon, social, fediverse, syndication, posse
 Tested up to: 6.6
-Stable tag: 0.19.0
+Stable tag: 0.19.1
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -13,7 +13,7 @@ Automatically share WordPress posts on [Mastodon](https://joinmastodon.org/).
 
 You choose which post types are shared, and sharing can still be disabled on a per-post basis.
 
-Supports image uploads, WordPress' new block editor, and comes with a number of filter hooks for developers.
+Supports WordPress' new block editor, image uploads and alt text, "template tags," and comes with a number of filter hooks for developers.
 
 More details can be found on [this plugin's web page](https://jan.boddez.net/wordpress/share-on-mastodon).
 
@@ -28,6 +28,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's web page](https://jan.boddez.net/wordpress/share-on-mastodon).
 
 == Changelog ==
+= 0.19.1 =
+Disable "block editor" share toggle for older posts. Fix "default" block editor value.
+
 = 0.19.0 =
 Update `share_on_mastodon_enabled` filter. Improve compatibility with Syndication Links. Rework `Options_Handler`.
 
