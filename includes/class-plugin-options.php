@@ -210,6 +210,8 @@ class Plugin_Options extends Options_Handler {
 				<a href="<?php echo esc_url( $this->get_options_url( 'images' ) ); ?>" class="nav-tab <?php echo esc_attr( 'images' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Images', 'share-on-mastodon' ); ?></a>
 				<a href="<?php echo esc_url( $this->get_options_url( 'advanced' ) ); ?>" class="nav-tab <?php echo esc_attr( 'advanced' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Advanced', 'share-on-mastodon' ); ?></a>
 				<a href="<?php echo esc_url( $this->get_options_url( 'debug' ) ); ?>" class="nav-tab <?php echo esc_attr( 'debug' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Debugging', 'share-on-mastodon' ); ?></a>
+
+				<?php do_action( 'share_on_mastodon_settings_after_tab_list', $active_tab ); ?>
 			</h2>
 
 			<?php
@@ -497,6 +499,8 @@ class Plugin_Options extends Options_Handler {
 					<?php
 				endif;
 			endif;
+
+			do_action( 'share_on_mastodon_settings_after_tabs', $active_tab );
 			?>
 		</div>
 		<?php
@@ -563,6 +567,11 @@ class Plugin_Options extends Options_Handler {
 	 * @return string Active tab.
 	 */
 	protected function get_active_tab() {
+		$active_tab = apply_filters( 'share_on_mastodon_active_tab', null );
+		if ( $active_tab ) {
+			return $active_tab;
+		}
+
 		if ( ! empty( $_POST['submit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			// @todo: Add a "_wp_http_referer" form field rather than rely on an HTTP header?
 			$query_string = wp_parse_url( wp_get_referer(), PHP_URL_QUERY );
