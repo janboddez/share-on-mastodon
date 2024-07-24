@@ -137,6 +137,8 @@ class Block_Editor {
 			);
 
 			if ( use_block_editor_for_post_type( $post_type ) && empty( $options['meta_box'] ) ) {
+				// Allow these fields to be *set* by the block editor. These will appear as properties of the post's
+				// `meta` property.
 				register_post_meta(
 					$post_type,
 					'_share_on_mastodon',
