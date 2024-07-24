@@ -142,11 +142,8 @@ class Block_Editor {
 					? '0'
 					: '1';
 
-				global $post;
-				if ( ! empty( $post ) ) {
-					$default = is_older_than( 900, $post )
-						? '0'
-						: $default;
+				if ( is_older_than( 900 ) ) { // Defaults to global `$post`.
+					$default = '0';
 				}
 
 				register_post_meta(
