@@ -29,7 +29,7 @@ More detailed instructions can be found on [this plugin's web page](https://jan.
 
 == Changelog ==
 = 0.19.1 =
-Disable "block editor" share toggle for older posts. Fix "default" block editor value.
+Auto-disable share toggle ("block editor") for older posts. Fix default "share" value. Provide fallback when `mime_content_type()` is undefined.
 
 = 0.19.0 =
 Update `share_on_mastodon_enabled` filter. Improve compatibility with Syndication Links. Rework `Options_Handler`.
