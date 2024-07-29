@@ -175,13 +175,10 @@
 								setMeta( { ...meta, _share_on_mastodon_cw: value } );
 							},
 						} ),
-						el ( 'p', { className: 'description' },
-							__( 'Add a “content warning.”', 'share-on-mastodon' ),
-						),
 					]
 					: null,
 				'1' === customStatusField
-					? [
+					? el( 'div', { style: { marginTop: '1em', marginBottom: '0' } },
 						el( TextareaControl, {
 							label: __( '(Optional) Custom Message', 'share-on-mastodon' ),
 							value: meta._share_on_mastodon_status ?? '',
@@ -192,7 +189,7 @@
 						el ( 'p', { className: 'description' },
 							__( 'Customize this post’s Mastodon status.', 'share-on-mastodon' ),
 						),
-					]
+					)
 					: null,
 				'' !== mastoUrl && isValidUrl( mastoUrl )
 					? el( 'p', { className: 'description', style: { marginTop: '1em', marginBottom: '0' } },

@@ -159,8 +159,8 @@ class Block_Editor {
 					)
 				);
 
+				// No need to register (and thus save) anything we won't be using.
 				if ( ! empty( $options['custom_status_field'] ) ) {
-					// No need to register (and thus save) anything we won't be using.
 					register_post_meta(
 						$post_type,
 						'_share_on_mastodon_status',
@@ -186,7 +186,6 @@ class Block_Editor {
 				}
 
 				if ( ! empty( $options['content_warning'] ) ) {
-					// No need to register (and thus save) anything we won't be using.
 					register_post_meta(
 						$post_type,
 						'_share_on_mastodon_cw',
