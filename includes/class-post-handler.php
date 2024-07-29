@@ -54,12 +54,14 @@ class Post_Handler {
 			return;
 		}
 
+		$options = get_options();
+
+		// Sanitize custom status, if any.
 		if ( isset( $_POST['share_on_mastodon_status'] ) ) {
 			$status = sanitize_textarea_field( wp_unslash( $_POST['share_on_mastodon_status'] ) );
 			$status = preg_replace( '~\R~u', "\r\n", $status );
 		}
 
-		$options = get_options();
 		if (
 			! empty( $status ) && '' !== preg_replace( '~\s~', '', $status ) &&
 			( empty( $options['status_template'] ) || $status !== $options['status_template'] )
@@ -69,6 +71,19 @@ class Post_Handler {
 		} else {
 			// Ignore, or delete a previously stored value.
 			delete_post_meta( $post->ID, '_share_on_mastodon_status' );
+		}
+
+		// Sanitize CW, if any.
+		if ( isset( $_POST['share_on_mastodon_cw'] ) ) {
+			$content_warning = sanitize_text_field( wp_unslash( $_POST['share_on_mastodon_cw'] ) );
+		}
+
+		if ( ! empty( $content_warning ) && '' !== preg_replace( '~\s~', '', $content_warning ) ) {
+			// Save only if `$content_warning` is non-empty and.
+			update_post_meta( $post->ID, '_share_on_mastodon_cw', $content_warning );
+		} else {
+			// Ignore, or delete a previously stored value.
+			delete_post_meta( $post->ID, '_share_on_mastodon_cw' );
 		}
 
 		if ( isset( $_POST['share_on_mastodon'] ) && ! post_password_required( $post ) ) {
@@ -189,6 +204,14 @@ class Post_Handler {
 		if ( apply_filters_deprecated( 'share_on_mastodon_cutoff', array( false ), '0.16.1' ) ) {
 			// May render hashtags or URLs, or unfiltered HTML, at the very end of a toot unusable.
 			$args['status'] = mb_substr( $args['status'], 0, 499, get_bloginfo( 'charset' ) ) . '…';
+		}
+
+		$content_warning = get_post_meta( $post->ID, '_share_on_mastodon_cw', true );
+		$content_warning = (string) apply_filters( 'share_on_mastodon_cw', $content_warning );
+
+		if ( '' !== $content_warning ) {
+			// May render hashtags or URLs, or unfiltered HTML, at the very end of a toot unusable.
+			$args['spoiler_text'] = sanitize_text_field( $content_warning );
 		}
 
 		// Encode, build query string.
@@ -312,6 +335,17 @@ class Post_Handler {
 			<?php esc_html_e( 'Share on Mastodon', 'share-on-mastodon' ); ?>
 		</label>
 		<?php
+		if ( ! empty( $options['content_warning'] ) ) :
+			// Content warning saved earlier, if any.
+			$content_warning = get_post_meta( $post->ID, '_share_on_mastodon_cw', true );
+			?>
+			<div style="margin-top: 1em;">
+				<label for="share_on_mastodon_cw"><?php esc_html_e( '(Optional) Content Warning', 'share-on-mastodon' ); ?></label>
+				<input type="text" id="share_on_mastodon_cw" name="share_on_mastodon_cw" style="width: 100%; box-sizing: border-box; margin-top: 0.5em;" value="<?php echo esc_attr( trim( $content_warning ) ); ?>" />
+			</div>
+			<?php
+		endif;
+
 		if ( ! empty( $options['custom_status_field'] ) ) :
 			// Custom message saved earlier, if any.
 			$custom_status = get_post_meta( $post->ID, '_share_on_mastodon_status', true );
@@ -322,7 +356,7 @@ class Post_Handler {
 			}
 			?>
 			<div style="margin-top: 1em;">
-				<label for="share_on_mastodon_status"><?php esc_html_e( '(Optional) Message', 'share-on-mastodon' ); ?></label>
+				<label for="share_on_mastodon_status"><?php esc_html_e( '(Optional) Custom Message', 'share-on-mastodon' ); ?></label>
 				<textarea id="share_on_mastodon_status" name="share_on_mastodon_status" rows="3" style="width: 100%; box-sizing: border-box; margin-top: 0.5em;"><?php echo esc_html( trim( $custom_status ) ); ?></textarea>
 				<p class="description" style="margin-top: 0.25em;"><?php esc_html_e( 'Customize this post&rsquo;s Mastodon status.', 'share-on-mastodon' ); ?></p>
 			</div>
@@ -430,6 +464,7 @@ class Post_Handler {
 				'nonce'               => wp_create_nonce( basename( __FILE__ ) ),
 				'ajaxurl'             => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 				'custom_status_field' => ! empty( $options['custom_status_field'] ) ? '1' : '0',
+				'content_warning'     => ! empty( $options['content_warning'] ) ? '1' : '0',
 			)
 		);
 	}

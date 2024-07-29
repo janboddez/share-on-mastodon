@@ -184,6 +184,30 @@ class Block_Editor {
 						)
 					);
 				}
+
+				if ( ! empty( $options['content_warning'] ) ) {
+					// No need to register (and thus save) anything we won't be using.
+					register_post_meta(
+						$post_type,
+						'_share_on_mastodon_cw',
+						array(
+							'single'            => true,
+							'show_in_rest'      => true,
+							'type'              => 'string',
+							'default'           => '',
+							'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+								if ( empty( $post_id ) || ! ctype_digit( (string) $post_id ) ) {
+									return false;
+								}
+
+								return current_user_can( 'edit_post', $post_id );
+							},
+							'sanitize_callback' => function ( $content_warning ) {
+								return sanitize_text_field( $content_warning );
+							},
+						)
+					);
+				}
 			}
 		}
 	}

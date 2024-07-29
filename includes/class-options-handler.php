@@ -94,6 +94,10 @@ abstract class Options_Handler {
 			'type'    => 'integer',
 			'default' => 0,
 		),
+		'content_warning'        => array(
+			'type'    => 'boolean',
+			'default' => false,
+		),
 	);
 
 	/**

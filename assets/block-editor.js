@@ -3,6 +3,7 @@
 	const interpolate                = element.createInterpolateElement;
 	const useState                   = element.useState;
 	const TextareaControl            = components.TextareaControl;
+	const TextControl                = components.TextControl;
 	const ToggleControl              = components.ToggleControl;
 	const __                         = i18n.__;
 	const sprintf                    = i18n.sprintf;
@@ -152,6 +153,7 @@
 
 			// Wether to also show the `TextareaControl` component.
 			const customStatusField = share_on_mastodon_obj?.custom_status_field ?? '0';
+			const contentWarning = share_on_mastodon_obj?.content_warning ?? '0';
 
 			return el( PluginDocumentSettingPanel, {
 					name: 'share-on-mastodon-panel',
@@ -164,6 +166,20 @@
 						setMeta( { ...meta, _share_on_mastodon: ( value ? '1' : '0' ) } );
 					},
 				} ),
+				'1' === contentWarning
+					? [
+						el( TextControl, {
+							label: __( '(Optional) Content Warning', 'share-on-mastodon' ),
+							value: meta._share_on_mastodon_cw ?? '',
+							onChange: ( value ) => {
+								setMeta( { ...meta, _share_on_mastodon_cw: value } );
+							},
+						} ),
+						el ( 'p', { className: 'description' },
+							__( 'Add a “content warning.”', 'share-on-mastodon' ),
+						),
+					]
+					: null,
 				'1' === customStatusField
 					? [
 						el( TextareaControl, {

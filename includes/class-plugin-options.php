@@ -174,6 +174,7 @@ class Plugin_Options extends Options_Handler {
 				? preg_replace( '~\R~u', "\r\n", sanitize_textarea_field( $settings['status_template'] ) )
 				: '',
 			'meta_box'            => isset( $settings['meta_box'] ) ? true : false,
+			'content_warning'     => isset( $settings['content_warning'] ) ? true : false,
 		);
 
 		// Updated settings.
@@ -416,10 +417,16 @@ class Plugin_Options extends Options_Handler {
 							<p class="description"><?php printf( esc_html__( 'Customize the default status template. Supported &ldquo;template tags&rdquo;: %s.', 'share-on-mastodon' ), '<code>%title%</code>, <code>%excerpt%</code>, <code>%tags%</code>, <code>%permalink%</code>' ); ?></p></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><span class="label"><?php esc_html_e( 'Customize Status', 'share-on-mastodon' ); ?></span></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'Customize Statuses', 'share-on-mastodon' ); ?></span></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[custom_status_field]" value="1" <?php checked( ! empty( $this->options['custom_status_field'] ) ); ?> /> <?php esc_html_e( 'Allow customizing Mastodon statuses', 'share-on-mastodon' ); ?></label>
 								<?php /* translators: %s: link to the `share_on_mastodon_status` documentation */ ?>
 							<p class="description"><?php printf( esc_html__( 'Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)', 'share-on-mastodon' ), '<a href="https://jan.boddez.net/wordpress/share-on-mastodon#share_on_mastodon_status" target="_blank" rel="noopener noreferrer"><code>share_on_mastodon_status</code></a>' ); ?></p></td>
+						</tr>
+
+						<tr valign="top">
+							<th scope="row"><span class="label"><?php esc_html_e( 'Content Warning', 'share-on-mastodon' ); ?></span></th>
+							<td><label><input type="checkbox" name="share_on_mastodon_settings[content_warning]" value="1" <?php checked( ! empty( $this->options['content_warning'] ) ); ?> /> <?php esc_html_e( 'Enable support for content warnings', 'share-on-mastodon' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Add a &ldquo;Content Warning&rdquo; input field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo;', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 
 						<tr valign="top">
@@ -428,7 +435,7 @@ class Plugin_Options extends Options_Handler {
 							<p class="description"><?php esc_html_e( 'Replace Share on Mastodon&rsquo;s &ldquo;block editor sidebar panel&rdquo; with a &ldquo;classic&rdquo; meta box (even for post types that use the block editor).', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 
-						<?php if ( class_exists( 'Micropub_Endpoint' ) ) : ?>
+						<?php if ( class_exists( '\\Micropub_Endpoint' ) ) : ?>
 							<tr valign="top">
 								<th scope="row"><span class="label"><?php esc_html_e( 'Micropub', 'share-on-mastodon' ); ?></span></th>
 								<td><label><input type="checkbox" name="share_on_mastodon_settings[micropub_compat]" value="1" <?php checked( ! empty( $this->options['micropub_compat'] ) ); ?> /> <?php esc_html_e( 'Add syndication target', 'share-on-mastodon' ); ?></label>
@@ -489,15 +496,7 @@ class Plugin_Options extends Options_Handler {
 						?>
 					</div>
 				</fieldset>
-
 				<?php
-				if ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) ) :
-					$options = apply_filters( 'share_on_mastodon_options', $this->options, get_current_user_id() );
-					?>
-					<p style="margin-top: 2em;"><?php esc_html_e( 'Below information is not meant to be shared with anyone but may help when troubleshooting issues.', 'share-on-mastodon' ); ?></p>
-					<p><textarea class="widefat" rows="5" style="max-width: 67%;"><?php var_export( $options ); ?></textarea></p><?php // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export ?>
-					<?php
-				endif;
 			endif;
 
 			do_action( 'share_on_mastodon_settings_after_tabs', $active_tab );
