@@ -424,7 +424,7 @@ class Plugin_Options extends Options_Handler {
 						</tr>
 
 						<tr valign="top">
-							<th scope="row"><span class="label"><?php esc_html_e( 'Content Warning', 'share-on-mastodon' ); ?></span></th>
+							<th scope="row"><span class="label"><?php esc_html_e( 'Content Warnings', 'share-on-mastodon' ); ?></span></th>
 							<td><label><input type="checkbox" name="share_on_mastodon_settings[content_warning]" value="1" <?php checked( ! empty( $this->options['content_warning'] ) ); ?> /> <?php esc_html_e( 'Enable support for content warnings', 'share-on-mastodon' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Add a &ldquo;Content Warning&rdquo; input field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo;', 'share-on-mastodon' ); ?></p></td>
 						</tr>
