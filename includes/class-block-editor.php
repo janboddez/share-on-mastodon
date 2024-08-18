@@ -17,6 +17,8 @@ class Block_Editor {
 		add_action( 'rest_api_init', array( __CLASS__, 'register_api_endpoints' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'register_meta' ) );
 		add_filter( 'default_post_metadata', array( __CLASS__, 'get_default_meta' ), 10, 4 );
+		add_filter( 'add_post_metadata', array( __CLASS__, 'maybe_skip_save_meta' ), 10, 4 );
+		add_filter( 'update_post_metadata', array( __CLASS__, 'maybe_skip_save_meta' ), 10, 4 );
 	}
 
 	/**
@@ -240,5 +242,28 @@ class Block_Editor {
 		return ! $single
 			? array( $default )
 			: $default;
+	}
+
+	/**
+	 * Bypasses saving post meta when doing so would not have any effect.
+	 *
+	 * @param  mixed  $check      Whether to allow updating metadata for the given type.
+	 * @param  int    $object_id  Object ID.
+	 * @param  string $meta_key   Meta key.
+	 * @param  mixed  $meta_value Metadata value.
+	 * @return mixed              Whether to allow updating metadata for the given type. A _non-null_ value will bypass updating.
+	 */
+	public static function maybe_skip_save_meta( $check, $object_id, $meta_key, $meta_value ) {
+		if ( '_share_on_mastodon_status' === $meta_key && '' === $meta_value && null === get_metadata_raw( 'post', $object_id, $meta_key, true ) ) {
+			// No current value exists, but the new value would equal the default. No need to save, then.
+			return true;
+		}
+
+		if ( '_share_on_mastodon_cw' === $meta_key && '' === $meta_value && null === get_metadata_raw( 'post', $object_id, $meta_key, true ) ) {
+			// No current value exists, but the new value would equal the default. No need to save, then.
+			return true;
+		}
+
+		return $check;
 	}
 }
