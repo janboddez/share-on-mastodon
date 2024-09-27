@@ -95,7 +95,7 @@ function attachment_url_to_postid( $url ) {
 /**
  * Determines whether a post is older than a certain number of seconds.
  *
- * @param  int          $seconds Minimum "age," in secondss.
+ * @param  int          $seconds Minimum "age," in seconds.
  * @param  int|\WP_Post $post    Post ID or object. Defaults to global `$post`.
  * @return bool                  True if the post exists and is older than `$seconds`, false otherwise.
  */
