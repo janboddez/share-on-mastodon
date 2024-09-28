@@ -173,6 +173,7 @@ abstract class Options_Handler {
 					$args,
 					array_filter(
 						array(
+							'host'          => $this->options['mastodon_host'],
 							'client_id'     => $app->client_id,
 							'client_secret' => $app->client_secret,
 							'vapid_key'     => isset( $app->vapid_key ) ? $app->vapid_key : null,
