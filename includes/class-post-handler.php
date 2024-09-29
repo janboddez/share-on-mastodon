@@ -105,6 +105,7 @@ class Post_Handler {
 
 		if ( 0 === strpos( current_action(), 'save_' ) && defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 			// For REST requests, we use a *later* hook, which runs *after* metadata, if any, has been saved.
+			debug_log( "[Share on Mastodon] Delaying scheduling to `rest_after_insert_{$post->post_type}`." );
 			add_action( "rest_after_insert_{$post->post_type}", array( $this, 'toot' ), 20 );
 
 			// Don't do anything just yet.
@@ -113,6 +114,7 @@ class Post_Handler {
 
 		$options = get_options();
 		if ( ! empty( $options['meta_box'] && $this->is_gutenberg() && empty( $_REQUEST['meta-box-loader'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			debug_log( '[Share on Mastodon] First of two expected requests. Quitting.' );
 			// This has to be the first of *two* "Gutenberg requests," and we should ignore it. Note: It could be that
 			// `$this->is_gutenberg()` always returns `false` whenever `$_REQUEST['meta-box-loader']` is present.
 			// Still, doesn't hurt to check.
@@ -125,6 +127,7 @@ class Post_Handler {
 		}
 
 		if ( ! $this->setup_completed( $post ) ) {
+			debug_log( '[Share on Mastodon] Setup incomplete.' );
 			return;
 		}
 
@@ -161,6 +164,7 @@ class Post_Handler {
 		}
 
 		if ( ! $this->is_valid( $post ) ) {
+			debug_log( '[Share on Mastodon] Skipping post.' );
 			return;
 		}
 
@@ -241,6 +245,8 @@ class Post_Handler {
 			}
 		}
 
+		debug_log( '[Share on Mastodon] Posting to Mastodon ...' );
+
 		$response = wp_safe_remote_post(
 			esc_url_raw( $options['mastodon_host'] . '/api/v1/statuses' ),
 			array(
@@ -264,6 +270,8 @@ class Post_Handler {
 		$status = json_decode( $response['body'] );
 
 		if ( ! empty( $status->url ) ) {
+			debug_log( "[Share on Mastodon] Post shared OK at {$status->url}." );
+
 			delete_post_meta( $post->ID, '_share_on_mastodon_error' );
 			update_post_meta( $post->ID, '_share_on_mastodon_url', esc_url_raw( $status->url ) );
 
@@ -282,6 +290,8 @@ class Post_Handler {
 			// Provided debugging's enabled, let's store the (somehow faulty) response.
 			debug_log( $response );
 		}
+
+		debug_log( '[Share on Mastodon] All done!' );
 	}
 
 	/**
@@ -478,11 +488,13 @@ class Post_Handler {
 	protected function is_valid( $post ) {
 		if ( 'publish' !== $post->post_status ) {
 			// Status is something other than `publish`.
+			debug_log( '[Share on Mastodon] Post not public.' );
 			return false;
 		}
 
 		if ( post_password_required( $post ) ) {
 			// Post is password-protected.
+			debug_log( '[Share on Mastodon] Post password-protected.' );
 			return false;
 		}
 
@@ -490,17 +502,20 @@ class Post_Handler {
 
 		if ( ! in_array( $post->post_type, (array) $options['post_types'], true ) ) {
 			// Unsupported post type.
+			debug_log( '[Share on Mastodon] Unsupported post type.' );
 			return false;
 		}
 
 		if ( '' !== get_post_meta( $post->ID, '_share_on_mastodon_url', true ) ) {
 			// Was shared before (and not "unlinked").
+			debug_log( '[Share on Mastodon] Post shared before.' );
 			return false;
 		}
 
 		if ( is_older_than( DAY_IN_SECONDS / 2, $post ) && '1' !== get_post_meta( $post->ID, '_share_on_mastodon', true ) ) {
 			// Unless the box was ticked explicitly, we won't share "older" posts. Since v0.13.0, sharing "older" posts
 			// is "opt-in," always.
+			debug_log( '[Share on Mastodon] Preventing older post from being shared automatically.' );
 			return false;
 		}
 
@@ -649,6 +664,10 @@ class Post_Handler {
 	protected function is_gutenberg() {
 		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
 			// Not a REST request.
+			return false;
+		}
+
+		if ( wp_doing_cron() ) {
 			return false;
 		}
 
