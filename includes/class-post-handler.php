@@ -113,11 +113,20 @@ class Post_Handler {
 		}
 
 		$options = get_options();
-		if ( ! empty( $options['meta_box'] && $this->is_gutenberg() && empty( $_REQUEST['meta-box-loader'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			debug_log( '[Share on Mastodon] First of two expected requests. Quitting.' );
+		if ( ! empty( $options['meta_box'] ) && $this->is_gutenberg() && empty( $_REQUEST['meta-box-loader'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			// This has to be the first of *two* "Gutenberg requests," and we should ignore it. Note: It could be that
 			// `$this->is_gutenberg()` always returns `false` whenever `$_REQUEST['meta-box-loader']` is present.
 			// Still, doesn't hurt to check.
+			debug_log( '[Share on Mastodon] First of two expected requests. Quitting.' );
+
+			return;
+		}
+
+		if ( empty( $options['meta_box'] ) && ! $this->is_gutenberg() && ! empty( $_REQUEST['meta-box-loader'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// This has to be that second "Gutenberg request," and *because we ourselves don't rely on a "classic" meta
+			// box*, it should be safe to ignore it.
+			debug_log( '[Share on Mastodon] Second, yet irrelevant (to us) request. Quitting.' );
+
 			return;
 		}
 
