@@ -122,7 +122,7 @@ class Post_Handler {
 			return;
 		}
 
-		if ( empty( $options['meta_box'] ) && ! $this->is_gutenberg() && ! empty( $_REQUEST['meta-box-loader'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $options['meta_box'] ) && ! empty( $_REQUEST['meta-box-loader'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			// This has to be that second "Gutenberg request," and *because we ourselves don't rely on a "classic" meta
 			// box*, it should be safe to ignore it.
 			debug_log( '[Share on Mastodon] Second, yet irrelevant (to us) request. Quitting.' );
