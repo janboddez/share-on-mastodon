@@ -1,54 +1,61 @@
-# Copyright (C) 2024 Jan Boddez
+# Copyright (C) 2025 Jan Boddez
 # This file is distributed under the GNU General Public License v3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Share on Mastodon 0.19.0\n"
+"Project-Id-Version: Share on Mastodon 0.19.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/share-on-mastodon\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-07-03T15:44:35+00:00\n"
+"POT-Creation-Date: 2025-06-22T18:35:36+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.6.0\n"
+"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: share-on-mastodon\n"
 
 #. Plugin Name of the plugin
-#: includes/class-options-handler.php:143
+#: share-on-mastodon.php
+#: includes/class-options-handler.php:147
 #: includes/class-plugin-options.php:41
 #: includes/class-plugin-options.php:42
-#: includes/class-plugin-options.php:205
-#: includes/class-post-handler.php:284
-#: includes/class-post-handler.php:312
+#: includes/class-plugin-options.php:206
+#: includes/class-post-handler.php:326
+#: includes/class-post-handler.php:354
 #: assets/block-editor.js:160
 #: assets/block-editor.js:163
 msgid "Share on Mastodon"
 msgstr ""
 
 #. Plugin URI of the plugin
+#: share-on-mastodon.php
 msgid "https://jan.boddez.net/wordpress/share-on-mastodon"
 msgstr ""
 
 #. Description of the plugin
+#: share-on-mastodon.php
 msgid "Easily share WordPress posts on Mastodon."
 msgstr ""
 
 #. Author of the plugin
+#: share-on-mastodon.php
 msgid "Jan Boddez"
 msgstr ""
 
 #. Author URI of the plugin
+#: share-on-mastodon.php
 msgid "https://jan.boddez.net/"
 msgstr ""
 
 #. translators: %s: error message
 #: includes/class-notices.php:50
+#, php-format
 msgid "Share on Mastodon ran into the following error: %s"
 msgstr ""
 
 #. translators: %s: link to Mastodon status
 #: includes/class-notices.php:71
+#, php-format
 msgid "Shared on Mastodon at %s."
 msgstr ""
 
@@ -56,291 +63,319 @@ msgstr ""
 msgid "Please provide a valid URL."
 msgstr ""
 
-#: includes/class-plugin-options.php:208
+#: includes/class-plugin-options.php:209
 msgid "Setup"
 msgstr ""
 
-#: includes/class-plugin-options.php:209
+#: includes/class-plugin-options.php:210
 msgid "Post Types"
 msgstr ""
 
-#: includes/class-plugin-options.php:210
+#: includes/class-plugin-options.php:211
 msgid "Images"
 msgstr ""
 
-#: includes/class-plugin-options.php:211
+#: includes/class-plugin-options.php:212
 msgid "Advanced"
 msgstr ""
 
-#: includes/class-plugin-options.php:212
+#: includes/class-plugin-options.php:213
 msgid "Debugging"
 msgstr ""
 
-#: includes/class-plugin-options.php:226
+#: includes/class-plugin-options.php:229
 msgid "Instance"
 msgstr ""
 
 #. translators: %s: example URL.
-#: includes/class-plugin-options.php:229
+#: includes/class-plugin-options.php:232
+#, php-format
 msgid "Your Mastodon instance&rsquo;s URL. E.g., %s."
 msgstr ""
 
 #: includes/class-plugin-options.php:235
-#: includes/class-plugin-options.php:277
+#: includes/class-plugin-options.php:350
+#: includes/class-plugin-options.php:385
+#: includes/class-plugin-options.php:454
+#: includes/class-plugin-options.php:474
+msgid "Save Changes"
+msgstr ""
+
+#: includes/class-plugin-options.php:238
+#: includes/class-plugin-options.php:280
 msgid "Authorize Access"
 msgstr ""
 
-#: includes/class-plugin-options.php:251
+#: includes/class-plugin-options.php:254
 msgid "Access granted!"
 msgstr ""
 
-#: includes/class-plugin-options.php:276
+#: includes/class-plugin-options.php:279
 msgid "Authorize WordPress to read and write to your Mastodon timeline in order to enable syndication."
 msgstr ""
 
-#: includes/class-plugin-options.php:282
+#: includes/class-plugin-options.php:285
 msgid "You&rsquo;ve authorized WordPress to read and write to your Mastodon timeline."
 msgstr ""
 
-#: includes/class-plugin-options.php:297
+#: includes/class-plugin-options.php:300
 msgid "Revoke Access"
 msgstr ""
 
-#: includes/class-plugin-options.php:306
+#: includes/class-plugin-options.php:309
 msgid "Something went wrong contacting your Mastodon instance. Please reload this page to try again."
 msgstr ""
 
-#: includes/class-plugin-options.php:312
+#: includes/class-plugin-options.php:315
 msgid "Please fill out and save your Mastodon instance&rsquo;s URL first."
 msgstr ""
 
-#: includes/class-plugin-options.php:329
+#: includes/class-plugin-options.php:332
 msgid "Supported Post Types"
 msgstr ""
 
-#: includes/class-plugin-options.php:344
+#: includes/class-plugin-options.php:347
 msgid "Post types for which sharing to Mastodon is possible. (Sharing can still be disabled on a per-post basis.)"
 msgstr ""
 
-#: includes/class-plugin-options.php:361
+#: includes/class-plugin-options.php:364
 msgid "Max. No. of Images"
 msgstr ""
 
-#: includes/class-plugin-options.php:363
+#: includes/class-plugin-options.php:366
 msgid "The maximum number of images that will be uploaded. (Mastodon supports up to 4 images.)"
 msgstr ""
 
-#: includes/class-plugin-options.php:366
+#: includes/class-plugin-options.php:369
 msgid "Featured Images"
 msgstr ""
 
-#: includes/class-plugin-options.php:367
+#: includes/class-plugin-options.php:370
 msgid "Include featured images"
 msgstr ""
 
-#: includes/class-plugin-options.php:368
+#: includes/class-plugin-options.php:371
 msgid "Upload featured images."
 msgstr ""
 
-#: includes/class-plugin-options.php:371
+#: includes/class-plugin-options.php:374
 msgid "In-Post Images"
 msgstr ""
 
-#: includes/class-plugin-options.php:372
+#: includes/class-plugin-options.php:375
 msgid "Include &ldquo;in-post&rdquo; images"
 msgstr ""
 
-#: includes/class-plugin-options.php:373
+#: includes/class-plugin-options.php:376
 msgid "Upload &ldquo;in-content&rdquo; images. (Limited to images in the Media Library.)"
 msgstr ""
 
-#: includes/class-plugin-options.php:376
+#: includes/class-plugin-options.php:379
 msgid "Attached Images"
 msgstr ""
 
-#: includes/class-plugin-options.php:377
+#: includes/class-plugin-options.php:380
 msgid "Include attached images"
 msgstr ""
 
 #. translators: %s: link to official WordPress documentation.
-#: includes/class-plugin-options.php:379
+#: includes/class-plugin-options.php:382
+#, php-format
 msgid "Upload %s."
 msgstr ""
 
 #. translators: %s: link to official WordPress documentation.
-#: includes/class-plugin-options.php:379
+#: includes/class-plugin-options.php:382
 msgid "attached images"
 msgstr ""
 
-#: includes/class-plugin-options.php:396
+#: includes/class-plugin-options.php:399
 msgid "Delayed Sharing"
 msgstr ""
 
-#: includes/class-plugin-options.php:398
+#: includes/class-plugin-options.php:401
 msgid "The number of seconds (0&ndash;3600) WordPress should delay sharing after a post is first published. (Setting this to, e.g., &ldquo;300&rdquo;&mdash;that&rsquo;s 5 minutes&mdash;may resolve issues with image uploads.)"
 msgstr ""
 
-#: includes/class-plugin-options.php:401
+#: includes/class-plugin-options.php:404
 msgid "Opt-In"
 msgstr ""
 
-#: includes/class-plugin-options.php:402
+#: includes/class-plugin-options.php:405
 msgid "Make sharing opt-in rather than opt-out"
 msgstr ""
 
-#: includes/class-plugin-options.php:403
+#: includes/class-plugin-options.php:406
 msgid "Have the &ldquo;Share on Mastodon&rdquo; checkbox unchecked by default."
 msgstr ""
 
-#: includes/class-plugin-options.php:406
+#: includes/class-plugin-options.php:409
 msgid "Share Always"
 msgstr ""
 
-#: includes/class-plugin-options.php:407
+#: includes/class-plugin-options.php:410
 msgid "Always share on Mastodon"
 msgstr ""
 
-#: includes/class-plugin-options.php:408
+#: includes/class-plugin-options.php:411
 msgid "&ldquo;Force&rdquo; sharing (regardless of the &ldquo;Share on Mastodon&rdquo; checkbox&rsquo;s state), like when posting from a mobile app."
 msgstr ""
 
-#: includes/class-plugin-options.php:411
+#: includes/class-plugin-options.php:414
 msgid "Status Template"
 msgstr ""
 
 #. translators: %s: supported template tags
-#: includes/class-plugin-options.php:414
+#: includes/class-plugin-options.php:417
+#, php-format
 msgid "Customize the default status template. Supported &ldquo;template tags&rdquo;: %s."
 msgstr ""
 
-#: includes/class-plugin-options.php:417
-msgid "Customize Status"
+#: includes/class-plugin-options.php:420
+msgid "Customize Statuses"
 msgstr ""
 
-#: includes/class-plugin-options.php:418
+#: includes/class-plugin-options.php:421
 msgid "Allow customizing Mastodon statuses"
 msgstr ""
 
 #. translators: %s: link to the `share_on_mastodon_status` documentation
-#: includes/class-plugin-options.php:420
+#: includes/class-plugin-options.php:423
+#, php-format
 msgid "Add a custom &ldquo;Message&rdquo; field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo; (For more fine-grained control, please have a look at the %s filter instead.)"
 msgstr ""
 
-#: includes/class-plugin-options.php:424
-msgid "Meta Box"
+#: includes/class-plugin-options.php:427
+msgid "Content Warnings"
 msgstr ""
 
-#: includes/class-plugin-options.php:425
-msgid "Use &ldquo;classic&rdquo; meta box"
+#: includes/class-plugin-options.php:428
+msgid "Enable support for content warnings"
 msgstr ""
 
-#: includes/class-plugin-options.php:426
-msgid "Replace Share on Mastodon&rsquo;s &ldquo;block editor sidebar panel&rdquo; with a &ldquo;classic&rdquo; meta box (even for post types that use the block editor)."
-msgstr ""
-
-#: includes/class-plugin-options.php:431
-msgid "Micropub"
-msgstr ""
-
-#: includes/class-plugin-options.php:432
-msgid "Add syndication target"
+#: includes/class-plugin-options.php:429
+msgid "Add a &ldquo;Content Warning&rdquo; input field to Share on Mastodon&rsquo;s &ldquo;meta box.&rdquo;"
 msgstr ""
 
 #: includes/class-plugin-options.php:433
-msgid "Add &ldquo;Mastodon&rdquo; as a Micropub syndication target."
+msgid "Meta Box"
 msgstr ""
 
-#: includes/class-plugin-options.php:439
-msgid "Syndication Links"
+#: includes/class-plugin-options.php:434
+msgid "Use &ldquo;classic&rdquo; meta box"
+msgstr ""
+
+#: includes/class-plugin-options.php:435
+msgid "Replace Share on Mastodon&rsquo;s &ldquo;block editor sidebar panel&rdquo; with a &ldquo;classic&rdquo; meta box (even for post types that use the block editor)."
 msgstr ""
 
 #: includes/class-plugin-options.php:440
-msgid "Add Mastodon URLs to syndication links"
+msgid "Micropub"
 msgstr ""
 
 #: includes/class-plugin-options.php:441
+msgid "Add syndication target"
+msgstr ""
+
+#: includes/class-plugin-options.php:442
+msgid "Add &ldquo;Mastodon&rdquo; as a Micropub syndication target."
+msgstr ""
+
+#: includes/class-plugin-options.php:448
+msgid "Syndication Links"
+msgstr ""
+
+#: includes/class-plugin-options.php:449
+msgid "Add Mastodon URLs to syndication links"
+msgstr ""
+
+#: includes/class-plugin-options.php:450
 msgid "(Experimental) Add Mastodon URLs to Syndication Links&rsquo; list of syndication links."
 msgstr ""
 
-#: includes/class-plugin-options.php:459
+#: includes/class-plugin-options.php:468
 msgid "Logging"
 msgstr ""
 
-#: includes/class-plugin-options.php:460
+#: includes/class-plugin-options.php:469
 msgid "Enable debug logging"
 msgstr ""
 
 #. translators: %s: link to the official WordPress documentation
-#: includes/class-plugin-options.php:462
+#: includes/class-plugin-options.php:471
+#, php-format
 msgid "You&rsquo;ll also need to set WordPress&rsquo; %s."
 msgstr ""
 
 #. translators: %s: link to the official WordPress documentation
-#: includes/class-plugin-options.php:462
+#: includes/class-plugin-options.php:471
 msgid "debug logging constants"
 msgstr ""
 
-#: includes/class-plugin-options.php:471
+#: includes/class-plugin-options.php:478
+msgid "Danger Zone"
+msgstr ""
+
+#: includes/class-plugin-options.php:480
 msgid "Just in case, this button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)"
 msgstr ""
 
-#: includes/class-plugin-options.php:485
+#: includes/class-plugin-options.php:494
 msgid "Reset Settings"
 msgstr ""
 
-#: includes/class-plugin-options.php:495
-msgid "Below information is not meant to be shared with anyone but may help when troubleshooting issues."
-msgstr ""
-
-#: includes/class-plugin-options.php:522
+#: includes/class-plugin-options.php:525
 msgid "Are you sure you want to reset all settings?"
 msgstr ""
 
-#: includes/class-plugin-options.php:531
+#: includes/class-plugin-options.php:534
 msgid "You have insufficient permissions to access this page."
 msgstr ""
 
-#: includes/class-post-handler.php:325
-msgid "(Optional) Message"
+#: includes/class-post-handler.php:362
+#: assets/block-editor.js:172
+msgid "(Optional) Content Warning"
 msgstr ""
 
-#: includes/class-post-handler.php:327
+#: includes/class-post-handler.php:378
+#: assets/block-editor.js:183
+msgid "(Optional) Custom Message"
+msgstr ""
+
+#: includes/class-post-handler.php:380
 msgid "Customize this post&rsquo;s Mastodon status."
 msgstr ""
 
 #. translators: toot URL
-#: includes/class-post-handler.php:343
-#: assets/block-editor.js:185
+#: includes/class-post-handler.php:396
+#: assets/block-editor.js:196
+#, php-format,js-format
 msgid "Shared at %s"
 msgstr ""
 
 #. translators: "unlink" link text
-#: includes/class-post-handler.php:345
-#: assets/block-editor.js:199
+#: includes/class-post-handler.php:398
+#: assets/block-editor.js:210
 msgid "Unlink"
 msgstr ""
 
-#: includes/class-post-handler.php:367
+#: includes/class-post-handler.php:420
 msgid "Missing or invalid nonce."
 msgstr ""
 
-#: includes/class-post-handler.php:373
+#: includes/class-post-handler.php:426
 msgid "Missing or incorrect post ID."
 msgstr ""
 
-#: includes/class-post-handler.php:379
+#: includes/class-post-handler.php:432
 msgid "Insufficient rights."
 msgstr ""
 
-#: includes/class-post-handler.php:428
-#: assets/block-editor.js:194
+#: includes/class-post-handler.php:481
+#: assets/block-editor.js:205
 msgid "Forget this URL?"
 msgstr ""
 
-#: assets/block-editor.js:172
-msgid "(Optional) Custom Message"
-msgstr ""
-
-#: assets/block-editor.js:179
+#: assets/block-editor.js:190
 msgid "Customize this post’s Mastodon status."
 msgstr ""

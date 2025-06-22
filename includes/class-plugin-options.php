@@ -232,7 +232,7 @@ class Plugin_Options extends Options_Handler {
 							<p class="description"><?php printf( esc_html__( 'Your Mastodon instance&rsquo;s URL. E.g., %s.', 'share-on-mastodon' ), '<code>https://mastodon.online</code>' ); ?></p></td>
 						</tr>
 					</table>
-					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+					<p class="submit"><?php submit_button( __( 'Save Changes', 'share-on-mastodon' ), 'primary', 'submit', false ); ?></p>
 				</form>
 
 				<h3><?php esc_html_e( 'Authorize Access', 'share-on-mastodon' ); ?></h3>
@@ -347,7 +347,7 @@ class Plugin_Options extends Options_Handler {
 							<p class="description"><?php esc_html_e( 'Post types for which sharing to Mastodon is possible. (Sharing can still be disabled on a per-post basis.)', 'share-on-mastodon' ); ?></p></td>
 						</tr>
 					</table>
-					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+					<p class="submit"><?php submit_button( __( 'Save Changes', 'share-on-mastodon' ), 'primary', 'submit', false ); ?></p>
 				</form>
 				<?php
 			endif;
@@ -382,7 +382,7 @@ class Plugin_Options extends Options_Handler {
 							<p class="description"><?php printf( esc_html__( 'Upload %s.', 'share-on-mastodon' ), sprintf( '<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>', 'https://wordpress.org/documentation/article/use-image-and-file-attachments/#attachment-to-a-post', esc_html__( 'attached images', 'share-on-mastodon' ) ) ); ?></p></td>
 						</tr>
 					</table>
-					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+					<p class="submit"><?php submit_button( __( 'Save Changes', 'share-on-mastodon' ), 'primary', 'submit', false ); ?></p>
 				</form>
 				<?php
 			endif;
@@ -451,7 +451,7 @@ class Plugin_Options extends Options_Handler {
 							</tr>
 						<?php endif; ?>
 					</table>
-					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+					<p class="submit"><?php submit_button( __( 'Save Changes', 'share-on-mastodon' ), 'primary', 'submit', false ); ?></p>
 				</form>
 				<?php
 			endif;
@@ -471,11 +471,11 @@ class Plugin_Options extends Options_Handler {
 							<p class="description"><?php printf( esc_html__( 'You&rsquo;ll also need to set WordPress&rsquo; %s.', 'share-on-mastodon' ), sprintf( '<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>', 'https://wordpress.org/documentation/article/debugging-in-wordpress/#example-wp-config-php-for-debugging', esc_html__( 'debug logging constants', 'share-on-mastodon' ) ) ); ?></p></td>
 						</tr>
 					</table>
-					<p class="submit"><?php submit_button( __( 'Save Changes' ), 'primary', 'submit', false ); ?></p>
+					<p class="submit"><?php submit_button( __( 'Save Changes', 'share-on-mastodon' ), 'primary', 'submit', false ); ?></p>
 				</form>
 
 				<fieldset>
-					<legend><?php esc_html_e( 'Danger Zone', 'feed-reader' ); ?></legend>
+					<legend><?php esc_html_e( 'Danger Zone', 'share-on-mastodon' ); ?></legend>
 					<div class="form-group">
 						<p><?php esc_html_e( 'Just in case, this button lets you delete Share on Mastodon&rsquo;s settings. Note: This will not invalidate previously issued tokens! (You can, however, still invalidate them on your instance&rsquo;s &ldquo;Account &gt; Authorized apps&rdquo; page.)', 'share-on-mastodon' ); ?></p>
 						<?php
