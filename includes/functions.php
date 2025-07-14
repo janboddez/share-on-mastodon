@@ -47,6 +47,16 @@ function get_options( $user_id = 0 ) {
  * @return int         The found post ID, or 0 on failure.
  */
 function attachment_url_to_postid( $url ) {
+	if ( str_starts_with( $url, 'data:' ) ) {
+		// Nothing to do.
+		return 0;
+	}
+
+	if ( strlen( $url ) > ( 2 * 2084 ) ) {
+		// 2,084 is sometimes seen as a practical maximum URL length, so anything over *twice* that is likely not a URL.
+		return 0;
+	}
+
 	global $wpdb;
 
 	$dir  = wp_get_upload_dir();
@@ -68,20 +78,25 @@ function attachment_url_to_postid( $url ) {
 
 	$sql = $wpdb->prepare(
 		"SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value REGEXP %s",
-		str_replace( $filename, "$filename(-scaled)*", $path ) // This is really the only change here.
+		// Thing is, we *might* elsewhere have stripped away suffixes like `-scaled`, so now we have to allow for them.
+		str_replace(
+			preg_quote( $filename, null ),
+			preg_quote( $filename, null ) . '(-scaled)*', /** @todo How 'bout `-rotated`? */
+			preg_quote( $path, null )
+		)
 	);
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 	$results = $wpdb->get_results( $sql );
-	$post_id = null;
+	$post_id = 0;
 
 	if ( $results ) {
-		// Use the first available result, but prefer a case-sensitive match, if exists.
 		$post_id = reset( $results )->post_id;
 
 		if ( count( $results ) > 1 ) {
 			foreach ( $results as $result ) {
 				if ( $path === $result->meta_value ) {
+					// If a case-sensitive match exists, use that instead.
 					$post_id = $result->post_id;
 					break;
 				}
