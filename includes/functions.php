@@ -74,16 +74,16 @@ function attachment_url_to_postid( $url ) {
 		$path = substr( $path, strlen( $dir['baseurl'] . '/' ) );
 	}
 
-	$filename = pathinfo( $path, PATHINFO_FILENAME ); // The bit before the (last) file extension (if any).
+	$extension           = pathinfo( $path, PATHINFO_EXTENSION );
+	$path_sans_extension = ! empty( $extension )
+		? preg_replace( "~\.{$extension}$~", '', $path )
+		: $path;
 
 	$sql = $wpdb->prepare(
-		"SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value REGEXP %s",
-		// Thing is, we *might* elsewhere have stripped away suffixes like `-scaled`, so now we have to allow for them.
-		str_replace(
-			preg_quote( $filename, null ),
-			preg_quote( $filename, null ) . '(-scaled)*', /** @todo How 'bout `-rotated`? */
-			preg_quote( $path, null )
-		)
+		"SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND (meta_value = %s OR meta_value = %s OR meta_value = %s) LIMIT 1",
+		$path,
+		"{$path_sans_extension}-scaled" . ( ! empty( $extension ) ? ".{$extension}" : '' ),
+		"{$path_sans_extension}-rotated" . ( ! empty( $extension ) ? ".{$extension}" : '' )
 	);
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
