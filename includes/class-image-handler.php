@@ -32,20 +32,12 @@ class Image_Handler {
 			return array();
 		}
 
-		// Always parse post content for images and alt text.
-		$referenced_images = static::get_referenced_images( $post );
-
 		// Alright, let's get started.
 		$media_ids = array();
 
 		if ( $enable_featured_image ) {
 			// Include featured image.
 			$media_ids[] = get_post_thumbnail_id( $post->ID );
-		}
-
-		if ( $enable_referenced_images && ! empty( $referenced_images ) ) {
-			// Add in-post images.
-			$media_ids = array_merge( $media_ids, array_keys( $referenced_images ) ); // We're interested only in the IDs, for now.
 		}
 
 		if ( $enable_attached_images ) {
@@ -57,6 +49,18 @@ class Image_Handler {
 					$media_ids[] = $attachment->ID;
 				}
 			}
+		}
+
+		$referenced_images = array();
+
+		if ( $enable_referenced_images || ! empty( $media_ids ) ) {
+			// Parse post content for images and alt text.
+			$referenced_images = static::get_referenced_images( $post );
+		}
+
+		if ( $enable_referenced_images && ! empty( $referenced_images ) ) {
+			// Actually add any in-post images.
+			$media_ids = array_merge( $media_ids, array_keys( $referenced_images ) ); // We're interested only in the IDs, for now.
 		}
 
 		// Remove duplicates, and (even though it isn't _really_ needed) reindex.
