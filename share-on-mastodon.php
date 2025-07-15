@@ -8,7 +8,7 @@
  * License:           GNU General Public License v3
  * License URI:       http://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain:       share-on-mastodon
- * Version:           0.19.2
+ * Version:           0.19.3
  * Requires at least: 5.9
  * Requires PHP:      7.2
  *
