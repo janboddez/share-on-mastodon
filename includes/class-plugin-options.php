@@ -163,6 +163,15 @@ class Plugin_Options extends Options_Handler {
 			: 0;
 		$delay = min( $delay, HOUR_IN_SECONDS ); // Limit to one hour.
 
+		$status_template = '';
+		if ( isset( $settings['status_template'] ) && is_string( $settings['status_template'] ) ) {
+			// Prevent the `%ca` in `%category%` from being mistaken for a percentage-encoded character.
+			$status_template = str_replace( '%category%', '%yrogetac%', $settings['status_template'] );
+			$status_template = sanitize_textarea_field( $status_template );
+			$status_template = str_replace( '%yrogetac%', '%category%', $status_template ); // Undo what we did before.
+			$status_template = preg_replace( '~\R~u', "\r\n", $status_template );
+		}
+
 		$options = array(
 			'optin'               => isset( $settings['optin'] ) ? true : false,
 			'share_always'        => isset( $settings['share_always'] ) ? true : false,
@@ -170,9 +179,7 @@ class Plugin_Options extends Options_Handler {
 			'micropub_compat'     => isset( $settings['micropub_compat'] ) ? true : false,
 			'syn_links_compat'    => isset( $settings['syn_links_compat'] ) ? true : false,
 			'custom_status_field' => isset( $settings['custom_status_field'] ) ? true : false,
-			'status_template'     => isset( $settings['status_template'] ) && is_string( $settings['status_template'] )
-				? preg_replace( '~\R~u', "\r\n", sanitize_textarea_field( $settings['status_template'] ) )
-				: '',
+			'status_template'     => $status_template,
 			'meta_box'            => isset( $settings['meta_box'] ) ? true : false,
 			'content_warning'     => isset( $settings['content_warning'] ) ? true : false,
 		);
@@ -414,7 +421,7 @@ class Plugin_Options extends Options_Handler {
 							<th scope="row"><label for="share_on_mastodon_status_template"><?php esc_html_e( 'Status Template', 'share-on-mastodon' ); ?></label></th>
 							<td><textarea name="share_on_mastodon_settings[status_template]" id="share_on_mastodon_status_template" rows="5" style="min-width: 33%;"><?php echo ! empty( $this->options['status_template'] ) ? esc_html( $this->options['status_template'] ) : ''; ?></textarea>
 							<?php /* translators: %s: supported template tags */ ?>
-							<p class="description"><?php printf( esc_html__( 'Customize the default status template. Supported &ldquo;template tags&rdquo;: %s.', 'share-on-mastodon' ), '<code>%title%</code>, <code>%excerpt%</code>, <code>%tags%</code>, <code>%permalink%</code>' ); ?></p></td>
+							<p class="description"><?php printf( esc_html__( 'Customize the default status template. Supported &ldquo;template tags&rdquo;: %s.', 'share-on-mastodon' ), '<code>%title%</code>, <code>%excerpt%</code>, <code>%tags%</code>, <code>%category%</code>, <code>%permalink%</code>' ); ?></p></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><span class="label"><?php esc_html_e( 'Customize Statuses', 'share-on-mastodon' ); ?></span></th>

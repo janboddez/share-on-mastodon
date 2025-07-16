@@ -179,7 +179,10 @@ class Block_Editor {
 								return current_user_can( 'edit_post', $post_id );
 							},
 							'sanitize_callback' => function ( $status ) {
+								// Prevent the `%ca` in `%category%` from being mistaken for a percentage-encoded character.
+								$status = str_replace( '%category%', '%yrogetac%', $status );
 								$status = sanitize_textarea_field( $status );
+								$status = str_replace( '%yrogetac%', '%category%', $status ); // Undo what we did before.
 								$status = preg_replace( '~\R~u', "\r\n", $status );
 								return $status;
 							},

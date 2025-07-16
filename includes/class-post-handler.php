@@ -555,6 +555,7 @@ class Post_Handler {
 		// Fill out title and tags.
 		$status = str_replace( '%title%', get_the_title( $post_id ), $status );
 		$status = str_replace( '%tags%', $this->get_tags( $post_id ), $status );
+		$status = str_replace( '%category%', $this->get_category( $post_id ), $status );
 
 		// Estimate a max length of sorts.
 		$max_length = mb_strlen( str_replace( array( '%excerpt%', '%permalink%' ), '', $status ) );
@@ -641,6 +642,32 @@ class Post_Handler {
 		}
 
 		return trim( $hashtags );
+	}
+
+	/**
+	 * Returns the first of a post's categories as a hashtag.
+	 *
+	 * @param  int $post_id Post ID.
+	 * @return string       (Possibly "CamelCased") hashtag, or empty string.
+	 */
+	protected function get_category( $post_id ) {
+		$cats = get_the_category( $post_id );
+
+		if ( empty( $cats[0]->cat_name ) ) {
+			return '';
+		}
+
+		// Grab the first category.
+		$cat_name = $cats[0]->cat_name;
+
+		if ( preg_match( '/(\s|-)+/', $cat_name ) ) {
+			// Try to "CamelCase" multi-word categories.
+			$cat_name = preg_replace( '~(\s|-)+~', ' ', $cat_name );
+			$cat_name = explode( ' ', $cat_name );
+			$cat_name = implode( '', array_map( 'ucfirst', $cat_name ) );
+		}
+
+		return '#' . trim( $cat_name );
 	}
 
 	/**
