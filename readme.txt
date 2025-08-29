@@ -29,7 +29,7 @@ More detailed instructions can be found on [this plugin's web page](https://jan.
 
 == Changelog ==
 = 0.19.4 =
-Added the `%category%` "template tag."
+Added the `%category%` "template tag" to share a post's _first_ category _as a hashtag_.
 
 = 0.19.3 =
 Improved detection of "in-post images."
