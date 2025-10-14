@@ -9,8 +9,8 @@ namespace Share_On_Mastodon;
  * Main plugin class.
  */
 class Share_On_Mastodon {
-	const PLUGIN_VERSION = '0.19.4';
-	const DB_VERSION     = '1';
+	const PLUGIN_VERSION = '0.20.0';
+	const DB_VERSION     = '2';
 
 	/**
 	 * This plugin's single instance.
@@ -20,11 +20,11 @@ class Share_On_Mastodon {
 	private static $instance;
 
 	/**
-	 * `Plugin_Options` instance.
+	 * `Options_Handler` instance.
 	 *
-	 * @var Plugin_Options $instance `Plugin_Options` instance.
+	 * @var Options_Handler $instance `Options_Handler` instance.
 	 */
-	private $plugin_options;
+	private $options_handler;
 
 	/**
 	 * `Post_Handler` instance.
@@ -50,8 +50,8 @@ class Share_On_Mastodon {
 	 * Interacts with WordPress's Plugin API.
 	 */
 	public function register() {
-		$this->plugin_options = new Plugin_Options();
-		$this->plugin_options->register();
+		$this->options_handler = new Options_Handler();
+		$this->options_handler->register();
 
 		$this->post_handler = new Post_Handler();
 		$this->post_handler->register();
@@ -60,7 +60,7 @@ class Share_On_Mastodon {
 		register_deactivation_hook( dirname( __DIR__ ) . '/share-on-mastodon.php', array( $this, 'deactivate' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'wp_loaded', array( $this, 'init' ) );
 
 		$options = get_options();
 
@@ -84,8 +84,9 @@ class Share_On_Mastodon {
 			wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'share_on_mastodon_verify_token' );
 		}
 
-		if ( get_option( 'share_on_mastodon_db_version' ) !== self::DB_VERSION ) {
+		if ( self::DB_VERSION !== get_option( 'share_on_mastodon_db_version' ) ) {
 			$this->migrate();
+			update_option( 'share_on_mastodon_db_version', self::DB_VERSION, true );
 		}
 	}
 
@@ -113,39 +114,34 @@ class Share_On_Mastodon {
 	}
 
 	/**
-	 * Returns `Plugin_Options` instance.
+	 * Returns `Options_Handler` instance.
 	 *
-	 * @return Plugin_Options This plugin's `Plugin_Options` instance.
+	 * @return Options_Handler This plugin's `Options_Handler` instance.
 	 */
 	public function get_plugin_options() {
-		return $this->plugin_options;
+		return $this->options_handler;
 	}
 
 	/**
-	 * Returns `Plugin_Options` instance.
+	 * Returns `Options_Handler` instance.
 	 *
-	 * @return Plugin_Options This plugin's `Plugin_Options` instance.
+	 * @return Options_Handler This plugin's `Options_Handler` instance.
 	 */
 	public function get_options_handler() {
-		_deprecated_function( __METHOD__, '0.19.0', '\Share_On_Mastodon\Share_On_Mastodon::get_plugin_options' );
-
-		return $this->plugin_options;
+		return $this->options_handler;
 	}
 
 	/**
 	 * Performs the necessary database migrations, if applicable.
+	 *
+	 * We no longer aim to eventually support multiple instances/accounts, so as of v0.20.0, back to basics it is.
 	 */
 	protected function migrate() {
-		if ( ! function_exists( '\\dbDelta' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		}
+		global $wpdb;
 
-		ob_start();
-		include __DIR__ . '/database/schema.php';
-		$sql = ob_get_clean();
+		debug_log( '[Share on Mastodon] Running migrations.' );
 
-		dbDelta( $sql );
-
-		update_option( 'share_on_mastodon_db_version', self::DB_VERSION, 'no' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'share_on_mastodon_clients' );
 	}
 }

@@ -8,7 +8,7 @@
  * License:           GNU General Public License v3
  * License URI:       http://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain:       share-on-mastodon
- * Version:           0.19.4
+ * Version:           0.20.0
  * Requires at least: 5.9
  * Requires PHP:      7.2
  *
@@ -26,11 +26,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require __DIR__ . '/includes/class-block-editor.php';
 require __DIR__ . '/includes/class-image-handler.php';
-require __DIR__ . '/includes/class-mastodon-client.php';
 require __DIR__ . '/includes/class-micropub-compat.php';
 require __DIR__ . '/includes/class-notices.php';
 require __DIR__ . '/includes/class-options-handler.php';
-require __DIR__ . '/includes/class-plugin-options.php';
 require __DIR__ . '/includes/class-post-handler.php';
 require __DIR__ . '/includes/class-share-on-mastodon.php';
 require __DIR__ . '/includes/class-syn-links-compat.php';

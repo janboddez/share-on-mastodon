@@ -31,7 +31,7 @@ function debug_log( $item ) {
  */
 function get_options( $user_id = 0 ) {
 	$options = Share_On_Mastodon::get_instance()
-		->get_plugin_options()
+		->get_options_handler()
 		->get_options();
 
 	return apply_filters( 'share_on_mastodon_options', $options, $user_id );

@@ -135,12 +135,12 @@ class Post_Handler {
 			return;
 		}
 
-		if ( ! $this->setup_completed( $post ) ) {
-			debug_log( '[Share on Mastodon] Setup incomplete.' );
+		if ( ! $this->is_valid( $post ) ) {
 			return;
 		}
 
-		if ( ! $this->is_valid( $post ) ) {
+		if ( ! $this->setup_completed( $post ) ) {
+			debug_log( '[Share on Mastodon] Setup incomplete.' );
 			return;
 		}
 
