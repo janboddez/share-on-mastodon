@@ -1,6 +1,6 @@
 === Share on Mastodon ===
 Contributors: janboddez
-Tags: mastodon, social, fediverse, syndication, posse
+Tags: mastodon, syndication, fediverse, posse, adopt-me
 Tested up to: 6.9
 Stable tag: 0.20.1
 License: GNU General Public License v3.0
