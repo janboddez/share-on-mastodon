@@ -2,7 +2,7 @@
 Contributors: janboddez
 Tags: mastodon, social, fediverse, syndication, posse
 Tested up to: 6.9
-Stable tag: 0.20.0
+Stable tag: 0.20.1
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
