@@ -633,9 +633,9 @@ class Post_Handler {
 			foreach ( $tags as $tag ) {
 				$tag_name = $tag->name;
 
-				if ( preg_match( '/(\s|-)+/', $tag_name ) ) {
+				if ( preg_match( '/(\s|-|\.)+/', $tag_name ) ) {
 					// Try to "CamelCase" multi-word tags.
-					$tag_name = preg_replace( '~(\s|-)+~', ' ', $tag_name );
+					$tag_name = preg_replace( '~(\s|-|\.)+~', ' ', $tag_name );
 					$tag_name = explode( ' ', $tag_name );
 					$tag_name = implode( '', array_map( 'ucfirst', $tag_name ) );
 				}
@@ -663,9 +663,9 @@ class Post_Handler {
 		// Grab the first category.
 		$cat_name = $cats[0]->cat_name;
 
-		if ( preg_match( '/(\s|-)+/', $cat_name ) ) {
+		if ( preg_match( '/(\s|-|\.)+/', $cat_name ) ) {
 			// Try to "CamelCase" multi-word categories.
-			$cat_name = preg_replace( '~(\s|-)+~', ' ', $cat_name );
+			$cat_name = preg_replace( '~(\s|-|\.)+~', ' ', $cat_name );
 			$cat_name = explode( ' ', $cat_name );
 			$cat_name = implode( '', array_map( 'ucfirst', $cat_name ) );
 		}
