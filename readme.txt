@@ -28,6 +28,9 @@ After activation, head over to *Settings > Share on Mastodon* to authorize WordP
 More detailed instructions can be found on [this plugin's web page](https://jan.boddez.net/wordpress/share-on-mastodon).
 
 == Changelog ==
+= 0.20.1 =
+Fix post screen `%category%` template tag.
+
 = 0.20.0 =
 Support for PKCE.
 

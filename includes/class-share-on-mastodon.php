@@ -9,7 +9,7 @@ namespace Share_On_Mastodon;
  * Main plugin class.
  */
 class Share_On_Mastodon {
-	const PLUGIN_VERSION = '0.20.0';
+	const PLUGIN_VERSION = '0.20.1';
 	const DB_VERSION     = '2';
 
 	/**
